@@ -1,0 +1,66 @@
+{
+  "name": "no kings — Augmented Democracy",
+  "short_name": "no kings",
+  "description": "Train your digital twin. Join the global network of equal voices.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#080808",
+  "theme_color": "#080808",
+  "orientation": "portrait-primary",
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Train your twin",
+      "short_name": "Train",
+      "description": "Answer 8 questions and create your digital twin",
+      "url": "/training",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Global network",
+      "short_name": "Network",
+      "description": "See what the world thinks in real time",
+      "url": "/network",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "My twin",
+      "short_name": "Twin",
+      "description": "View your digital twin profile",
+      "url": "/twin",
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
+    }
+  ],
+  "categories": ["politics", "social", "utilities"],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

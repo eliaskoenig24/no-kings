@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Offline — no kings</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #080808;
+      color: #F0F0F0;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+    }
+    .label {
+      font-family: monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: #555;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+    }
+    h1 {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: clamp(1.8rem, 7vw, 3rem);
+      font-weight: normal;
+      line-height: 1.2;
+      margin-bottom: 1.25rem;
+    }
+    p {
+      font-size: 0.95rem;
+      line-height: 1.75;
+      color: #888;
+      max-width: 38ch;
+      margin-bottom: 2.5rem;
+    }
+    button {
+      background: none;
+      border: 1px solid #2a2a2a;
+      color: #888;
+      font-size: 0.75rem;
+      font-family: monospace;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 10px 24px;
+      cursor: pointer;
+    }
+    button:hover { border-color: #555; color: #ccc; }
+    footer {
+      position: fixed;
+      bottom: 1.5rem;
+      font-size: 0.7rem;
+      color: #333;
+      font-family: monospace;
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+  <div class="label">NO KINGS</div>
+  <h1 id="title"></h1>
+  <p id="body"></p>
+  <button onclick="window.location.reload()">↺ <span id="retry"></span></button>
+  <footer>no kings — augmented democracy</footer>
+
+  <script>
+    const T = {
+      de: { title: 'Du bist offline.', body: 'Dein Zwilling ist auf diesem Gerät gespeichert. Sobald du wieder online bist, verbindet sich die App automatisch.', retry: 'Neu laden' },
+      en: { title: 'You are offline.', body: 'Your twin is stored on this device. The app will reconnect automatically when you are back online.', retry: 'Reload' },
+      es: { title: 'Estás sin conexión.', body: 'Tu gemelo está guardado en este dispositivo. La app se reconectará automáticamente cuando estés en línea.', retry: 'Recargar' },
+      fr: { title: 'Vous êtes hors ligne.', body: 'Votre jumeau est enregistré sur cet appareil. L\'app se reconnectera automatiquement une fois en ligne.', retry: 'Recharger' },
+      pt: { title: 'Você está offline.', body: 'Seu gêmeo está armazenado neste dispositivo. O app se reconectará automaticamente quando voltar online.', retry: 'Recarregar' },
+      ar: { title: 'أنت غير متصل.', body: 'توأمك مُخزَّن على هذا الجهاز. سيتصل التطبيق تلقائيًا عند عودة الاتصال.', retry: 'إعادة تحميل' },
+      zh: { title: '您已离线。', body: '您的数字孪生已存储在本设备上。网络恢复后，应用将自动重新连接。', retry: '重新加载' },
+      ja: { title: 'オフラインです。', body: 'ツインはこのデバイスに保存されています。オンラインに戻ると自動で接続します。', retry: '再読み込み' },
+      hi: { title: 'आप ऑफलाइन हैं।', body: 'आपका ट्विन इस डिवाइस पर सेव है। ऑनलाइन होते ही ऐप स्वतः कनेक्ट हो जाएगा।', retry: 'पुनः लोड करें' },
+      ru: { title: 'Вы не в сети.', body: 'Ваш двойник хранится на этом устройстве. Приложение подключится автоматически при восстановлении соединения.', retry: 'Обновить' },
+      id: { title: 'Anda sedang offline.', body: 'Kembaran Anda tersimpan di perangkat ini. Aplikasi akan terhubung kembali secara otomatis.', retry: 'Muat ulang' },
+      tr: { title: 'Çevrimdışısınız.', body: 'İkiziniz bu cihazda kayıtlı. Çevrimiçi olduğunuzda uygulama otomatik olarak bağlanır.', retry: 'Yenile' },
+      ko: { title: '오프라인 상태입니다.', body: '트윈이 이 기기에 저장되어 있습니다. 온라인 상태가 되면 앱이 자동으로 연결됩니다.', retry: '새로고침' },
+      it: { title: 'Sei offline.', body: 'Il tuo gemello è salvato su questo dispositivo. L\'app si riconnetterà automaticamente.', retry: 'Ricaricare' },
+      nl: { title: 'Je bent offline.', body: 'Je tweeling is opgeslagen op dit apparaat. De app maakt automatisch opnieuw verbinding.', retry: 'Herladen' },
+      pl: { title: 'Jesteś offline.', body: 'Twój bliźniak jest zapisany na tym urządzeniu. Aplikacja połączy się automatycznie.', retry: 'Odśwież' },
+      uk: { title: 'Ви офлайн.', body: 'Ваш двійник збережено на цьому пристрої. Додаток підключиться автоматично.', retry: 'Оновити' },
+      vi: { title: 'Bạn đang ngoại tuyến.', body: 'Sinh đôi của bạn được lưu trên thiết bị này. Ứng dụng sẽ tự động kết nối lại.', retry: 'Tải lại' },
+      bn: { title: 'আপনি অফলাইনে আছেন।', body: 'আপনার যমজ এই ডিভাইসে সংরক্ষিত। অনলাইন হলে অ্যাপ স্বয়ংক্রিয়ভাবে সংযুক্ত হবে।', retry: 'পুনরায় লোড করুন' },
+      fa: { title: 'شما آفلاین هستید.', body: 'دوقلوی شما روی این دستگاه ذخیره شده است. پس از اتصال، برنامه به طور خودکار متصل می‌شود.', retry: 'بارگذاری مجدد' },
+    };
+    const lang = (navigator.language || 'en').slice(0, 2);
+    const t = T[lang] || T.en;
+    document.getElementById('title').textContent = t.title;
+    document.getElementById('body').textContent = t.body;
+    document.getElementById('retry').textContent = t.retry;
+    if (lang === 'ar' || lang === 'fa') {
+      document.documentElement.setAttribute('dir', 'rtl');
+    }
+  </script>
+</body>
+</html>

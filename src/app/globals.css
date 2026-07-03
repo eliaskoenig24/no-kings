@@ -1,26 +1,272 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg:       #FAFAF8;
+  --surface:  #F4F3F0;
+  --raised:   #ECEAE6;
+  --border:   #D0CEC9;
+  --divider:  #E4E2DE;
+
+  --text-1: #1A1A1A;
+  --text-2: #4A4A4A;
+  --text-3: #8A8A8A;
+
+  --accent:   #1A1A8C;
+  --positive: #1B5E20;
+  --negative: #7B0000;
+
+  --font-sans:  system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-mono:  ui-monospace, "SF Mono", "Fira Code", monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text-1);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* Typography */
+h1, h2, h3 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--text-1);
+}
+
+h1 { font-size: clamp(2.5rem, 6vw, 5.5rem); }
+h2 { font-size: clamp(1.75rem, 3.5vw, 2.75rem); }
+h3 { font-size: clamp(1.25rem, 2vw, 1.5rem); }
+
+p {
+  color: var(--text-2);
+  line-height: 1.75;
+}
+
+a {
+  color: var(--text-1);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+button {
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: all 0.15s;
+}
+
+/* Dividers */
+hr {
+  border: none;
+  border-top: 1px solid var(--divider);
+  margin: 0;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 0; }
+
+/* Focus */
+:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* Skip link becomes visible on focus */
+a[href="#main-content"]:focus {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 9999;
+  width: auto;
+  height: auto;
+  padding: 8px 16px;
+  background: var(--accent);
+  color: #000;
+  font-size: 13px;
+  font-family: var(--font-mono);
+}
+
+/* Selection */
+::selection {
+  background: var(--accent);
+  color: #000;
+}
+
+/* Utility classes used across pages */
+.container {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.container--wide {
+  max-width: 1100px;
+}
+
+.label {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-3);
+}
+
+.accent { color: var(--accent); }
+
+/* ── Range / Spectrum Slider ─────────────────────────────────────────────── */
+.spectrum-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 3px;
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.spectrum-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 0;
+  background: var(--text-1);
+  cursor: pointer;
+  border: 1px solid var(--border);
+  box-shadow: none;
+  transition: background 0.1s;
+}
+
+.spectrum-slider::-webkit-slider-thumb:hover {
+  background: var(--accent);
+}
+
+.spectrum-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 0;
+  background: var(--text-1);
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: background 0.1s;
+}
+
+.spectrum-slider::-moz-range-thumb:hover {
+  background: var(--accent);
+}
+
+.spectrum-slider::-moz-range-track {
+  background: var(--border);
+  height: 3px;
+}
+
+.spectrum-slider:focus-visible::-webkit-slider-thumb {
+  background: var(--accent);
+  outline: none;
+}
+
+.spectrum-slider:active::-webkit-slider-thumb {
+  background: var(--accent);
+}
+
+.spectrum-slider:active::-moz-range-thumb {
+  background: var(--accent);
+}
+
+/* ── Mobile Responsive ───────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .container { padding: 0 16px; }
+  h1 { font-size: clamp(2rem, 8vw, 3rem); }
+}
+
+/* ── Header: responsive nav ─────────────────────────────────────────────── */
+/* Desktop: full nav visible, hamburger hidden */
+.header-nav-desktop { display: flex; }
+.header-create-btn  { display: inline-block; }
+.header-hamburger   { display: none !important; }
+.header-mobile-menu { display: flex; }
+
+@media (max-width: 639px) {
+  /* Mobile: hide full nav, show hamburger */
+  .header-nav-desktop { display: none !important; }
+  .header-create-btn  { display: none !important; }
+  .header-hamburger   { display: flex !important; }
+}
+
+/* CTA buttons: full-width on very small screens */
+@media (max-width: 400px) {
+  .cta-btn-full {
+    display: block !important;
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Twin page: topic grid stacks on mobile */
+@media (max-width: 520px) {
+  .twin-topic-row {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+}
+
+/* Network page: label + percentages row wraps on mobile */
+@media (max-width: 480px) {
+  .network-topic-header {
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+  }
+  .network-pct-group {
+    gap: 12px !important;
+  }
+}
+
+/* Training page: slider labels smaller on mobile */
+@media (max-width: 480px) {
+  .slider-label {
+    font-size: 10px !important;
+  }
+  .slider-gap {
+    gap: 40px !important;
+  }
+}
+
+/* Training page: actions row stacks on very small screens */
+@media (max-width: 360px) {
+  .train-actions {
+    flex-direction: column !important;
+    gap: 16px !important;
+    align-items: stretch !important;
+  }
+  .train-actions .train-finish-btn {
+    text-align: center;
+  }
+}
+
+/* Compare page: archetype grid stacks on mobile */
+@media (max-width: 600px) {
+  .compare-archetype-grid {
+    grid-template-columns: 1fr !important;
+  }
 }
