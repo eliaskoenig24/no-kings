@@ -105,7 +105,7 @@ function twinFilters(extra?: Partial<NostrFilter>): NostrFilter[] {
  * One person, one entry: keeps a single event per pubkey, preferring the
  * addressable record over legacy notes, then the newest timestamp.
  */
-class PubkeyDeduper {
+export class PubkeyDeduper {
   private byPubkey = new Map<string, RawEvent>();
   private seenIds = new Set<string>();
   public events = 0;

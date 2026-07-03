@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { QRCodeSVG } from 'qrcode.react';
-import { getOrCreateIdentity } from '@/lib/identity';
+import { getOrCreateIdentity, encodeSecretKey, importIdentity } from '@/lib/identity';
 import type { Identity } from '@/lib/identity';
+import { fetchTwinByPubkey } from '@/lib/nostr-reader';
+import { saveMyTwin } from '@/lib/db';
 import { useLang } from '@/context/LangContext';
 import { t } from '@/lib/i18n';
 
@@ -24,6 +26,19 @@ const ID_TX = {
   pseudonym:      { de: 'Diese Identität ist pseudonym — sie enthält keinen Namen, keine E-Mail, keine IP-Adresse.', en: 'This identity is pseudonymous — it contains no name, no email, no IP address.', es: 'Esta identidad es seudónima: no contiene nombre, correo electrónico ni dirección IP.', fr: 'Cette identité est pseudonyme — elle ne contient ni nom, ni email, ni adresse IP.', pt: 'Esta identidade é pseudônima — não contém nome, email nem endereço IP.', ar: 'هذه الهوية مستعارة — لا تحتوي على اسم أو بريد إلكتروني أو عنوان IP.', zh: '该身份是匿名的——不包含姓名、邮箱或IP地址。', ja: 'この身元は匿名です — 名前、メール、IPアドレスを含みません。', hi: 'यह पहचान छद्म है — इसमें कोई नाम, ईमेल या IP पता नहीं है।', ru: 'Эта личность псевдонимна — не содержит имени, email и IP-адреса.', id: 'Identitas ini pseudonim — tidak mengandung nama, email, atau alamat IP.', tr: 'Bu kimlik takma adlıdır — isim, e-posta veya IP adresi içermez.', ko: '이 신원은 익명입니다 — 이름, 이메일, IP 주소가 없습니다.', it: 'Questa identità è pseudonima — non contiene nome, email o indirizzo IP.', nl: 'Deze identiteit is pseudoniem — bevat geen naam, e-mail of IP-adres.', pl: 'Ta tożsamość jest pseudonimowa — nie zawiera imienia, emaila ani adresu IP.', uk: 'Ця ідентичність є псевдонімною — не містить імені, email чи IP-адреси.', vi: 'Danh tính này là bút danh — không chứa tên, email hay địa chỉ IP.', bn: 'এই পরিচয়টি ছদ্মনামীয় — এটিতে কোনো নাম, ইমেল বা আইপি ঠিকানা নেই।', fa: 'این هویت مستعار است — شامل هیچ نام، ایمیل یا آدرس IP نیست.' },
   copy_id:        { de: 'Identität kopieren', en: 'Copy identity', es: 'Copiar identidad', fr: 'Copier l\'identité', pt: 'Copiar identidade', ar: 'نسخ الهوية', zh: '复制身份', ja: 'IDをコピー', hi: 'पहचान कॉपी करें', ru: 'Копировать ключ', id: 'Salin identitas', tr: 'Kimliği kopyala', ko: '신원 복사', it: 'Copia identità', nl: 'Identiteit kopiëren', pl: 'Kopiuj tożsamość', uk: 'Копіювати ідентичність', vi: 'Sao chép danh tính', bn: 'পরিচয় কপি করুন', fa: 'کپی هویت' },
   copied:         { de: 'Kopiert ✓', en: 'Copied ✓', es: 'Copiado ✓', fr: 'Copié ✓', pt: 'Copiado ✓', ar: 'تم النسخ ✓', zh: '已复制 ✓', ja: 'コピー済み ✓', hi: 'कॉपी हो गया ✓', ru: 'Скопировано ✓', id: 'Disalin ✓', tr: 'Kopyalandı ✓', ko: '복사됨 ✓', it: 'Copiato ✓', nl: 'Gekopieerd ✓', pl: 'Skopiowano ✓', uk: 'Скопійовано ✓', vi: 'Đã sao chép ✓', bn: 'কপি হয়েছে ✓', fa: 'کپی شد ✓' },
+  transfer_title: { de: 'Gerät wechseln / sichern', en: 'Transfer / back up' },
+  transfer_desc:  { de: 'Mit deinem geheimen Schlüssel bist du auf jedem Gerät dieselbe Person im Netzwerk — ein Mensch, ein Zwilling, statt doppelt zu zählen. Zeige ihn niemandem: Wer diesen Schlüssel besitzt, ist im Netzwerk du.', en: 'With your secret key you are the same person in the network on every device — one human, one twin, instead of counting twice. Show it to no one: whoever holds this key, is you.' },
+  reveal_btn:     { de: 'Geheimen Schlüssel anzeigen', en: 'Reveal secret key' },
+  hide_btn:       { de: 'Verbergen', en: 'Hide' },
+  copy_secret:    { de: 'Schlüssel kopieren', en: 'Copy key' },
+  scan_hint:      { de: 'Auf dem anderen Gerät: Identität → Importieren → Schlüssel scannen oder einfügen.', en: 'On the other device: Identity → Import → scan or paste the key.' },
+  import_title:   { de: 'Identität importieren', en: 'Import identity' },
+  import_desc:    { de: 'Füge den geheimen Schlüssel (nsec… oder Hex) von deinem anderen Gerät ein. Achtung: Die aktuelle Identität dieses Geräts wird dabei ersetzt — sichere sie vorher, falls du sie behalten willst.', en: 'Paste the secret key (nsec… or hex) from your other device. Warning: this device’s current identity will be replaced — back it up first if you want to keep it.' },
+  import_btn:     { de: 'Importieren', en: 'Import' },
+  importing:      { de: 'Importiere…', en: 'Importing…' },
+  import_invalid: { de: 'Ungültiger Schlüssel — erwartet nsec1… oder 64 Hex-Zeichen.', en: 'Invalid key — expected nsec1… or 64 hex characters.' },
+  import_ok_twin: { de: '✓ Identität importiert — dein Zwilling wurde aus dem Netzwerk geladen.', en: '✓ Identity imported — your twin was loaded from the network.' },
+  import_ok_notwin: { de: '✓ Identität importiert — im Netzwerk ist noch kein Zwilling für diesen Schlüssel veröffentlicht.', en: '✓ Identity imported — no published twin found for this key yet.' },
   share_twin:     { de: 'Zwilling teilen', en: 'Share twin', es: 'Compartir gemelo', fr: 'Partager le jumeau', pt: 'Compartilhar gêmeo', ar: 'مشاركة التوأم', zh: '分享孪生', ja: 'ツインを共有', hi: 'ट्विन शेयर करें', ru: 'Поделиться двойником', id: 'Bagikan kembaran', tr: 'İkizi paylaş', ko: '트윈 공유', it: 'Condividi gemello', nl: 'Tweeling delen', pl: 'Udostępnij bliźniaka', uk: 'Поділитися двійником', vi: 'Chia sẻ sinh đôi', bn: 'যমজ শেয়ার করুন', fa: 'اشتراک‌گذاری دوقلو' },
 };
 
@@ -36,6 +51,10 @@ export default function IdentityPage() {
   const [identity, setIdentity] = useState<Identity | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [revealed, setRevealed] = useState(false);
+  const [secretCopied, setSecretCopied] = useState(false);
+  const [importVal, setImportVal] = useState('');
+  const [importState, setImportState] = useState<'idle' | 'busy' | 'invalid' | 'ok-twin' | 'ok-notwin'>('idle');
   const { lang } = useLang();
   const router = useRouter();
   const isRtl = lang === 'ar' || lang === 'fa';
@@ -52,6 +71,35 @@ export default function IdentityPage() {
     await navigator.clipboard.writeText(identity.pubkey);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  }
+
+  async function handleCopySecret() {
+    if (!identity) return;
+    await navigator.clipboard.writeText(encodeSecretKey(identity.privkey));
+    setSecretCopied(true);
+    setTimeout(() => setSecretCopied(false), 2000);
+  }
+
+  async function handleImport() {
+    setImportState('busy');
+    const imported = await importIdentity(importVal);
+    if (!imported) {
+      setImportState('invalid');
+      return;
+    }
+    setIdentity(imported);
+    setImportVal('');
+    setRevealed(false);
+    // Adopt the twin this identity already published, if any
+    try {
+      const networkTwin = await fetchTwinByPubkey(imported.pubkey, 6000);
+      if (networkTwin) {
+        await saveMyTwin(networkTwin);
+        setImportState('ok-twin');
+        return;
+      }
+    } catch { /* network unavailable — identity import still succeeded */ }
+    setImportState('ok-notwin');
   }
 
   function shareLink() {
@@ -146,17 +194,125 @@ export default function IdentityPage() {
           </div>
         )}
 
-        {/* Private key block */}
+        {/* Transfer / backup — the secret key moves you between devices */}
         <div style={{
           background: 'var(--surface)',
           border: '1px solid var(--border)',
           padding: '40px',
           marginBottom: '40px',
         }}>
-          <p className="label" style={{ marginBottom: '12px' }}>{tx('private_key', lang)}</p>
-          <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: 1.6 }}>
-            {tx('private_desc', lang)}
+          <p className="label" style={{ marginBottom: '12px' }}>{tx('transfer_title', lang)}</p>
+          <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: 1.7, marginBottom: '24px', maxWidth: '560px' }}>
+            {tx('transfer_desc', lang)}
           </p>
+          {!revealed ? (
+            <button
+              onClick={() => setRevealed(true)}
+              style={{
+                background: 'transparent', color: 'var(--text-2)',
+                border: '1px solid var(--border)', padding: '12px 24px',
+                fontSize: '12px', letterSpacing: '0.06em', cursor: 'pointer',
+                fontFamily: 'var(--font-mono)',
+              }}
+            >
+              {tx('reveal_btn', lang)}
+            </button>
+          ) : identity && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'flex-start' }}>
+              <QRCodeSVG
+                value={encodeSecretKey(identity.privkey)}
+                size={160}
+                bgColor="#080808"
+                fgColor="#F0F0F0"
+              />
+              <p style={{
+                fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-3)',
+                wordBreak: 'break-all', margin: 0, maxWidth: '480px',
+              }}>
+                {encodeSecretKey(identity.privkey)}
+              </p>
+              <p style={{ fontSize: '12px', color: 'var(--text-3)', margin: 0 }}>
+                {tx('scan_hint', lang)}
+              </p>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <button
+                  onClick={handleCopySecret}
+                  style={{
+                    background: 'var(--text-1)', color: '#000', border: 'none',
+                    padding: '10px 20px', fontSize: '12px', fontWeight: 700,
+                    letterSpacing: '0.06em', textTransform: 'uppercase', cursor: 'pointer',
+                  }}
+                >
+                  {secretCopied ? tx('copied', lang) : tx('copy_secret', lang)}
+                </button>
+                <button
+                  onClick={() => setRevealed(false)}
+                  style={{
+                    background: 'transparent', color: 'var(--text-3)',
+                    border: '1px solid var(--border)', padding: '10px 20px',
+                    fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-mono)',
+                  }}
+                >
+                  {tx('hide_btn', lang)}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Import — become the same person as on your other device */}
+        <div style={{
+          background: 'var(--surface)',
+          border: '1px solid var(--border)',
+          padding: '40px',
+          marginBottom: '40px',
+        }}>
+          <p className="label" style={{ marginBottom: '12px' }}>{tx('import_title', lang)}</p>
+          <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: 1.7, marginBottom: '20px', maxWidth: '560px' }}>
+            {tx('import_desc', lang)}
+          </p>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', maxWidth: '560px' }}>
+            <input
+              value={importVal}
+              onChange={(e) => { setImportVal(e.target.value); setImportState('idle'); }}
+              placeholder="nsec1…"
+              autoComplete="off"
+              spellCheck={false}
+              style={{
+                flex: '1 1 260px', background: 'var(--raised, #111)', color: 'var(--text-1)',
+                border: '1px solid var(--border)', padding: '12px 14px',
+                fontFamily: 'var(--font-mono)', fontSize: '12px',
+              }}
+            />
+            <button
+              onClick={handleImport}
+              disabled={importState === 'busy' || importVal.trim().length === 0}
+              style={{
+                background: 'var(--text-1)', color: '#000', border: 'none',
+                padding: '12px 24px', fontSize: '12px', fontWeight: 700,
+                letterSpacing: '0.06em', textTransform: 'uppercase',
+                cursor: importState === 'busy' ? 'default' : 'pointer',
+                opacity: importState === 'busy' || importVal.trim().length === 0 ? 0.6 : 1,
+              }}
+            >
+              {importState === 'busy' ? tx('importing', lang) : tx('import_btn', lang)}
+            </button>
+          </div>
+          {importState === 'invalid' && (
+            <p style={{ fontSize: '12px', color: 'var(--negative, #ef4444)', marginTop: '14px', fontFamily: 'var(--font-mono)' }}>
+              {tx('import_invalid', lang)}
+            </p>
+          )}
+          {importState === 'ok-twin' && (
+            <p style={{ fontSize: '12px', color: 'var(--positive, #22c55e)', marginTop: '14px', fontFamily: 'var(--font-mono)' }}>
+              {tx('import_ok_twin', lang)}
+            </p>
+          )}
+          {importState === 'ok-notwin' && (
+            <p style={{ fontSize: '12px', color: 'var(--positive, #22c55e)', marginTop: '14px', fontFamily: 'var(--font-mono)' }}>
+              {tx('import_ok_notwin', lang)}
+            </p>
+          )}
         </div>
 
         {/* Pseudonym explanation */}
