@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { getMyTwin, saveMyTwin } from '@/lib/db';
 import { classifyTwin, type ArchetypeKey } from '@/lib/twin-engine';
 import { useLang } from '@/context/LangContext';
@@ -426,7 +426,6 @@ function SkipButton({ onClick, lang }: { onClick: () => void; lang: string }) {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function PulsePage() {
-  const router = useRouter();
   const { lang } = useLang();
 
   const [twin, setTwin] = useState<TwinProfile | null>(null);
@@ -490,14 +489,14 @@ export default function PulsePage() {
         <p style={{ fontFamily: 'var(--font-serif)', fontSize: '1.1rem', color: 'var(--text-1)', marginBottom: '32px' }}>
           Du hast noch keinen Zwilling erstellt.
         </p>
-        <a href="/training" style={{
+        <Link href="/training" style={{
           display: 'inline-block', border: '1px solid var(--text-1)',
           color: 'var(--text-1)', padding: '12px 28px',
           fontFamily: 'var(--font-mono)', fontSize: '12px',
           letterSpacing: '0.1em', textDecoration: 'none',
         }}>
           ZWILLING ERSTELLEN →
-        </a>
+        </Link>
       </div>
     </main>
   );
@@ -566,12 +565,12 @@ export default function PulsePage() {
 
         {/* Footer links */}
         <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-          <a href="/twin" style={{ fontSize: '12px', color: 'var(--text-3)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}>
+          <Link href="/twin" style={{ fontSize: '12px', color: 'var(--text-3)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}>
             {lang === 'de' ? 'ZWILLING ANSEHEN →' : 'VIEW TWIN →'}
-          </a>
-          <a href="/training" style={{ fontSize: '12px', color: 'var(--text-3)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}>
+          </Link>
+          <Link href="/training" style={{ fontSize: '12px', color: 'var(--text-3)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}>
             {lang === 'de' ? 'NEU EINRICHTEN →' : 'RESET TRAINING →'}
-          </a>
+          </Link>
         </div>
 
       </div>

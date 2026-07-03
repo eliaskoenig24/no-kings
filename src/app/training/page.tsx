@@ -71,10 +71,10 @@ export default function TrainingPage() {
   const [saving, setSaving] = useState(false);
   const [barVisible, setBarVisible] = useState(false);
   const [archFlash, setArchFlash] = useState(false);
+  const [countryTouched, setCountryTouched] = useState(false);
 
-  useEffect(() => {
-    if (autoCountry && !country) setCountry(autoCountry.toUpperCase());
-  }, [autoCountry, country]);
+  // Geo-detected country is only the default; typing takes over permanently.
+  const effCountry = countryTouched ? country : (autoCountry?.toUpperCase() ?? '');
 
   // Show the live twin bar while the header radar is scrolled away,
   // hide it near the bottom so it never covers the save button.
@@ -116,9 +116,9 @@ export default function TrainingPage() {
     try {
       const twin = createTwinFromValues(liveValues);
       await saveMyTwin(twin);
-      if (country) {
+      if (effCountry) {
         await saveDemographics({
-          country,
+          country: effCountry,
           region: region || undefined,
           ageGroup: (age as TwinDemographics['ageGroup']) || undefined,
         });
@@ -246,8 +246,8 @@ export default function TrainingPage() {
                   {tx(lang, 'country_lbl')}
                 </label>
                 <input
-                  type="text" value={country}
-                  onChange={e => setCountry(e.target.value.toUpperCase().slice(0, 2))}
+                  type="text" value={effCountry}
+                  onChange={e => { setCountryTouched(true); setCountry(e.target.value.toUpperCase().slice(0, 2)); }}
                   placeholder="DE"
                   maxLength={2}
                   style={{

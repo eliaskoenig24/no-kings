@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getMyTwin } from '@/lib/db';
 import { calculateNetworkAggregate } from '@/lib/twin-engine';
@@ -388,7 +388,7 @@ export default function ComparePage() {
               const maxScore = scored[0].score;
               return (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {scored.map((region, i) => {
+                  {scored.map((region) => {
                     const score = region.score;
                     const color = matchColor(score);
                     const isTop = score === maxScore;

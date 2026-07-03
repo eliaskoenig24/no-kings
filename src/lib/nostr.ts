@@ -4,14 +4,10 @@ import { Relay } from 'nostr-tools/relay';
 import { hexToBytes } from 'nostr-tools/utils';
 import type { TwinProfile } from '@/types';
 
-export const NK_RELAYS = [
-  'wss://relay.damus.io',       // US — large, reliable
-  'wss://nos.lol',              // US — well-maintained
-  'wss://relay.nostr.band',     // global indexer
-  'wss://nostr.wine',           // EU — community
-  'wss://relay.snort.social',   // EU — snort.social
-  'wss://nostr-pub.wellorder.net', // global
-];
+import { getRelays, DEFAULT_RELAYS } from './relays';
+
+/** @deprecated use getRelays() from '@/lib/relays' — respects user config */
+export const NK_RELAYS = DEFAULT_RELAYS;
 
 // NIP-78 addressable event: relays keep exactly ONE event per (pubkey, kind, d-tag).
 // This is what enforces "one twin per keypair" at the protocol level — an update
@@ -71,8 +67,9 @@ export async function minePowAsync(
 async function publishToRelays(
   signedEvent: ReturnType<typeof finalizeEvent>,
 ): Promise<{ success: boolean; eventId?: string; error?: string }> {
+  const relays = getRelays();
   const results = await Promise.allSettled(
-    NK_RELAYS.map(async (url) => {
+    relays.map(async (url) => {
       let relay: Relay | null = null;
       try {
         relay = new Relay(url);
@@ -89,7 +86,7 @@ async function publishToRelays(
   if (accepted.length > 0) return { success: true, eventId: signedEvent.id };
 
   const errors = results
-    .map((r, i) => `${NK_RELAYS[i]}: ${r.status === 'rejected' ? String(r.reason) : 'ok'}`)
+    .map((r, i) => `${relays[i]}: ${r.status === 'rejected' ? String(r.reason) : 'ok'}`)
     .join('; ');
   return { success: false, error: errors };
 }

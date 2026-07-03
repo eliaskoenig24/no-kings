@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { AGENDA } from '@/data/agenda';
 import { DEMO_TWINS_TAGGED } from '@/data/demo-twins';
 import { aggregateForItem, inferAllPositions } from '@/lib/inference';
@@ -60,19 +60,6 @@ const COUNTRY_DIVERGENCE = Object.entries(COUNTRY_MAP)
 
 const flagOf = (code: string) =>
   code.toUpperCase().replace(/./g, c => String.fromCodePoint(c.charCodeAt(0) + 127397));
-
-// Per-country dimension averages for comparison tool
-const COUNTRY_AVGS: Record<string, Record<TopicKey, number>> = Object.fromEntries(
-  Object.entries(COUNTRY_MAP)
-    .filter(([, { twins }]) => twins.length >= 20)
-    .map(([code, { twins }]) => [
-      code,
-      Object.fromEntries(
-        TOPICS.map(t => [t, twins.reduce((s, tw) => s + tw[t], 0) / twins.length])
-      ) as Record<TopicKey, number>,
-    ])
-);
-const COUNTRY_LIST = Object.keys(COUNTRY_AVGS).sort();
 
 const TX = {
   title:      { de: 'Einblicke', en: 'Insights', es: 'Perspectivas', fr: 'Analyses', pt: 'Perspectivas', ar: 'رؤى', zh: '洞察', ja: 'インサイト', hi: 'अंतर्दृष्टि', ru: 'Аналитика', id: 'Wawasan', tr: 'Analizler', ko: '인사이트', it: 'Analisi', nl: 'Inzichten', pl: 'Analizy', uk: 'Аналітика', vi: 'Phân tích', bn: 'অন্তর্দৃষ্টি', fa: 'بینش‌ها' },

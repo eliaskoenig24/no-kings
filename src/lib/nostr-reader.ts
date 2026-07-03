@@ -1,7 +1,8 @@
 import { Relay } from 'nostr-tools/relay';
 import { getPow } from 'nostr-tools/nip13';
 import type { TwinProfile } from '@/types';
-import { NK_RELAYS, TWIN_KIND, TWIN_D_TAG, TWIN_POW_BITS } from './nostr';
+import { TWIN_KIND, TWIN_D_TAG, TWIN_POW_BITS } from './nostr';
+import { getRelays } from './relays';
 
 const TWIN_FIELDS = [
   'klimaschutz',
@@ -205,7 +206,7 @@ export async function fetchUniqueNetworkTwins(
 
   try {
     await Promise.all(
-      NK_RELAYS.map((url) =>
+      getRelays().map((url) =>
         collectFromRelay(url, twinFilters(extra), timeoutMs, (ev) => dedup.add(ev)),
       ),
     );
@@ -228,6 +229,7 @@ export function subscribeToUniqueNetworkTwins(
   timeoutMs: number = 30000,
 ): () => void {
   const dedup = new PubkeyDeduper();
+  const relayUrls = getRelays();
   const relays: Relay[] = [];
   let eoseCount = 0;
   let cleaned = false;
@@ -244,14 +246,14 @@ export function subscribeToUniqueNetworkTwins(
 
   const settleEose = () => {
     eoseCount++;
-    if (eoseCount >= NK_RELAYS.length) {
+    if (eoseCount >= relayUrls.length) {
       clearTimeout(timer);
       onEose();
       cleanup();
     }
   };
 
-  for (const url of NK_RELAYS) {
+  for (const url of relayUrls) {
     (async () => {
       let relay: Relay | null = null;
       try {
@@ -297,7 +299,7 @@ export async function fetchTwinByPubkey(
   const dedup = new PubkeyDeduper();
   try {
     await Promise.all(
-      NK_RELAYS.map((url) =>
+      getRelays().map((url) =>
         collectFromRelay(url, twinFilters({ authors: [pubkey], limit: 5 }), timeoutMs, (ev) =>
           dedup.add(ev),
         ),
@@ -340,7 +342,7 @@ export async function checkRelayStatus(
     });
   }
 
-  const results = await Promise.all(NK_RELAYS.map(checkOne));
+  const results = await Promise.all(getRelays().map(checkOne));
   return Object.fromEntries(results);
 }
 
@@ -351,7 +353,7 @@ export async function fetchCountryStats(
   const dedup = new PubkeyDeduper();
   try {
     await Promise.all(
-      NK_RELAYS.map((url) =>
+      getRelays().map((url) =>
         collectFromRelay(url, twinFilters(), timeoutMs, (ev) => dedup.add(ev)),
       ),
     );

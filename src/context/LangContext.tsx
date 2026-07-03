@@ -43,9 +43,11 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
   const [country, setCountry] = useState<string | null>(null);
 
   useEffect(() => {
-    // Detect language from browser / localStorage
+    // Detect language from browser / localStorage.
+    // Deferred to a microtask: keeps SSR markup ('en') and first client render
+    // identical, then switches — avoids hydration mismatch and cascading renders.
     const detected = detectLang();
-    setLangState(detected);
+    queueMicrotask(() => setLangState(detected));
 
     // Detect country from our API (uses Vercel geo headers, no GPS)
     fetch('/api/location')

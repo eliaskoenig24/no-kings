@@ -12,7 +12,7 @@ import {
   type NetworkTwin,
   type NetworkStats,
 } from '@/lib/nostr-reader';
-import { NK_RELAYS } from '@/lib/nostr';
+import { getRelays, addRelay, removeRelay, DEFAULT_RELAYS } from '@/lib/relays';
 import { MIN_AGGREGATE_PERSONS, networkPhase, foundingProgress } from '@/lib/network-policy';
 import { TwinProfile, TOPICS } from '@/types';
 import dynamic from 'next/dynamic';
@@ -123,9 +123,16 @@ export default function NetworkPage() {
   const [eose, setEose] = useState(false);
   const [simView, setSimView] = useState(false);
   const [countryStats, setCountryStats] = useState<Record<string, number>>({});
-  const [relayStatus, setRelayStatus] = useState<Record<string, 'online' | 'offline' | 'checking'>>(() =>
-    Object.fromEntries(NK_RELAYS.map((url) => [url, 'checking' as const])),
-  );
+  const [relayStatus, setRelayStatus] = useState<Record<string, 'online' | 'offline' | 'checking'>>({});
+  const [relayList, setRelayList] = useState<string[]>(DEFAULT_RELAYS);
+  const [relayInput, setRelayInput] = useState('');
+  const [relayInvalid, setRelayInvalid] = useState(false);
+  const relayKey = relayList.join('|');
+
+  useEffect(() => {
+    // deferred: SSR markup renders the defaults, then the user's list takes over
+    queueMicrotask(() => setRelayList(getRelays()));
+  }, []);
 
   useEffect(() => {
     getMyTwin().then((result) => {
@@ -146,17 +153,31 @@ export default function NetworkPage() {
     // After 8s treat the network as settled even if a relay never answers
     const fallback = setTimeout(() => setEose(true), 8000);
     return () => { cleanup(); clearTimeout(fallback); };
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [relayKey]);
 
   useEffect(() => {
     fetchCountryStats(5000).then((s) => {
       if (Object.keys(s).length > 0) setCountryStats(s);
     });
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [relayKey]);
 
   useEffect(() => {
     checkRelayStatus(4000).then(setRelayStatus);
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [relayKey]);
+
+  function handleAddRelay() {
+    const next = addRelay(relayInput);
+    if (!next) {
+      setRelayInvalid(true);
+      setTimeout(() => setRelayInvalid(false), 1600);
+      return;
+    }
+    setRelayInput('');
+    setRelayList(next);
+  }
 
   const phase = networkPhase(stats.persons);
   const showAggregates = simView || phase === 'live';
@@ -261,12 +282,12 @@ export default function NetworkPage() {
               </span>
             )}
           </div>
-          {/* Relay status bar */}
+          {/* Relay status bar — user-configurable: your relays, your network */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', flexWrap: 'wrap' }}>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-3)', letterSpacing: '0.08em' }}>
               {t(lang, 'net_relays')}
             </span>
-            {NK_RELAYS.map((url) => {
+            {relayList.map((url) => {
               const status = relayStatus[url] ?? 'checking';
               const label = url.replace('wss://', '').replace(/\/$/, '');
               const color =
@@ -277,9 +298,41 @@ export default function NetworkPage() {
               return (
                 <span key={url} style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color, display: 'flex', alignItems: 'center', gap: '4px' }}>
                   {dot} {label}
+                  {relayList.length > 1 && (
+                    <button
+                      onClick={() => setRelayList(removeRelay(url))}
+                      aria-label={`remove ${label}`}
+                      style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', fontSize: '10px', padding: '0 2px', lineHeight: 1 }}
+                    >
+                      ✕
+                    </button>
+                  )}
                 </span>
               );
             })}
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <input
+                value={relayInput}
+                onChange={(e) => setRelayInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && relayInput.trim()) handleAddRelay(); }}
+                placeholder="wss://…"
+                spellCheck={false}
+                style={{
+                  width: '140px', background: 'var(--raised, #111)',
+                  border: `1px solid ${relayInvalid ? 'var(--negative, #ef4444)' : 'var(--border)'}`,
+                  color: 'var(--text-2)', padding: '3px 8px',
+                  fontFamily: 'var(--font-mono)', fontSize: '10px', outline: 'none',
+                  transition: 'border-color 0.2s',
+                }}
+              />
+              <button
+                onClick={handleAddRelay}
+                disabled={!relayInput.trim()}
+                style={{ background: 'none', border: '1px solid var(--border)', color: 'var(--text-3)', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: '10px', padding: '3px 8px' }}
+              >
+                +
+              </button>
+            </span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '24px' }}>
             <h1 style={{ fontSize: 'clamp(2rem, 4vw, 3.5rem)' }}>

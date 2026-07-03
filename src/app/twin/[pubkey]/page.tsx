@@ -379,7 +379,6 @@ export default function TwinByPubkeyPage({
           const clashed = rows.filter(r => !r.agree);
           const policyLabel = (TX.policy_compare as Record<string, string>)[lang] ?? TX.policy_compare.en;
           const agreeLabel = (TX.both_agree as Record<string, string>)[lang] ?? TX.both_agree.en;
-          const opposeLabel = (TX.both_oppose as Record<string, string>)[lang] ?? TX.both_oppose.en;
           const clashLabel = (TX.views_clash as Record<string, string>)[lang] ?? TX.views_clash.en;
           return (
             <div style={{ marginBottom: '48px' }}>
