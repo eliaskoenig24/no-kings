@@ -9,7 +9,8 @@ const RadarChart = dynamic(() => import('@/components/RadarChart'), { ssr: false
 import { getOrCreateIdentity } from '@/lib/identity';
 import { publishTwin } from '@/lib/nostr';
 import { useLang } from '@/context/LangContext';
-import { SPECTRUM, getTopicLabel, getTopicDesc } from '@/lib/i18n';
+import { SPECTRUM, getTopicLabel } from '@/lib/i18n';
+import { generateShareCard, shareOrDownloadCard } from '@/lib/share-card';
 import { createTwinFromValues, classifyTwin } from '@/lib/twin-engine';
 import { AGENDA } from '@/data/agenda';
 import { inferPosition } from '@/lib/inference';
@@ -45,6 +46,12 @@ const TX = {
   shared:     { de: '✓ Zwilling ist im Netzwerk', en: '✓ Twin is in the network', es: '✓ Gemelo está en la red', fr: '✓ Jumeau dans le réseau', pt: '✓ Gêmeo na rede', ar: '✓ التوأم في الشبكة', zh: '✓ 孪生已在网络中', ja: '✓ ツインはネットワーク上', hi: '✓ जुड़वां नेटवर्क में है', ru: '✓ Двойник в сети', id: '✓ Kembaran ada di jaringan', tr: '✓ İkiz ağda', ko: '✓ 트윈이 네트워크에 있음', it: '✓ Gemello nella rete', nl: '✓ Tweeling in netwerk', pl: '✓ Bliźniak jest w sieci', uk: '✓ Двійник у мережі', vi: '✓ Sinh đôi đã trong mạng', bn: '✓ যমজ নেটওয়ার্কে আছে', fa: '✓ دوقلو در شبکه است' },
   sharing:    { de: 'Wird geteilt…', en: 'Sharing…', es: 'Compartiendo…', fr: 'Partage…', pt: 'Compartilhando…', ar: 'جارٍ المشاركة…', zh: '共享中…', ja: '共有中…', hi: 'साझा हो रहा है…', ru: 'Публикуется…', id: 'Berbagi…', tr: 'Paylaşılıyor…', ko: '공유 중…', it: 'Condivisione…', nl: 'Delen…', pl: 'Udostępnianie…', uk: 'Публікація…', vi: 'Đang chia sẻ…', bn: 'শেয়ার হচ্ছে…', fa: 'در حال اشتراک‌گذاری…' },
   share_hint: { de: 'Dein Profil wird anonym via Nostr geteilt — kein Name, kein Login.', en: 'Your profile is shared anonymously via Nostr — no name, no login.', es: 'Tu perfil se comparte de forma anónima a través de Nostr — sin nombre, sin inicio de sesión.', fr: 'Ton profil est partagé anonymement via Nostr — sans nom, sans connexion.', pt: 'Seu perfil é compartilhado anonimamente via Nostr — sem nome, sem login.', ar: 'ملفك الشخصي يُشارك بشكل مجهول عبر نوسترا — بدون اسم، بدون تسجيل دخول.', zh: '您的档案通过Nostr匿名共享——无姓名，无登录。', ja: 'プロフィールはNostr経由で匿名共有されます — 名前なし、ログインなし。', hi: 'आपका प्रोफ़ाइल Nostr के माध्यम से गुमनाम रूप से साझा किया जाता है — कोई नाम नहीं, कोई लॉगिन नहीं।', ru: 'Ваш профиль анонимно публикуется через Nostr — без имени, без входа.', id: 'Profil Anda dibagikan secara anonim melalui Nostr — tanpa nama, tanpa login.', tr: 'Profiliniz Nostr aracılığıyla anonim olarak paylaşılır — isim yok, giriş yok.', ko: '프로필이 Nostr를 통해 익명으로 공유됩니다 — 이름 없음, 로그인 없음.', it: 'Il tuo profilo viene condiviso anonimamente tramite Nostr — nessun nome, nessun login.', nl: 'Je profiel wordt anoniem gedeeld via Nostr — geen naam, geen login.', pl: 'Twój profil jest udostępniany anonimowo przez Nostr — bez nazwy, bez logowania.', uk: 'Ваш профіль анонімно публікується через Nostr — без імені, без входу.', vi: 'Hồ sơ của bạn được chia sẻ ẩn danh qua Nostr — không tên, không đăng nhập.', bn: 'তোমার প্রোফাইল Nostr এর মাধ্যমে বেনামে শেয়ার করা হয় — কোনো নাম নেই, কোনো লগইন নেই।', fa: 'پروفایل شما به صورت ناشناس از طریق Nostr به اشتراک گذاشته می‌شود — بدون نام، بدون ورود.' },
+  backup_title: { de: 'Wichtig: Schlüssel sichern', en: 'Important: back up your key' },
+  backup_body: { de: 'Dein Zwilling ist im Netzwerk — aber dein Schlüssel existiert nur auf diesem Gerät. Werden die Browserdaten gelöscht (iPhone macht das nach 7 Tagen ohne Besuch automatisch!), kannst du deinen Zwilling nie wieder ändern. Sichern dauert 30 Sekunden.', en: 'Your twin is in the network — but your key exists only on this device. If browser data is cleared (iPhone does this automatically after 7 days without a visit!), you can never change your twin again. Backing up takes 30 seconds.' },
+  backup_btn: { de: 'Schlüssel jetzt sichern →', en: 'Back up key now →' },
+  card_btn: { de: 'Als Bild teilen', en: 'Share as image' },
+  card_making: { de: 'Erstelle Bild…', en: 'Creating image…' },
+  card_headline: { de: 'Mein digitaler Zwilling', en: 'My digital twin' },
   consent_title: { de: 'Bevor du teilst', en: 'Before you share' },
   consent_body: { de: 'Dein Zwilling wird pseudonym, aber öffentlich und dauerhaft auf dezentralen Nostr-Relays gespeichert. Politische Positionen sind sensible Daten — von den Relays kann nichts gelöscht werden. Es gilt: ein Schlüsselpaar, ein Zwilling; erneutes Teilen ersetzt deinen Eintrag, statt einen zweiten anzulegen.', en: 'Your twin is stored pseudonymously but publicly and permanently on decentralized Nostr relays. Political positions are sensitive data — nothing can be deleted from the relays. One keypair, one twin: sharing again replaces your record instead of adding a second one.' },
   consent_ok: { de: 'Verstanden — jetzt teilen', en: 'Understood — share now' },
@@ -67,6 +74,7 @@ export default function TwinPage() {
   const [sharing, setSharing] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
   const [confirming, setConfirming] = useState(false);
   const [mining, setMining] = useState(false);
+  const [cardBusy, setCardBusy] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editVals, setEditVals] = useState<Record<TopicKey, number>>(
     Object.fromEntries(TOPICS.map(k => [k, 50])) as Record<TopicKey, number>
@@ -129,6 +137,22 @@ export default function TwinPage() {
     } catch {
       setMining(false);
       setSharing('error');
+    }
+  }
+
+  async function handleShareCard() {
+    if (!twin || cardBusy) return;
+    setCardBusy(true);
+    try {
+      const blob = await generateShareCard({
+        values: twin,
+        archetypeLabel,
+        topicLabels: Object.fromEntries(TOPICS.map((k) => [k, getTopicLabel(k, lang)])),
+        headline: tx(lang, 'card_headline'),
+      });
+      await shareOrDownloadCard(blob);
+    } finally {
+      setCardBusy(false);
     }
   }
 
@@ -346,6 +370,50 @@ export default function TwinPage() {
                confirming ? tx(lang, 'consent_ok') :
                tx(lang, 'share_btn')}
             </button>
+            <button
+              onClick={handleShareCard}
+              disabled={cardBusy}
+              style={{
+                background: 'transparent',
+                color: 'var(--text-2)',
+                border: '1px solid var(--border)',
+                padding: '14px 28px', fontSize: '13px',
+                letterSpacing: '0.06em',
+                cursor: cardBusy ? 'default' : 'pointer',
+                opacity: cardBusy ? 0.6 : 1,
+                marginLeft: '12px',
+                fontFamily: 'var(--font-sans)',
+              }}
+            >
+              {cardBusy ? tx(lang, 'card_making') : tx(lang, 'card_btn')}
+            </button>
+
+            {/* Key backup nudge — the twin is now public, the key is still mortal */}
+            {sharing === 'done' && (
+              <div style={{
+                marginTop: '28px',
+                border: '1px solid rgba(250,180,50,0.45)',
+                background: 'rgba(250,180,50,0.05)',
+                padding: '20px 24px',
+                maxWidth: '520px',
+              }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgb(250,180,50)', marginBottom: '10px' }}>
+                  {tx(lang, 'backup_title')}
+                </p>
+                <p style={{ fontSize: '13px', color: 'var(--text-2)', lineHeight: 1.7, marginBottom: '16px' }}>
+                  {tx(lang, 'backup_body')}
+                </p>
+                <Link href="/identity" style={{
+                  display: 'inline-block',
+                  background: 'var(--text-1)', color: '#000',
+                  padding: '10px 22px', fontSize: '12px', fontWeight: 700,
+                  letterSpacing: '0.06em', textTransform: 'uppercase',
+                  textDecoration: 'none',
+                }}>
+                  {tx(lang, 'backup_btn')}
+                </Link>
+              </div>
+            )}
           </div>
         )}
 

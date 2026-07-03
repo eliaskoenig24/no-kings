@@ -69,10 +69,24 @@ export default function TrainingPage() {
   const [country, setCountry] = useState('');
   const [region, setRegion] = useState('');
   const [saving, setSaving] = useState(false);
+  const [barVisible, setBarVisible] = useState(false);
+  const [archFlash, setArchFlash] = useState(false);
 
   useEffect(() => {
     if (autoCountry && !country) setCountry(autoCountry.toUpperCase());
   }, [autoCountry, country]);
+
+  // Show the live twin bar while the header radar is scrolled away,
+  // hide it near the bottom so it never covers the save button.
+  useEffect(() => {
+    function onScroll() {
+      const nearBottom = window.innerHeight + window.scrollY > document.body.scrollHeight - 280;
+      setBarVisible(window.scrollY > 240 && !nearBottom);
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const liveValues = useMemo(() =>
     Object.fromEntries(TOPICS.map(k => [k, values[k] / 100])) as Record<TopicKey, number>,
@@ -85,7 +99,16 @@ export default function TrainingPage() {
   }, [liveValues]);
 
   function handleSlider(key: TopicKey, val: number) {
-    setValues(v => ({ ...v, [key]: val }));
+    const next = { ...values, [key]: val };
+    const nextArch = classifyTwin(createTwinFromValues(
+      Object.fromEntries(TOPICS.map(k => [k, next[k] / 100])) as Record<TopicKey, number>
+    ));
+    if (nextArch !== liveArchetype) {
+      // the answer just tipped the twin into a different archetype — make it felt
+      setArchFlash(true);
+      setTimeout(() => setArchFlash(false), 700);
+    }
+    setValues(next);
   }
 
   async function handleSave() {
@@ -276,6 +299,38 @@ export default function TrainingPage() {
           </button>
         </div>
 
+      </div>
+
+      {/* Live twin bar — the twin visibly morphs while you train it */}
+      <div style={{
+        position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 40,
+        display: 'flex', alignItems: 'center', gap: '16px',
+        padding: '10px 20px',
+        background: 'rgba(8,8,8,0.92)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+        borderTop: '1px solid var(--border)',
+        transform: barVisible ? 'translateY(0)' : 'translateY(110%)',
+        transition: 'transform 0.28s ease',
+      }}>
+        <RadarChart values={liveValues} animated={false} size={48} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.14em', color: 'var(--text-3)', textTransform: 'uppercase' }}>
+            {tx(lang, 'archetype_lbl')}
+          </span>
+          <span style={{
+            fontFamily: 'var(--font-mono)', fontSize: '13px', letterSpacing: '0.08em',
+            color: archFlash ? '#fff' : '#60a5fa',
+            transform: archFlash ? 'scale(1.06)' : 'scale(1)',
+            transformOrigin: 'left center',
+            transition: 'color 0.25s, transform 0.25s',
+          }}>
+            {archetypeLabel}
+          </span>
+        </div>
+        <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--positive, #22c55e)', letterSpacing: '0.1em' }}>
+          ● LIVE
+        </span>
       </div>
     </div>
   );
