@@ -23,3 +23,28 @@ export function networkPhase(persons: number): NetworkPhase {
 export function foundingProgress(persons: number): number {
   return Math.min(1, persons / MIN_AGGREGATE_PERSONS);
 }
+
+/**
+ * Groups twins by region and applies the SAME k-anonymity rule per bucket:
+ * a region's aggregate unlocks only once that region alone has enough persons —
+ * regardless of how big the global network is.
+ */
+export function groupByRegion<T extends { region?: string }>(
+  twins: T[],
+): { code: string; twins: T[]; count: number; unlocked: boolean }[] {
+  const map = new Map<string, T[]>();
+  for (const t of twins) {
+    if (!t.region) continue;
+    const list = map.get(t.region) ?? [];
+    list.push(t);
+    map.set(t.region, list);
+  }
+  return [...map.entries()]
+    .map(([code, list]) => ({
+      code,
+      twins: list,
+      count: list.length,
+      unlocked: list.length >= MIN_AGGREGATE_PERSONS,
+    }))
+    .sort((a, b) => b.count - a.count);
+}

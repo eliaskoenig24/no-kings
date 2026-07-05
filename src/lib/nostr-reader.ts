@@ -3,6 +3,7 @@ import { getPow } from 'nostr-tools/nip13';
 import type { TwinProfile } from '@/types';
 import { TWIN_KIND, TWIN_D_TAG, TWIN_POW_BITS } from './nostr';
 import { getRelays } from './relays';
+import { isValidRegion } from '@/data/regions';
 
 const TWIN_FIELDS = [
   'klimaschutz',
@@ -25,6 +26,8 @@ export type NetworkTwin = TwinProfile & {
   pubkey: string;
   powBits: number;
   tier: 'pow' | 'unverified';
+  country?: string; // ISO 3166-1 alpha-2, self-declared
+  region?: string;  // ISO 3166-2 (coarse), self-declared, validated against our list
 };
 
 export type NetworkStats = {
@@ -71,11 +74,23 @@ function parseTwinEvent(event: RawEvent): NetworkTwin | null {
     };
     const iso = new Date(event.created_at * 1000).toISOString();
     const powBits = getPow(event.id);
+
+    const countryTag = event.tags?.find(t => t[0] === 'g')?.[1]?.toUpperCase();
+    const country = countryTag && /^[A-Z]{2}$/.test(countryTag) ? countryTag : undefined;
+    const regionTag = event.tags?.find(t => t[0] === 'nk-region')?.[1]?.toUpperCase();
+    // accept a region only if it is in our curated list AND matches the country
+    const region =
+      regionTag && isValidRegion(regionTag) && (!country || regionTag.startsWith(country + '-'))
+        ? regionTag
+        : undefined;
+
     return {
       id: event.id,
       pubkey: event.pubkey,
       powBits,
       tier: powBits >= TWIN_POW_BITS ? 'pow' : 'unverified',
+      country,
+      region,
       ...values,
       createdAt: iso,
       updatedAt: iso,

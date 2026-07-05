@@ -100,11 +100,18 @@ export async function publishTwin(
   privkeyHex: string,
   countryCode?: string | null,
   onPowProgress?: (hashes: number) => void,
+  regionCode?: string | null, // coarse ISO 3166-2 (e.g. DE-BY), opt-in, from the curated list only
 ): Promise<{ success: boolean; eventId?: string; error?: string }> {
   const { klimaschutz, sozialstaat, wirtschaft, bildung, gesundheit, migration, freiheit, europa } = twin;
   const values = { klimaschutz, sozialstaat, wirtschaft, bildung, gesundheit, migration, freiheit, europa };
 
   const privkeyBytes = hexToBytes(privkeyHex);
+  const country = countryCode?.toUpperCase() ?? null;
+  // region must belong to the stated country — never publish a mismatched pair
+  const region =
+    regionCode && country && regionCode.toUpperCase().startsWith(country + '-')
+      ? regionCode.toUpperCase()
+      : null;
 
   const unsigned: UnsignedEvent = {
     kind: TWIN_KIND,
@@ -113,7 +120,8 @@ export async function publishTwin(
       ['d', TWIN_D_TAG],
       ['t', TWIN_D_TAG],
       ['nk-twin', JSON.stringify(values)],
-      ...(countryCode ? [['g', countryCode.toUpperCase()]] : []),
+      ...(country ? [['g', country]] : []),
+      ...(region ? [['nk-region', region]] : []),
     ],
     content: JSON.stringify(values),
     created_at: Math.floor(Date.now() / 1000),

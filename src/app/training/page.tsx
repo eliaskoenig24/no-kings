@@ -8,6 +8,7 @@ import { SPECTRUM } from '@/lib/i18n';
 import { TOPICS, TopicKey } from '@/types';
 import { createTwinFromValues, classifyTwin } from '@/lib/twin-engine';
 import { saveMyTwin, saveDemographics, type TwinDemographics } from '@/lib/db';
+import { regionsForCountry } from '@/data/regions';
 
 const RadarChart = dynamic(() => import('@/components/RadarChart'), { ssr: false });
 
@@ -58,6 +59,9 @@ export default function TrainingPage() {
 
   // Geo-detected country is only the default; typing takes over permanently.
   const effCountry = countryTouched ? country : (autoCountry?.toUpperCase() ?? '');
+  const regionOptions = regionsForCountry(effCountry);
+  // never keep a region that belongs to a different country
+  const effRegion = region.startsWith(effCountry + '-') ? region : '';
 
   // Show the live twin bar while the header radar is scrolled away,
   // hide it near the bottom so it never covers the save button.
@@ -102,7 +106,7 @@ export default function TrainingPage() {
       if (effCountry) {
         await saveDemographics({
           country: effCountry,
-          region: region || undefined,
+          region: effRegion || undefined,
           ageGroup: (age as TwinDemographics['ageGroup']) || undefined,
         });
       }
@@ -234,21 +238,29 @@ export default function TrainingPage() {
                   }}
                 />
               </div>
-              <div style={{ flex: 2, minWidth: '200px' }}>
-                <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: '8px' }}>
-                  {tx(lang, 'region_lbl')}
-                </label>
-                <input
-                  type="text" value={region}
-                  onChange={e => setRegion(e.target.value)}
-                  placeholder="Bayern, Île-de-France, Texas…"
-                  style={{
-                    width: '100%', background: 'var(--raised)', border: '1px solid var(--border)',
-                    color: 'var(--text-1)', padding: '10px 14px', fontSize: '14px',
-                    fontFamily: 'var(--font-sans)', outline: 'none',
-                  }}
-                />
-              </div>
+              {regionOptions.length > 0 && (
+                <div style={{ flex: 2, minWidth: '200px' }}>
+                  <label style={{ display: 'block', fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: '8px' }}>
+                    {tx(lang, 'region_lbl')}
+                  </label>
+                  {/* fixed list only (ISO 3166-2) — free text is not bucketable and a deanonymization risk */}
+                  <select
+                    value={effRegion}
+                    onChange={e => setRegion(e.target.value)}
+                    style={{
+                      width: '100%', background: 'var(--raised)', border: '1px solid var(--border)',
+                      color: effRegion ? 'var(--text-1)' : 'var(--text-3)', padding: '10px 14px', fontSize: '14px',
+                      fontFamily: 'var(--font-sans)', outline: 'none', appearance: 'none',
+                      borderRadius: 0,
+                    }}
+                  >
+                    <option value="">—</option>
+                    {regionOptions.map(r => (
+                      <option key={r.code} value={r.code}>{r.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
           </div>
         </div>

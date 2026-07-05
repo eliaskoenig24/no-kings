@@ -4,7 +4,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { DEMO_TWINS, DEMO_TWINS_TAGGED } from '@/data/demo-twins';
 import { calculateNetworkAggregate } from '@/lib/twin-engine';
-import { getMyTwin } from '@/lib/db';
+import { getMyTwin, getDemographics } from '@/lib/db';
+import { MIN_AGGREGATE_PERSONS as RG_MIN } from '@/lib/network-policy';
+import { groupByRegion } from '@/lib/network-policy';
+import { regionName } from '@/data/regions';
 import {
   subscribeToUniqueNetworkTwins,
   fetchCountryStats,
@@ -111,6 +114,7 @@ export default function NetworkPage() {
   const [relayList, setRelayList] = useState<string[]>(DEFAULT_RELAYS);
   const [relayInput, setRelayInput] = useState('');
   const [relayInvalid, setRelayInvalid] = useState(false);
+  const [myRegion, setMyRegion] = useState<string | null>(null);
   const relayKey = relayList.join('|');
 
   useEffect(() => {
@@ -123,6 +127,7 @@ export default function NetworkPage() {
       setMyTwin(result ?? null);
       setLoaded(true);
     });
+    getDemographics().then((d) => setMyRegion(d?.region ?? null));
   }, []);
 
   useEffect(() => {
@@ -615,6 +620,89 @@ export default function NetworkPage() {
                   </div>
                 ))}
               </div>
+            </div>
+          );
+        })()}
+
+        {/* Regions — real network only; each region unlocks at its OWN 25-person threshold */}
+        {!simView && eose && (() => {
+          const buckets = groupByRegion(networkTwins);
+          const hasAny = buckets.length > 0 || !!myRegion;
+          if (!hasAny) return null;
+          const globalAvg = calculateNetworkAggregate(networkTwins).averages;
+          const myBucket = myRegion ? buckets.find(b => b.code === myRegion) : undefined;
+          const rows = [
+            ...(myRegion ? [{ code: myRegion, count: myBucket?.count ?? 0, unlocked: myBucket?.unlocked ?? false, twins: myBucket?.twins ?? [], mine: true }] : []),
+            ...buckets.filter(b => b.code !== myRegion).map(b => ({ ...b, mine: false })),
+          ];
+          return (
+            <div style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              padding: '40px',
+              marginBottom: '64px',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '28px', flexWrap: 'wrap', gap: '8px' }}>
+                <p className="label" style={{ margin: 0 }}>{nx(lang, 'rg_title')}</p>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-3)', letterSpacing: '0.06em' }}>
+                  {nx(lang, 'rg_vs')}
+                </span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                {rows.map((row) => {
+                  const deviations = row.unlocked
+                    ? TOPICS.map((topicKey) => ({
+                        topicKey,
+                        diff: Math.round((row.twins.reduce((s, tw) => s + tw[topicKey], 0) / row.count - globalAvg[topicKey]) * 100),
+                      }))
+                        .sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff))
+                        .slice(0, 3)
+                    : [];
+                  return (
+                    <div key={row.code} style={{
+                      border: row.mine ? '1px solid rgba(96,165,250,0.3)' : '1px solid var(--divider)',
+                      background: row.mine ? 'rgba(96,165,250,0.04)' : 'transparent',
+                      padding: '16px 18px',
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '12px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                        <span style={{ fontSize: '14px', color: 'var(--text-1)', fontWeight: 500 }}>
+                          {regionName(row.code)}
+                          {row.mine && (
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#60a5fa', marginLeft: '10px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                              {nx(lang, 'rg_yours')}
+                            </span>
+                          )}
+                        </span>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-3)' }}>
+                          {row.count} / {RG_MIN} {row.unlocked ? '' : `· ${nx(lang, 'rg_until')}`}
+                        </span>
+                      </div>
+                      <div style={{ height: '3px', background: 'var(--divider)', position: 'relative', marginBottom: row.unlocked ? '12px' : 0 }}>
+                        <div style={{
+                          position: 'absolute', left: 0, top: 0, height: '100%',
+                          width: `${Math.min(100, Math.round((row.count / RG_MIN) * 100))}%`,
+                          background: row.unlocked ? 'var(--positive)' : 'var(--accent)',
+                          transition: 'width 0.8s ease',
+                        }} />
+                      </div>
+                      {row.unlocked && (
+                        <div style={{ display: 'flex', gap: '18px', flexWrap: 'wrap' }}>
+                          {deviations.map(({ topicKey, diff }) => (
+                            <span key={topicKey} style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-2)' }}>
+                              {getTopicLabel(topicKey, lang)} {diff > 0 ? '+' : ''}{diff}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              {buckets.length === 0 && (
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-3)', marginTop: '16px' }}>
+                  {nx(lang, 'rg_none')}
+                </p>
+              )}
             </div>
           );
         })()}
