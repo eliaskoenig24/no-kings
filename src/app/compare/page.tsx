@@ -11,6 +11,7 @@ import { TwinProfile, TwinValues, TOPICS, TopicKey } from '@/types';
 import dynamic from 'next/dynamic';
 const RadarChart = dynamic(() => import('@/components/RadarChart'), { ssr: false });
 import { useLang } from '@/context/LangContext';
+import { useNetworkTwins, SimulationBanner, FoundingNotice } from '@/components/NetworkTruth';
 import { t, getTopicLabel } from '@/lib/i18n';
 import type { Lang } from '@/lib/i18n';
 
@@ -185,6 +186,7 @@ export default function ComparePage() {
     });
   }, []);
 
+  const { stats, simView, setSimView } = useNetworkTwins();
   const networkAvg = calculateNetworkAggregate(DEMO_TWINS).averages;
 
   if (loading) {
@@ -207,6 +209,16 @@ export default function ComparePage() {
           animation: 'spin 0.8s linear infinite',
         }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
+
+  // Region/network comparisons run on demo data — labeled simulation only,
+  // until the real network is large enough to compare against.
+  if (!simView) {
+    return (
+      <div style={{ maxWidth: '800px', margin: '0 auto', padding: '48px 16px' }}>
+        <FoundingNotice lang={lang} persons={stats.persons} onSimulate={() => setSimView(true)} />
       </div>
     );
   }

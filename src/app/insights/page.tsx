@@ -6,6 +6,7 @@ import { AGENDA } from '@/data/agenda';
 import { DEMO_TWINS_TAGGED } from '@/data/demo-twins';
 import { aggregateForItem, inferAllPositions } from '@/lib/inference';
 import { useLang } from '@/context/LangContext';
+import { useNetworkTwins, SimulationBanner, FoundingNotice } from '@/components/NetworkTruth';
 import { getTopicLabel } from '@/lib/i18n';
 import type { TopicKey } from '@/types';
 
@@ -79,13 +80,28 @@ function tx(lang: string, key: keyof typeof TX): string {
 export default function InsightsPage() {
   const { lang } = useLang();
 
+  const { stats, simView, setSimView } = useNetworkTwins();
   const top5Controversial = useMemo(() => CONTROVERSY.slice(0, 5), []);
   const top5Consensus = useMemo(() => CONSENSUS.slice(0, 5), []);
   const top8Outliers = useMemo(() => COUNTRY_DIVERGENCE.slice(0, 8), []);
 
+  // Analytics need thousands of twins — until the real network is that big,
+  // this page exists only as an explicitly labeled simulation.
+  if (!simView) {
+    return (
+      <div style={{ padding: 'clamp(60px, 8vw, 100px) 0', minHeight: '60vh' }}>
+        <div className="container" style={{ maxWidth: '900px' }}>
+          <FoundingNotice lang={lang} persons={stats.persons} onSimulate={() => setSimView(true)} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ padding: 'clamp(60px, 8vw, 100px) 0', minHeight: '60vh' }}>
       <div className="container" style={{ maxWidth: '900px' }}>
+
+        <SimulationBanner lang={lang} onExit={() => setSimView(false)} />
 
         {/* Header */}
         <div style={{ marginBottom: '80px' }}>

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nk-v2';
+const CACHE_NAME = 'nk-v3';
 
 // App-Shell-Seiten die immer verfügbar sein sollen
 const PRECACHE_URLS = [
@@ -78,7 +78,30 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 3. Navigation + assets → Stale-While-Revalidate
+  // 3a. Navigations → Network First: users get the freshest app right after
+  // a deploy; the cache only serves when actually offline.
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(async () => {
+          const cache = await caches.open(CACHE_NAME);
+          const cached = await cache.match(request);
+          if (cached) return cached;
+          const offline = await cache.match('/offline.html');
+          return offline ?? new Response(null, { status: 503 });
+        })
+    );
+    return;
+  }
+
+  // 3b. Other assets → Stale-While-Revalidate
   event.respondWith(
     caches.open(CACHE_NAME).then(async (cache) => {
       const cached = await cache.match(request);

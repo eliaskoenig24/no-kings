@@ -7,6 +7,7 @@ import { AGENDA } from '@/data/agenda';
 import { DEMO_TWINS_TAGGED } from '@/data/demo-twins';
 import { aggregateForItem, inferPosition } from '@/lib/inference';
 import { useLang } from '@/context/LangContext';
+import { useNetworkTwins, SimulationBanner, FoundingNotice } from '@/components/NetworkTruth';
 import { getTopicLabel } from '@/lib/i18n';
 import type { AgendaItem, TwinValues } from '@/types';
 
@@ -79,9 +80,10 @@ export default function QuestionPage({ params }: { params: { id: string } }) {
   const barColor = isSupport ? 'var(--positive)' : 'var(--negative)';
 
   const archetypeData = useMemo(() => archetypeSupport(item), [item]);
+  const { stats, simView, setSimView } = useNetworkTwins();
 
   const shareText = encodeURIComponent(
-    `${pct}% ${isSupport ? 'support' : 'oppose'}: "${(item.text['en'] ?? '').slice(0, 100)}"\n\nno-kings.world/question/${item.id} #democracy #augmenteddemocracy`
+    `"${(item.text['en'] ?? '').slice(0, 120)}"\n\nno-kings.world/question/${item.id} #democracy #augmenteddemocracy`
   );
 
   return (
@@ -104,6 +106,11 @@ export default function QuestionPage({ params }: { params: { id: string } }) {
           {item.text[lang] ?? item.text['en']}
         </h1>
 
+        {simView && <SimulationBanner lang={lang} onExit={() => setSimView(false)} />}
+        {!simView && (
+          <FoundingNotice lang={lang} persons={stats.persons} onSimulate={() => setSimView(true)} />
+        )}
+        {simView && (<>
         {/* Result */}
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', padding: '32px', marginBottom: '40px' }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '16px', marginBottom: '20px' }}>
@@ -149,6 +156,8 @@ export default function QuestionPage({ params }: { params: { id: string } }) {
             })}
           </div>
         </div>
+
+        </>)}
 
         {/* Context */}
         {item.description?.['en'] && (
