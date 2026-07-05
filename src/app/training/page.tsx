@@ -8,25 +8,8 @@ import { SPECTRUM } from '@/lib/i18n';
 import { TOPICS, TopicKey } from '@/types';
 import { createTwinFromValues, classifyTwin } from '@/lib/twin-engine';
 import { saveMyTwin, saveDemographics, type TwinDemographics } from '@/lib/db';
-import { DEMO_TWINS_TAGGED } from '@/data/demo-twins';
 
 const RadarChart = dynamic(() => import('@/components/RadarChart'), { ssr: false });
-
-// Sorted demo twin values per topic for percentile lookup
-const SORTED: Record<TopicKey, number[]> = (() => {
-  const twins = DEMO_TWINS_TAGGED.map(t => t.twin);
-  return Object.fromEntries(
-    TOPICS.map(k => [k, twins.map(tw => tw[k]).sort((a, b) => a - b)])
-  ) as Record<TopicKey, number[]>;
-})();
-
-function percentile(key: TopicKey, val: number): number {
-  const s = SORTED[key];
-  const v = val / 100;
-  let lo = 0, hi = s.length;
-  while (lo < hi) { const m = (lo + hi) >> 1; if (s[m] < v) lo = m + 1; else hi = m; }
-  return Math.round((lo / s.length) * 100);
-}
 
 const ARCHETYPE_NAMES: Record<string, Record<string, string>> = {
   progressive:  { de: 'Progressiv', en: 'Progressive', es: 'Progresista', fr: 'Progressiste', pt: 'Progressista', ar: 'تقدمي', zh: '进步派', ja: 'プログレッシブ', hi: 'प्रगतिशील', ru: 'Прогрессист', id: 'Progresif', tr: 'İlerici', ko: '진보적', it: 'Progressista', nl: 'Progressief', pl: 'Progresywny', uk: 'Прогресивний', vi: 'Tiến bộ', bn: 'প্রগতিশীল', fa: 'پیشرو' },
@@ -164,24 +147,17 @@ export default function TrainingPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '48px', marginBottom: '72px' }}>
           {topics.map((topic) => {
             const val = values[topic.key];
-            const pct = percentile(topic.key, val);
-            const barColor = `hsl(${Math.round((val / 100) * 120)},50%,45%)`;
-            const pctLabel = pct >= 50
-              ? `${pct}%`
-              : `${100 - pct}%`;
 
             return (
               <div key={topic.key}>
-                {/* Label row */}
+                {/* Label row — deliberately NO comparison values here: training is
+                    blind so nobody anchors their answer to what "the world" thinks */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--text-2)' }}>
                     {topic.title}
                   </span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: barColor }}>
-                    {pct >= 50
-                      ? `↑ ${pctLabel}`
-                      : `↓ ${pctLabel}`
-                    }
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-3)' }}>
+                    {val}%
                   </span>
                 </div>
 
@@ -302,7 +278,7 @@ export default function TrainingPage() {
       </div>
 
       {/* Live twin bar — the twin visibly morphs while you train it */}
-      <div style={{
+      <div className="training-livebar" style={{
         position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 40,
         display: 'flex', alignItems: 'center', gap: '16px',
         padding: '10px 20px',

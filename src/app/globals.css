@@ -200,6 +200,15 @@ a[href="#main-content"]:focus {
   h1 { font-size: clamp(2rem, 8vw, 3rem); }
 }
 
+/* ── Bottom tab bar: mobile only ────────────────────────────────────────── */
+.bottom-nav { display: none !important; }
+@media (max-width: 639px) {
+  .bottom-nav { display: flex !important; }
+  /* keep content and fixed bars clear of the tab bar */
+  main { padding-bottom: 64px; }
+  .training-livebar { bottom: 52px !important; }
+}
+
 /* ── Header: responsive nav ─────────────────────────────────────────────── */
 /* Desktop: full nav visible, hamburger hidden */
 .header-nav-desktop { display: flex; }

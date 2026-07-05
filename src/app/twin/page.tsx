@@ -14,15 +14,9 @@ import { generateShareCard, shareOrDownloadCard } from '@/lib/share-card';
 import { createTwinFromValues, classifyTwin } from '@/lib/twin-engine';
 import { AGENDA } from '@/data/agenda';
 import { inferPosition } from '@/lib/inference';
-import { DEMO_TWINS_TAGGED } from '@/data/demo-twins';
-
-// World average per dimension
-const WORLD_AVGS = (() => {
-  const twins = DEMO_TWINS_TAGGED.map(t => t.twin);
-  return Object.fromEntries(
-    TOPICS.map(k => [k, twins.reduce((s, tw) => s + tw[k], 0) / twins.length])
-  ) as Record<TopicKey, number>;
-})();
+// Positions are shown in ONE neutral color: high/low is a stance, not a score.
+// (Red-to-green coloring silently frames one pole as "good" — a neutrality bug.)
+const POSITION_COLOR = '#4B9EFF';
 
 const ARCHETYPE_NAMES: Record<string, Record<string, string>> = {
   progressive:  { de: 'Progressiv', en: 'Progressive', es: 'Progresista', fr: 'Progressiste', pt: 'Progressista', ar: 'تقدمي', zh: '进步派', ja: 'プログレッシブ', hi: 'प्रगतिशील', ru: 'Прогрессист', id: 'Progresif', tr: 'İlerici', ko: '진보적', it: 'Progressista', nl: 'Progressief', pl: 'Progresywny', uk: 'Прогресивний', vi: 'Tiến bộ', bn: 'প্রগতিশীল', fa: 'پیشرو' },
@@ -225,11 +219,8 @@ export default function TwinPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: editMode ? '32px' : '16px' }}>
             {topics.map(topic => {
               const val = twin[topic.key];
-              const worldVal = WORLD_AVGS[topic.key];
               const pct = Math.round(val * 100);
-              const worldPct = Math.round(worldVal * 100);
-              const hue = Math.round(val * 120);
-              const color = `hsl(${hue},50%,50%)`;
+              const color = POSITION_COLOR;
 
               if (editMode) {
                 const eVal = editVals[topic.key];
@@ -239,7 +230,7 @@ export default function TwinPage() {
                       <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--text-2)' }}>
                         {topic.title}
                       </span>
-                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: `hsl(${Math.round((eVal / 100) * 120)},50%,50%)` }}>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: POSITION_COLOR }}>
                         {eVal}%
                       </span>
                     </div>
@@ -257,20 +248,15 @@ export default function TwinPage() {
               }
 
               return (
-                <div key={topic.key} style={{ display: 'grid', gridTemplateColumns: '80px 1fr 48px 80px', alignItems: 'center', gap: '12px' }}>
+                <div key={topic.key} style={{ display: 'grid', gridTemplateColumns: '80px 1fr 48px', alignItems: 'center', gap: '12px' }}>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-3)' }}>
                     {topic.title}
                   </span>
                   <div style={{ height: '4px', background: 'var(--raised)', position: 'relative' }}>
                     <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${pct}%`, background: color }} />
-                    {/* World avg tick */}
-                    <div style={{ position: 'absolute', left: `${worldPct}%`, top: '-2px', transform: 'translateX(-50%)', width: '1px', height: '8px', background: 'var(--text-3)', opacity: 0.4 }} />
                   </div>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', fontWeight: 700, color, textAlign: 'right' }}>
                     {pct}%
-                  </span>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-3)', whiteSpace: 'nowrap' }}>
-                    {tx(lang, 'world')} {worldPct}%
                   </span>
                 </div>
               );
