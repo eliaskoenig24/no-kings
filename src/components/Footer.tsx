@@ -46,6 +46,8 @@ export default function Footer() {
           <Link href="/twin"     style={{ fontSize: '12px', color: 'var(--text-3)', textDecoration: 'none' }}>Mein Zwilling</Link>
           <Link href="/training" style={{ fontSize: '12px', color: 'var(--text-3)', textDecoration: 'none' }}>Training</Link>
           <Link href="/about"    style={{ fontSize: '12px', color: 'var(--text-3)', textDecoration: 'none' }}>About</Link>
+          <Link href="/impressum"   style={{ fontSize: '12px', color: 'var(--text-3)', textDecoration: 'none' }}>Impressum</Link>
+          <Link href="/datenschutz" style={{ fontSize: '12px', color: 'var(--text-3)', textDecoration: 'none' }}>Datenschutz</Link>
         </nav>
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-3)' }}>
           © {year} no kings · Open Source

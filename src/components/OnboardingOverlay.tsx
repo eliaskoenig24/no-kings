@@ -33,6 +33,7 @@ export default function OnboardingOverlay() {
   return (
     <div
       role="banner"
+      className="onboarding-banner"
       style={{
         position: 'fixed',
         bottom: 0,

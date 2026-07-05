@@ -42,22 +42,57 @@ export function ntx(lang: string, key: keyof typeof NTX): string {
   return NTX[key][lang] ?? NTX[key]['en'];
 }
 
+/**
+ * Session-wide cache: at thousands of visitors, every page navigation must NOT
+ * re-query six relays. One fetch feeds all pages; refreshed after a short TTL.
+ */
+type TruthState = { twins: NetworkTwin[]; stats: NetworkStats; eose: boolean };
+let truthCache: TruthState = { twins: [], stats: { events: 0, persons: 0, verified: 0 }, eose: false };
+let truthFetchedAt = 0;
+let truthInflight = false;
+const truthListeners = new Set<(s: TruthState) => void>();
+const TRUTH_TTL_MS = 60_000;
+
+function notifyTruth() {
+  for (const l of truthListeners) l(truthCache);
+}
+
+function ensureTruthSubscription() {
+  if (truthInflight) return;
+  if (truthCache.eose && Date.now() - truthFetchedAt < TRUTH_TTL_MS) return;
+  truthInflight = true;
+
+  const settle = () => {
+    if (!truthInflight) return;
+    truthInflight = false;
+    truthCache = { ...truthCache, eose: true };
+    truthFetchedAt = Date.now();
+    notifyTruth();
+  };
+
+  subscribeToUniqueNetworkTwins(
+    (twins, stats) => {
+      truthCache = { ...truthCache, twins, stats };
+      notifyTruth();
+    },
+    settle,
+    30000,
+  );
+  setTimeout(settle, 8000); // relays that never answer must not block the UI
+}
+
 export function useNetworkTwins() {
-  const [twins, setTwins] = useState<NetworkTwin[]>([]);
-  const [stats, setStats] = useState<NetworkStats>({ events: 0, persons: 0, verified: 0 });
-  const [eose, setEose] = useState(false);
+  const [state, setState] = useState<TruthState>(truthCache);
   const [simView, setSimView] = useState(false);
 
   useEffect(() => {
-    const cleanup = subscribeToUniqueNetworkTwins(
-      (t, s) => { setTwins(t); setStats(s); },
-      () => setEose(true),
-      30000,
-    );
-    const fallback = setTimeout(() => setEose(true), 8000);
-    return () => { cleanup(); clearTimeout(fallback); };
+    truthListeners.add(setState);
+    setState(truthCache);
+    ensureTruthSubscription();
+    return () => { truthListeners.delete(setState); };
   }, []);
 
+  const { twins, stats, eose } = state;
   const phase: NetworkPhase = networkPhase(stats.persons);
   const showAggregates = simView || phase === 'live';
   const displayTwins: TwinProfile[] = simView ? DEMO_TWINS : twins;

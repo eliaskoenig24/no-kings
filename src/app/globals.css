@@ -236,6 +236,7 @@ body { overscroll-behavior-x: none; }
   /* keep content and fixed bars clear of the tab bar */
   main { padding-bottom: 64px; }
   .training-livebar { bottom: 52px !important; }
+  .onboarding-banner { bottom: 52px !important; }
 }
 
 /* ── Header: responsive nav ─────────────────────────────────────────────── */
