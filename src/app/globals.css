@@ -134,37 +134,57 @@ a[href="#main-content"]:focus {
 .accent { color: var(--accent); }
 
 /* ── Range / Spectrum Slider ─────────────────────────────────────────────── */
+/* Slider: 44px touch target (Apple HIG), thin visual track, big thumb.
+   touch-action pan-y: horizontal drags belong to the slider, vertical scrolls the page. */
 .spectrum-slider {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 3px;
-  background: var(--border);
+  height: 44px;
+  background: transparent;
   outline: none;
   cursor: pointer;
   border-radius: 0;
+  touch-action: pan-y;
+  margin: 0;
+}
+
+.spectrum-slider::-webkit-slider-runnable-track {
+  height: 3px;
+  background: var(--border);
 }
 
 .spectrum-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 26px;
+  height: 26px;
   border-radius: 0;
   background: var(--text-1);
   cursor: pointer;
   border: 1px solid var(--border);
   box-shadow: none;
-  transition: background 0.1s;
+  margin-top: -11.5px; /* centers 26px thumb on 3px track */
+  transition: background 0.1s, transform 0.12s;
+}
+
+.spectrum-slider:active::-webkit-slider-thumb {
+  background: var(--accent);
+  transform: scale(1.18);
 }
 
 .spectrum-slider::-webkit-slider-thumb:hover {
   background: var(--accent);
 }
 
+.spectrum-slider::-moz-range-track {
+  height: 3px;
+  background: var(--border);
+}
+
 .spectrum-slider::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
+  width: 26px;
+  height: 26px;
   border-radius: 0;
   background: var(--text-1);
   cursor: pointer;
@@ -198,6 +218,15 @@ a[href="#main-content"]:focus {
 @media (max-width: 480px) {
   .container { padding: 0 16px; }
   h1 { font-size: clamp(2rem, 8vw, 3rem); }
+}
+
+/* ── Touch feel: no gray tap flash, instant feedback, no gesture lag ────── */
+* { -webkit-tap-highlight-color: transparent; }
+button, a { touch-action: manipulation; }
+html { -webkit-text-size-adjust: 100%; }
+body { overscroll-behavior-x: none; }
+@media (hover: none) {
+  button:active, a:active { opacity: 0.55; }
 }
 
 /* ── Bottom tab bar: mobile only ────────────────────────────────────────── */

@@ -48,6 +48,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
+  viewportFit: 'cover', // enables safe-area insets (home-indicator spacing) on iPhone
 };
 
 const jsonLd = {
