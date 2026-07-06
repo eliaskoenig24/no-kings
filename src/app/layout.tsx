@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import Header from '@/components/Header';
 import BottomNav from '@/components/BottomNav';
+import AppErrorBoundary from '@/components/AppErrorBoundary';
 import Footer from '@/components/Footer';
 import OnboardingOverlay from '@/components/OnboardingOverlay';
 import { LangProvider } from '@/context/LangContext';
@@ -88,7 +89,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <LangProvider>
           <Header />
           <OnboardingOverlay />
-          <main id="main-content">{children}</main>
+          <main id="main-content"><AppErrorBoundary>{children}</AppErrorBoundary></main>
           <BottomNav />
           <Footer />
           <InstallPrompt />
