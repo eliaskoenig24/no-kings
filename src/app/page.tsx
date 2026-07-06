@@ -7,7 +7,11 @@ import { AGENDA } from '@/data/agenda';
 import { aggregateForItem, inferPosition } from '@/lib/inference';
 import { getMyTwin } from '@/lib/db';
 import { useNetworkTwins, SimulationBanner, FoundingNotice, ntx } from '@/components/NetworkTruth';
-import { dailyIndex, dateKey, readDaily, saveDailyEntry, streak, type DailyStore } from '@/lib/daily';
+import { dailyIndex, dateKey, readDaily, saveDailyEntry, streak, aggregateDailyEntries, type DailyStore } from '@/lib/daily';
+import { getOrCreateIdentity } from '@/lib/identity';
+import { publishDailyAnswer } from '@/lib/nostr';
+import { fetchDailyEntries } from '@/lib/nostr-reader';
+import { MIN_AGGREGATE_PERSONS } from '@/lib/network-policy';
 import type { TwinProfile } from '@/types';
 
 const TX = {
@@ -24,6 +28,10 @@ const TX = {
   dq_net:   { de: 'Netzwerk', en: 'Network', es: 'Red', fr: 'Réseau', pt: 'Rede', ar: 'الشبكة', zh: '网络', ja: 'ネットワーク', hi: 'नेटवर्क', ru: 'Сеть', id: 'Jaringan', tr: 'Ağ', ko: '네트워크', it: 'Rete', nl: 'Netwerk', pl: 'Sieć', uk: 'Мережа', vi: 'Mạng', bn: 'নেটওয়ার্ক', fa: 'شبکه' },
   dq_yourguess: { de: 'Deine Schätzung', en: 'Your guess', es: 'Tu estimación', fr: 'Ton estimation', pt: 'Seu palpite', ar: 'تخمينك', zh: '你的猜测', ja: 'あなたの推測', hi: 'आपका अनुमान', ru: 'Ваша догадка', id: 'Tebakanmu', tr: 'Tahminin', ko: '내 추측', it: 'La tua stima', nl: 'Jouw gok', pl: 'Twój strzał', uk: 'Ваш здогад', vi: 'Dự đoán của bạn', bn: 'আপনার অনুমান', fa: 'حدس شما' },
   dq_off:   { de: 'Punkte daneben', en: 'points off', es: 'puntos de diferencia', fr: 'points d’écart', pt: 'pontos de diferença', ar: 'نقاط فرق', zh: '个百分点误差', ja: 'ポイントのずれ', hi: 'अंक का अंतर', ru: 'пунктов мимо', id: 'poin meleset', tr: 'puan fark', ko: '포인트 차이', it: 'punti di scarto', nl: 'punten ernaast', pl: 'punktów obok', uk: 'пунктів різниці', vi: 'điểm chênh lệch', bn: 'পয়েন্ট পার্থক্য', fa: 'واحد اختلاف' },
+  dq_publish: { de: 'Anonym mitzählen — öffentlich & unlöschbar, wie beim Twin', en: 'Count me in anonymously — public & permanent, like the twin', es: 'Contarme anónimamente — público y permanente, como el gemelo', fr: 'Me compter anonymement — public et permanent, comme le jumeau', pt: 'Contar-me anonimamente — público e permanente, como o gêmeo', ar: 'احسبني بشكل مجهول — علني ودائم كما التوأم', zh: '匿名计入——公开且永久，如同孪生', ja: '匿名でカウント — ツインと同じく公開・永久', hi: 'गुमनाम रूप से गिनें — सार्वजनिक और स्थायी, जुड़वां की तरह', ru: 'Считать меня анонимно — публично и навсегда, как двойника', id: 'Hitung saya secara anonim — publik & permanen, seperti kembaran', tr: 'Beni anonim say — ikiz gibi herkese açık ve kalıcı', ko: '익명으로 집계 — 트윈처럼 공개·영구', it: 'Contami in modo anonimo — pubblico e permanente, come il gemello', nl: 'Tel mij anoniem mee — openbaar & permanent, net als de tweeling', pl: 'Policz mnie anonimowo — publicznie i trwale, jak bliźniaka', uk: 'Рахувати мене анонімно — публічно й назавжди, як двійника', vi: 'Tính tôi ẩn danh — công khai & vĩnh viễn, như sinh đôi', bn: 'বেনামে গণনা করুন — যমজের মতো প্রকাশ্য ও স্থায়ী', fa: 'ناشناس حسابم کن — مانند دوقلو عمومی و دائمی' },
+  dq_gap_real: { de: 'Realität', en: 'Reality', es: 'Realidad', fr: 'Réalité', pt: 'Realidade', ar: 'الواقع', zh: '现实', ja: '現実', hi: 'वास्तविकता', ru: 'Реальность', id: 'Realitas', tr: 'Gerçek', ko: '현실', it: 'Realtà', nl: 'Realiteit', pl: 'Rzeczywistość', uk: 'Реальність', vi: 'Thực tế', bn: 'বাস্তবতা', fa: 'واقعیت' },
+  dq_gap_guessed: { de: 'Ø-Schätzung', en: 'Avg. guess', es: 'Estimación media', fr: 'Estimation moy.', pt: 'Palpite médio', ar: 'متوسط التخمين', zh: '平均猜测', ja: '平均推測', hi: 'औसत अनुमान', ru: 'Средняя догадка', id: 'Rata-rata tebakan', tr: 'Ort. tahmin', ko: '평균 추측', it: 'Stima media', nl: 'Gem. gok', pl: 'Śr. strzał', uk: 'Середній здогад', vi: 'Dự đoán TB', bn: 'গড় অনুমান', fa: 'میانگین حدس' },
+  dq_gap: { de: 'Wahrnehmungs-Lücke', en: 'Perception gap', es: 'Brecha de percepción', fr: 'Écart de perception', pt: 'Lacuna de percepção', ar: 'فجوة الإدراك', zh: '认知差距', ja: '認識ギャップ', hi: 'धारणा अंतर', ru: 'Разрыв восприятия', id: 'Kesenjangan persepsi', tr: 'Algı farkı', ko: '인식 격차', it: 'Divario di percezione', nl: 'Perceptiekloof', pl: 'Luka percepcji', uk: 'Розрив сприйняття', vi: 'Khoảng cách nhận thức', bn: 'ধারণার ফারাক', fa: 'شکاف ادراک' },
   dq_streak:{ de: 'Serie', en: 'Streak', es: 'Racha', fr: 'Série', pt: 'Sequência', ar: 'سلسلة', zh: '连续', ja: '連続', hi: 'सिलसिला', ru: 'Серия', id: 'Runtunan', tr: 'Seri', ko: '연속', it: 'Serie', nl: 'Reeks', pl: 'Seria', uk: 'Серія', vi: 'Chuỗi', bn: 'ধারা', fa: 'زنجیره' },
   dq_days:  { de: 'Tage', en: 'days', es: 'días', fr: 'jours', pt: 'dias', ar: 'أيام', zh: '天', ja: '日', hi: 'दिन', ru: 'дн.', id: 'hari', tr: 'gün', ko: '일', it: 'giorni', nl: 'dagen', pl: 'dni', uk: 'дн.', vi: 'ngày', bn: 'দিন', fa: 'روز' },
   support:  { de: 'dafür', en: 'support', es: 'a favor', fr: 'pour', pt: 'a favor', ar: 'مؤيد', zh: '支持', ja: '支持', hi: 'पक्ष', ru: 'за', id: 'mendukung', tr: 'destek', ko: '찬성', it: 'a favore', nl: 'voor', pl: 'za', uk: 'за', vi: 'ủng hộ', bn: 'সমর্থন', fa: 'موافق' },
@@ -38,7 +46,7 @@ export default function HomePage() {
   const { lang } = useLang();
   const [myTwin, setMyTwin] = useState<TwinProfile | null>(null);
   const [loaded, setLoaded] = useState(false);
-  const { stats, eose, phase, simView, setSimView, displayTwins } = useNetworkTwins();
+  const { twins, stats, eose, phase, simView, setSimView, displayTwins } = useNetworkTwins();
 
   // ---- Question of the day: answer → guess the network → reveal ----
   const dq = AGENDA[dailyIndex(AGENDA.length)];
@@ -47,11 +55,31 @@ export default function HomePage() {
   const [dqGuess, setDqGuess] = useState(50);
   const todayEntry = dailyStore[dateKey()];
   const dqStreak = streak(dailyStore);
+  const [dqPublish, setDqPublish] = useState(false);
+  const [dailyAgg, setDailyAgg] = useState<{ n: number; support: number; meanGuess: number; gap: number } | null>(null);
 
   function lockDaily() {
     if (!dqStance) return;
     setDailyStore(saveDailyEntry({ questionId: dq.id, stance: dqStance, guess: dqGuess }));
+    if (dqPublish) {
+      // fire-and-forget: the local entry is the source of truth for the UI
+      getOrCreateIdentity()
+        .then(id => publishDailyAnswer({ questionId: dq.id, stance: dqStance!, guess: dqGuess }, id.privkey, dateKey()))
+        .catch(() => { /* network unavailable — local entry stands */ });
+    }
   }
+
+  // Perception gap: real published answers vs. what people guessed
+  useEffect(() => {
+    if (!todayEntry || simView || phase !== 'live') return;
+    let cancelled = false;
+    const knownPubkeys = new Set(twins.map(t => t.pubkey));
+    fetchDailyEntries(dateKey()).then(entries => {
+      if (!cancelled) setDailyAgg(aggregateDailyEntries(entries, knownPubkeys));
+    });
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [!!todayEntry, simView, phase, twins.length]);
 
   useEffect(() => {
     getMyTwin().then(t => { setMyTwin(t ?? null); setLoaded(true); });
@@ -167,6 +195,17 @@ export default function HomePage() {
                   {dqGuess}%
                 </span>
               </div>
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginBottom: '16px', cursor: 'pointer', maxWidth: '520px' }}>
+                <input
+                  type="checkbox"
+                  checked={dqPublish}
+                  onChange={e => setDqPublish(e.target.checked)}
+                  style={{ marginTop: '3px', accentColor: 'var(--accent, #4B9EFF)' }}
+                />
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-3)', lineHeight: 1.6 }}>
+                  {tx(lang, 'dq_publish')}
+                </span>
+              </label>
               <button onClick={lockDaily} style={{
                 background: 'var(--text-1)', color: '#000', border: 'none',
                 padding: '12px 28px', fontSize: '12px', fontWeight: 700,
@@ -203,6 +242,32 @@ export default function HomePage() {
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--text-2)', margin: 0 }}>
                   {tx(lang, 'dq_yourguess')}: {todayEntry.guess}% · {diff} {tx(lang, 'dq_off')} · {tx(lang, 'you')}: {todayEntry.stance === 'for' ? tx(lang, 'support') : tx(lang, 'oppose')}
                 </p>
+
+                {/* The perception gap — what nobody else can show: reality vs. what
+                    people believed the majority thinks. Gated at 25 real answers. */}
+                {dailyAgg && dailyAgg.n >= MIN_AGGREGATE_PERSONS && (() => {
+                  const real = Math.round(dailyAgg.support * 100);
+                  const guessed = Math.round(dailyAgg.meanGuess);
+                  return (
+                    <div style={{ marginTop: '24px', borderTop: '1px solid var(--divider)', paddingTop: '18px' }}>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--accent, #4B9EFF)', marginBottom: '14px' }}>
+                        {tx(lang, 'dq_gap')} · n={dailyAgg.n}
+                      </p>
+                      {[{ label: tx(lang, 'dq_gap_real'), v: real, strong: true }, { label: tx(lang, 'dq_gap_guessed'), v: guessed, strong: false }].map(({ label, v, strong }) => (
+                        <div key={label} style={{ display: 'grid', gridTemplateColumns: '110px 1fr 44px', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</span>
+                          <div style={{ height: strong ? '8px' : '5px', background: 'var(--raised)', position: 'relative' }}>
+                            <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${v}%`, background: strong ? 'var(--text-1)' : 'var(--text-3)' }} />
+                          </div>
+                          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', fontWeight: strong ? 700 : 400, color: strong ? 'var(--text-1)' : 'var(--text-3)', textAlign: 'right' }}>{v}%</span>
+                        </div>
+                      ))}
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--text-2)', margin: '10px 0 0' }}>
+                        Δ {dailyAgg.gap > 0 ? '+' : ''}{dailyAgg.gap}
+                      </p>
+                    </div>
+                  );
+                })()}
               </div>
             );
           })()}

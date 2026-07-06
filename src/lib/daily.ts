@@ -42,6 +42,36 @@ export function saveDailyEntry(entry: DailyEntry, d: Date = new Date()): DailySt
   return store;
 }
 
+/** A published daily answer as seen on the network (pseudonymous). */
+export type PublishedDaily = {
+  pubkey: string;
+  stance: 'for' | 'against';
+  guess: number; // 0–100
+};
+
+/**
+ * Aggregates published daily answers: one voice per pubkey; optionally only
+ * pubkeys that also published a twin count (spam costs a proof-of-work twin).
+ * Returns support share (0–1), mean guess (0–100) and the perception gap.
+ */
+export function aggregateDailyEntries(
+  entries: PublishedDaily[],
+  knownPubkeys?: Set<string>,
+): { n: number; support: number; meanGuess: number; gap: number } {
+  const byPubkey = new Map<string, PublishedDaily>();
+  for (const e of entries) {
+    if (knownPubkeys && !knownPubkeys.has(e.pubkey)) continue;
+    if (e.guess < 0 || e.guess > 100) continue;
+    byPubkey.set(e.pubkey, e); // last one wins — addressable events replace anyway
+  }
+  const list = [...byPubkey.values()];
+  if (list.length === 0) return { n: 0, support: 0.5, meanGuess: 50, gap: 0 };
+  const support = list.filter(e => e.stance === 'for').length / list.length;
+  const meanGuess = list.reduce((s, e) => s + e.guess, 0) / list.length;
+  const gap = Math.round(support * 100 - meanGuess);
+  return { n: list.length, support, meanGuess, gap };
+}
+
 /** Consecutive days answered, counting backwards from today (or yesterday if today is open). */
 export function streak(store: DailyStore, today: Date = new Date()): number {
   let count = 0;

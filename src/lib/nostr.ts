@@ -132,6 +132,37 @@ export async function publishTwin(
   return publishToRelays(signedEvent);
 }
 
+export const DAILY_D_PREFIX = 'nk-daily-';
+
+/**
+ * Publishes the answer to today's question as an addressable event:
+ * one answer per keypair per day, replaceable, pseudonymous.
+ * No PoW here (the daily ritual must stay instant) — aggregation instead
+ * counts only pubkeys that also carry a PoW-mined twin.
+ */
+export async function publishDailyAnswer(
+  entry: { questionId: string; stance: 'for' | 'against'; guess: number },
+  privkeyHex: string,
+  dateStr: string, // YYYY-MM-DD
+): Promise<{ success: boolean; error?: string }> {
+  const privkeyBytes = hexToBytes(privkeyHex);
+  const payload = JSON.stringify({ q: entry.questionId, s: entry.stance, g: Math.round(entry.guess) });
+  const unsigned: UnsignedEvent = {
+    kind: TWIN_KIND,
+    pubkey: '',
+    tags: [
+      ['d', DAILY_D_PREFIX + dateStr],
+      ['t', 'nk-daily'],
+      ['nk-daily', payload],
+    ],
+    content: payload,
+    created_at: Math.floor(Date.now() / 1000),
+  };
+  const signedEvent = finalizeEvent(unsigned, privkeyBytes);
+  const result = await publishToRelays(signedEvent);
+  return { success: result.success, error: result.error };
+}
+
 function makeBar(value: number): string {
   const filled = Math.round(value * 10);
   return '█'.repeat(filled) + '░'.repeat(10 - filled);

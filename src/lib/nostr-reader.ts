@@ -1,7 +1,8 @@
 import { Relay } from 'nostr-tools/relay';
 import { getPow } from 'nostr-tools/nip13';
 import type { TwinProfile } from '@/types';
-import { TWIN_KIND, TWIN_D_TAG, TWIN_POW_BITS } from './nostr';
+import { TWIN_KIND, TWIN_D_TAG, TWIN_POW_BITS, DAILY_D_PREFIX } from './nostr';
+import type { PublishedDaily } from './daily';
 import { getRelays } from './relays';
 import { isValidRegion } from '@/data/regions';
 
@@ -324,6 +325,33 @@ export async function fetchTwinByPubkey(
     // fall through
   }
   return dedup.twins()[0] ?? null;
+}
+
+/** Fetches all published answers to a given day's question (deduped by pubkey downstream). */
+export async function fetchDailyEntries(
+  dateStr: string,
+  timeoutMs = 6000,
+): Promise<PublishedDaily[]> {
+  const out: PublishedDaily[] = [];
+  const seen = new Set<string>();
+  const filter: NostrFilter[] = [{ kinds: [TWIN_KIND], '#d': [DAILY_D_PREFIX + dateStr], limit: 2000 }];
+  try {
+    await Promise.all(
+      getRelays().map((url) =>
+        collectFromRelay(url, filter, timeoutMs, (ev) => {
+          if (seen.has(ev.id)) return;
+          seen.add(ev.id);
+          try {
+            const raw = JSON.parse(ev.tags?.find(t => t[0] === 'nk-daily')?.[1] ?? ev.content);
+            const stance = raw?.s === 'for' || raw?.s === 'against' ? raw.s : null;
+            const guess = typeof raw?.g === 'number' ? raw.g : null;
+            if (stance && guess !== null) out.push({ pubkey: ev.pubkey, stance, guess });
+          } catch { /* malformed — ignore */ }
+        }),
+      ),
+    );
+  } catch { /* return what arrived */ }
+  return out;
 }
 
 export async function checkRelayStatus(
