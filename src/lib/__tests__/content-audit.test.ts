@@ -21,23 +21,15 @@ describe('agenda content integrity', () => {
     expect(gaps).toEqual([]);
   });
 
-  it('every agenda item has a description at least in en (fallback anchor) and de', () => {
+  it('every agenda item has a description in all supported languages', () => {
     const gaps: string[] = [];
     for (const item of AGENDA) {
-      for (const lang of ['en', 'de']) {
+      for (const lang of LANGS) {
         if (!item.description[lang]?.trim()) gaps.push(`${item.id}:desc:${lang}`);
       }
     }
     expect(gaps).toEqual([]);
   });
-
-  // KNOWN GAP (audit 2026-07-06): 10 items have descriptions only in de/en —
-  // atomwaffen-verbot, digitalsteuer-konzerne, vier-tage-woche,
-  // drogenkrieg-entkriminalisierung, welternaehrung-recht,
-  // sozialwohnungsbau-pflicht, klimafluechtlinge-aufnahme,
-  // patentrecht-impfstoffe, digitale-zentralbankwaehrung, plattformarbeit-rechte.
-  // UI falls back to English. Tighten this to all languages once translated:
-  it.todo('every agenda item has a description in all 20 supported languages');
 
   it('agenda ids are unique', () => {
     const ids = AGENDA.map(a => a.id);
