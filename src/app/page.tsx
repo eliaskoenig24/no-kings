@@ -2,6 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+import { DEMO_TWINS_TAGGED } from '@/data/demo-twins';
+
+const WorldGlobe = dynamic(() => import('@/components/WorldGlobe'), { ssr: false });
 import { useLang } from '@/context/LangContext';
 import { AGENDA } from '@/data/agenda';
 import { aggregateForItem, inferPosition } from '@/lib/inference';
@@ -31,6 +35,8 @@ const TX = {
   dq_publish: { de: 'Anonym mitzählen — öffentlich & unlöschbar, wie beim Twin', en: 'Count me in anonymously — public & permanent, like the twin', es: 'Contarme anónimamente — público y permanente, como el gemelo', fr: 'Me compter anonymement — public et permanent, comme le jumeau', pt: 'Contar-me anonimamente — público e permanente, como o gêmeo', ar: 'احسبني بشكل مجهول — علني ودائم كما التوأم', zh: '匿名计入——公开且永久，如同孪生', ja: '匿名でカウント — ツインと同じく公開・永久', hi: 'गुमनाम रूप से गिनें — सार्वजनिक और स्थायी, जुड़वां की तरह', ru: 'Считать меня анонимно — публично и навсегда, как двойника', id: 'Hitung saya secara anonim — publik & permanen, seperti kembaran', tr: 'Beni anonim say — ikiz gibi herkese açık ve kalıcı', ko: '익명으로 집계 — 트윈처럼 공개·영구', it: 'Contami in modo anonimo — pubblico e permanente, come il gemello', nl: 'Tel mij anoniem mee — openbaar & permanent, net als de tweeling', pl: 'Policz mnie anonimowo — publicznie i trwale, jak bliźniaka', uk: 'Рахувати мене анонімно — публічно й назавжди, як двійника', vi: 'Tính tôi ẩn danh — công khai & vĩnh viễn, như sinh đôi', bn: 'বেনামে গণনা করুন — যমজের মতো প্রকাশ্য ও স্থায়ী', fa: 'ناشناس حسابم کن — مانند دوقلو عمومی و دائمی' },
   dq_gap_real: { de: 'Realität', en: 'Reality', es: 'Realidad', fr: 'Réalité', pt: 'Realidade', ar: 'الواقع', zh: '现实', ja: '現実', hi: 'वास्तविकता', ru: 'Реальность', id: 'Realitas', tr: 'Gerçek', ko: '현실', it: 'Realtà', nl: 'Realiteit', pl: 'Rzeczywistość', uk: 'Реальність', vi: 'Thực tế', bn: 'বাস্তবতা', fa: 'واقعیت' },
   dq_gap_guessed: { de: 'Ø-Schätzung', en: 'Avg. guess', es: 'Estimación media', fr: 'Estimation moy.', pt: 'Palpite médio', ar: 'متوسط التخمين', zh: '平均猜测', ja: '平均推測', hi: 'औसत अनुमान', ru: 'Средняя догадка', id: 'Rata-rata tebakan', tr: 'Ort. tahmin', ko: '평균 추측', it: 'Stima media', nl: 'Gem. gok', pl: 'Śr. strzał', uk: 'Середній здогад', vi: 'Dự đoán TB', bn: 'গড় অনুমান', fa: 'میانگین حدس' },
+  wg_title: { de: 'So denkt die Welt — live', en: 'How the world thinks — live', es: 'Así piensa el mundo — en vivo', fr: 'Ce que pense le monde — en direct', pt: 'Como o mundo pensa — ao vivo', ar: 'هكذا يفكر العالم — مباشر', zh: '世界怎么想——实时', ja: '世界はこう考える — ライブ', hi: 'दुनिया ऐसा सोचती है — लाइव', ru: 'Как думает мир — вживую', id: 'Beginilah dunia berpikir — langsung', tr: 'Dünya böyle düşünüyor — canlı', ko: '세계는 이렇게 생각한다 — 라이브', it: 'Come pensa il mondo — dal vivo', nl: 'Zo denkt de wereld — live', pl: 'Tak myśli świat — na żywo', uk: 'Так думає світ — наживо', vi: 'Thế giới nghĩ gì — trực tiếp', bn: 'বিশ্ব যা ভাবে — লাইভ', fa: 'جهان چنین می‌اندیشد — زنده' },
+  wg_hint: { de: 'Mit dem Finger drehen · Land antippen', en: 'Drag to spin · tap a country', es: 'Gira con el dedo · toca un país', fr: 'Fais tourner du doigt · touche un pays', pt: 'Gire com o dedo · toque num país', ar: 'أدر بإصبعك · انقر على دولة', zh: '手指旋转 · 点击国家', ja: '指で回す · 国をタップ', hi: 'उंगली से घुमाएं · देश पर टैप करें', ru: 'Вращайте пальцем · нажмите на страну', id: 'Putar dengan jari · ketuk negara', tr: 'Parmağınla çevir · ülkeye dokun', ko: '손가락으로 회전 · 국가를 탭', it: 'Ruota col dito · tocca un paese', nl: 'Draai met je vinger · tik op een land', pl: 'Obracaj palcem · dotknij kraju', uk: 'Обертайте пальцем · торкніться країни', vi: 'Xoay bằng ngón tay · chạm vào quốc gia', bn: 'আঙুল দিয়ে ঘোরান · দেশে ট্যাপ করুন', fa: 'با انگشت بچرخانید · روی کشور بزنید' },
   dq_gap: { de: 'Wahrnehmungs-Lücke', en: 'Perception gap', es: 'Brecha de percepción', fr: 'Écart de perception', pt: 'Lacuna de percepção', ar: 'فجوة الإدراك', zh: '认知差距', ja: '認識ギャップ', hi: 'धारणा अंतर', ru: 'Разрыв восприятия', id: 'Kesenjangan persepsi', tr: 'Algı farkı', ko: '인식 격차', it: 'Divario di percezione', nl: 'Perceptiekloof', pl: 'Luka percepcji', uk: 'Розрив сприйняття', vi: 'Khoảng cách nhận thức', bn: 'ধারণার ফারাক', fa: 'شکاف ادراک' },
   dq_streak:{ de: 'Serie', en: 'Streak', es: 'Racha', fr: 'Série', pt: 'Sequência', ar: 'سلسلة', zh: '连续', ja: '連続', hi: 'सिलसिला', ru: 'Серия', id: 'Runtunan', tr: 'Seri', ko: '연속', it: 'Serie', nl: 'Reeks', pl: 'Seria', uk: 'Серія', vi: 'Chuỗi', bn: 'ধারা', fa: 'زنجیره' },
   dq_days:  { de: 'Tage', en: 'days', es: 'días', fr: 'jours', pt: 'dias', ar: 'أيام', zh: '天', ja: '日', hi: 'दिन', ru: 'дн.', id: 'hari', tr: 'gün', ko: '일', it: 'giorni', nl: 'dagen', pl: 'dni', uk: 'дн.', vi: 'ngày', bn: 'দিন', fa: 'روز' },
@@ -86,6 +92,29 @@ export default function HomePage() {
     // deferred: keeps SSR markup and first client render identical
     queueMicrotask(() => setDailyStore(readDaily()));
   }, []);
+
+  // Per-country data for the globe: how each country leans on today's question.
+  // Real twins by default; the labeled simulation shows the fully lit world.
+  const countryData = useMemo(() => {
+    const acc: Record<string, { count: number; sum: number }> = {};
+    if (simView) {
+      for (const { twin, country } of DEMO_TWINS_TAGGED) {
+        (acc[country] ??= { count: 0, sum: 0 });
+        acc[country].count++;
+        acc[country].sum += inferPosition(twin, dq).score;
+      }
+    } else {
+      for (const t of twins) {
+        if (!t.country) continue;
+        (acc[t.country] ??= { count: 0, sum: 0 });
+        acc[t.country].count++;
+        acc[t.country].sum += inferPosition(t, dq).score;
+      }
+    }
+    return Object.fromEntries(
+      Object.entries(acc).map(([a2, { count, sum }]) => [a2, { count, support: sum / count }]),
+    );
+  }, [simView, twins, dq]);
 
   // Reveal rules ("answer first, see later"):
   //  - simulation: numbers visible, loudly labeled as fake
@@ -271,6 +300,20 @@ export default function HomePage() {
               </div>
             );
           })()}
+        </div>
+
+        {/* The world, lit country by country — dark until 25 persons per country */}
+        <div style={{ marginBottom: '48px' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.2em', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: '18px' }}>
+            {tx(lang, 'wg_title')}
+          </p>
+          <WorldGlobe
+            data={countryData}
+            lang={lang}
+            hint={tx(lang, 'wg_hint')}
+            lockedLabel={ntx(lang, 'rg_until')}
+            supportLabel={`${tx(lang, 'support')} · ${tx(lang, 'dq_label')}`}
+          />
         </div>
 
         {/* Founding phase — the honest cold start, right on the front door */}
