@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { makeTx } from '@/lib/tx';
 import { useMemo } from 'react';
 import { AGENDA } from '@/data/agenda';
 import { DEMO_TWINS_TAGGED } from '@/data/demo-twins';
@@ -73,9 +74,7 @@ const TX = {
   view_q:     { de: 'Frage ansehen →', en: 'View question →', es: 'Ver pregunta →', fr: 'Voir la question →', pt: 'Ver pergunta →', ar: 'عرض السؤال ←', zh: '查看问题 →', ja: '質問を見る →', hi: 'प्रश्न देखें →', ru: 'Открыть вопрос →', id: 'Lihat pertanyaan →', tr: 'Soruyu gör →', ko: '질문 보기 →', it: 'Vedi domanda →', nl: 'Bekijk vraag →', pl: 'Zobacz pytanie →', uk: 'Переглянути питання →', vi: 'Xem câu hỏi →', bn: 'প্রশ্ন দেখুন →', fa: 'مشاهده سؤال ←' },
 };
 
-function tx(lang: string, key: keyof typeof TX): string {
-  return (TX[key] as Record<string, string>)[lang] ?? (TX[key] as Record<string, string>)['en'];
-}
+const tx = makeTx(TX);
 
 export default function InsightsPage() {
   const { lang } = useLang();

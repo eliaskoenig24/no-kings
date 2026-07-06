@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import Link from 'next/link';
+import { makeTx } from '@/lib/tx';
 import { notFound } from 'next/navigation';
 import { AGENDA } from '@/data/agenda';
 import { DEMO_TWINS_TAGGED } from '@/data/demo-twins';
@@ -63,9 +64,7 @@ const TX = {
   by_archetype:{ de: 'Nach politischem Profil', en: 'By political profile', es: 'Por perfil político', fr: 'Par profil politique', pt: 'Por perfil político', ar: 'حسب الملف السياسي', zh: '按政治档案', ja: '政治プロフィール別', hi: 'राजनीतिक प्रोफ़ाइल के अनुसार', ru: 'По политическому профилю', id: 'Berdasarkan profil politik', tr: 'Siyasi profile göre', ko: '정치 프로필별', it: 'Per profilo politico', nl: 'Op politiek profiel', pl: 'Według profilu politycznego', uk: 'За політичним профілем', vi: 'Theo hồ sơ chính trị', bn: 'রাজনৈতিক প্রোফাইল অনুযায়ী', fa: 'بر اساس پروفایل سیاسی' },
 };
 
-function t(lang: string, key: keyof typeof TX): string {
-  return (TX[key] as Record<string, string>)[lang] ?? (TX[key] as Record<string, string>)['en'];
-}
+const t = makeTx(TX);
 
 const ALL_TWINS = DEMO_TWINS_TAGGED.map(tt => tt.twin);
 

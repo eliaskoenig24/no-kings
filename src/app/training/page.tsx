@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import dynamic from 'next/dynamic';
+import { makeTx } from '@/lib/tx';
 import { useRouter } from 'next/navigation';
 import { useLang } from '@/context/LangContext';
 import { SPECTRUM } from '@/lib/i18n';
@@ -36,9 +37,7 @@ const TX = {
   archetype_lbl: { de: 'Profil', en: 'Profile', es: 'Perfil', fr: 'Profil', pt: 'Perfil', ar: 'الملف الشخصي', zh: '档案', ja: 'プロフィール', hi: 'प्रोफ़ाइल', ru: 'Профиль', id: 'Profil', tr: 'Profil', ko: '프로필', it: 'Profilo', nl: 'Profiel', pl: 'Profil', uk: 'Профіль', vi: 'Hồ sơ', bn: 'প্রোফাইল', fa: 'پروفایل' },
 };
 
-function tx(lang: string, key: keyof typeof TX): string {
-  return (TX[key] as Record<string, string>)[lang] ?? (TX[key] as Record<string, string>)['en'];
-}
+const tx = makeTx(TX);
 
 export default function TrainingPage() {
   const { lang, country: autoCountry } = useLang();

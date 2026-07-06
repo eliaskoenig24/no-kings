@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { makeTx } from '@/lib/tx';
 import { getMyTwin, saveMyTwin, getDemographics } from '@/lib/db';
 import { TwinProfile, TOPICS, TopicKey } from '@/types';
 import dynamic from 'next/dynamic';
@@ -62,9 +63,7 @@ const TX = {
   cancel:     { de: 'Abbrechen', en: 'Cancel', es: 'Cancelar', fr: 'Annuler', pt: 'Cancelar', ar: 'إلغاء', zh: '取消', ja: 'キャンセル', hi: 'रद्द करें', ru: 'Отмена', id: 'Batal', tr: 'İptal', ko: '취소', it: 'Annulla', nl: 'Annuleren', pl: 'Anuluj', uk: 'Скасувати', vi: 'Hủy', bn: 'বাতিল', fa: 'لغو' },
 };
 
-function tx(lang: string, key: keyof typeof TX): string {
-  return (TX[key] as Record<string, string>)[lang] ?? (TX[key] as Record<string, string>)['en'];
-}
+const tx = makeTx(TX);
 
 export default function TwinPage() {
   const { lang, country } = useLang();

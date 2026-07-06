@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import { makeTx } from '@/lib/tx';
 import { DEMO_TWINS_TAGGED } from '@/data/demo-twins';
 
 const WorldGlobe = dynamic(() => import('@/components/WorldGlobe'), { ssr: false });
@@ -44,9 +45,7 @@ const TX = {
   oppose:   { de: 'dagegen', en: 'oppose', es: 'en contra', fr: 'contre', pt: 'contra', ar: 'معارض', zh: '反对', ja: '反対', hi: 'विरोध', ru: 'против', id: 'menolak', tr: 'karşı', ko: '반대', it: 'contro', nl: 'tegen', pl: 'przeciw', uk: 'проти', vi: 'phản đối', bn: 'বিরোধ', fa: 'مخالف' },
 };
 
-function tx(lang: string, key: keyof typeof TX): string {
-  return (TX[key] as Record<string, string>)[lang] ?? (TX[key] as Record<string, string>)['en'];
-}
+const tx = makeTx(TX);
 
 export default function HomePage() {
   const { lang } = useLang();

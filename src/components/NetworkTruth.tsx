@@ -11,6 +11,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { makeTx } from '@/lib/tx';
 import { subscribeToUniqueNetworkTwins, type NetworkTwin, type NetworkStats } from '@/lib/nostr-reader';
 import { MIN_AGGREGATE_PERSONS, networkPhase, foundingProgress, type NetworkPhase } from '@/lib/network-policy';
 import { DEMO_TWINS } from '@/data/demo-twins';
@@ -38,9 +39,7 @@ export const NTX: Record<string, Record<string, string>> = {
   locked_hint:  { de: 'Positioniere deinen Zwilling, um zu sehen, wie das Netzwerk denkt.', en: 'Position your twin to see how the network thinks.', es: 'Posiciona tu gemelo para ver cómo piensa la red.', fr: 'Positionne ton jumeau pour voir ce que pense le réseau.', pt: 'Posicione seu gêmeo para ver como a rede pensa.', ar: 'حدد موقف توأمك لترى كيف تفكر الشبكة.', zh: '先确定你的孪生立场，再查看网络的想法。', ja: 'ツインの立場を決めると、ネットワークの考えが見られます。', hi: 'नेटवर्क की राय देखने के लिए पहले अपने जुड़वां की स्थिति तय करें।', ru: 'Определите позицию двойника, чтобы увидеть мнение сети.', id: 'Tentukan posisi kembaranmu untuk melihat pendapat jaringan.', tr: 'Ağın ne düşündüğünü görmek için önce ikizinin konumunu belirle.', ko: '네트워크의 생각을 보려면 먼저 트윈의 입장을 정하세요.', it: 'Posiziona il tuo gemello per vedere cosa pensa la rete.', nl: 'Positioneer je tweeling om te zien hoe het netwerk denkt.', pl: 'Określ pozycję bliźniaka, aby zobaczyć, co myśli sieć.', uk: 'Визначте позицію двійника, щоб побачити думку мережі.', vi: 'Xác định vị trí sinh đôi để xem mạng nghĩ gì.', bn: 'নেটওয়ার্ক কী ভাবে দেখতে আগে যমজের অবস্থান ঠিক করুন।', fa: 'موضع دوقلوی خود را مشخص کنید تا نظر شبکه را ببینید.' },
 };
 
-export function ntx(lang: string, key: keyof typeof NTX): string {
-  return NTX[key][lang] ?? NTX[key]['en'];
-}
+export const ntx = makeTx(NTX);
 
 /**
  * Session-wide cache: at thousands of visitors, every page navigation must NOT

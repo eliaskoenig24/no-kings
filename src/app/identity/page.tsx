@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { QRCodeSVG } from 'qrcode.react';
+import { makeTx } from '@/lib/tx';
 import { getOrCreateIdentity, encodeSecretKey, importIdentity } from '@/lib/identity';
 import type { Identity } from '@/lib/identity';
 import { fetchTwinByPubkey } from '@/lib/nostr-reader';
@@ -42,10 +43,8 @@ const ID_TX = {
   share_twin:     { de: 'Zwilling teilen', en: 'Share twin', es: 'Compartir gemelo', fr: 'Partager le jumeau', pt: 'Compartilhar gêmeo', ar: 'مشاركة التوأم', zh: '分享孪生', ja: 'ツインを共有', hi: 'ट्विन शेयर करें', ru: 'Поделиться двойником', id: 'Bagikan kembaran', tr: 'İkizi paylaş', ko: '트윈 공유', it: 'Condividi gemello', nl: 'Tweeling delen', pl: 'Udostępnij bliźniaka', uk: 'Поділитися двійником', vi: 'Chia sẻ sinh đôi', bn: 'যমজ শেয়ার করুন', fa: 'اشتراک‌گذاری دوقلو' },
 };
 
-function tx(key: keyof typeof ID_TX, lang: string): string {
-  const block = ID_TX[key] as Record<string, string>;
-  return block[lang] ?? block.en;
-}
+const idTx = makeTx(ID_TX);
+const tx = (key: keyof typeof ID_TX & string, lang: string) => idTx(lang, key);
 
 export default function IdentityPage() {
   const [identity, setIdentity] = useState<Identity | null>(null);
