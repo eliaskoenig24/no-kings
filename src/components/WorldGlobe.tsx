@@ -33,18 +33,22 @@ function alpha2Of(f: CountryFeature): string | undefined {
   return NUMERIC_TO_A2[String(f.id ?? '').padStart(3, '0')];
 }
 
+export type RegionRow = { code: string; name: string; count: number; unlocked: boolean };
+
 export default function WorldGlobe({
   data,
   lang,
   hint,
   lockedLabel,
   supportLabel,
+  regions,
 }: {
   data: Record<string, CountryDatum>;
   lang: string;
   hint: string;
   lockedLabel: string;   // e.g. "Personen bis zur Freischaltung"
   supportLabel: string;  // e.g. "dafür — Frage des Tages"
+  regions?: Record<string, RegionRow[]>; // zoom level 2: per-country region breakdown
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -212,6 +216,26 @@ export default function WorldGlobe({
           {!selUnlocked && (
             <div style={{ height: '3px', background: 'var(--divider)', position: 'relative', marginTop: '10px' }}>
               <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${Math.min(100, Math.round(((sel?.count ?? 0) / MIN_AGGREGATE_PERSONS) * 100))}%`, background: 'var(--accent)' }} />
+            </div>
+          )}
+
+          {/* Zoom level 2: the country's regions — each with its OWN threshold.
+              The ladder deliberately ends here (see privacy notes in regions.ts). */}
+          {selected.a2 && regions?.[selected.a2] && regions[selected.a2].length > 0 && (
+            <div style={{ marginTop: '16px', borderTop: '1px solid var(--divider)', paddingTop: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {regions[selected.a2].map((r) => (
+                <div key={r.code}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px' }}>
+                    <span style={{ fontSize: '12px', color: 'var(--text-2)' }}>{r.name}</span>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: r.unlocked ? 'var(--positive, #22c55e)' : 'var(--text-3)' }}>
+                      {r.count} / {MIN_AGGREGATE_PERSONS}
+                    </span>
+                  </div>
+                  <div style={{ height: '2px', background: 'var(--divider)', position: 'relative', marginTop: '4px' }}>
+                    <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${Math.min(100, Math.round((r.count / MIN_AGGREGATE_PERSONS) * 100))}%`, background: r.unlocked ? 'var(--positive, #22c55e)' : 'var(--accent)' }} />
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>

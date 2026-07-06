@@ -16,7 +16,8 @@ import { dailyIndex, dateKey, readDaily, saveDailyEntry, streak, aggregateDailyE
 import { getOrCreateIdentity } from '@/lib/identity';
 import { publishDailyAnswer } from '@/lib/nostr';
 import { fetchDailyEntries } from '@/lib/nostr-reader';
-import { MIN_AGGREGATE_PERSONS } from '@/lib/network-policy';
+import { MIN_AGGREGATE_PERSONS, groupByRegion } from '@/lib/network-policy';
+import { regionName } from '@/data/regions';
 import type { TwinProfile } from '@/types';
 
 const TX = {
@@ -114,6 +115,17 @@ export default function HomePage() {
       Object.entries(acc).map(([a2, { count, sum }]) => [a2, { count, support: sum / count }]),
     );
   }, [simView, twins, dq]);
+
+  // Zoom level 2 for the globe: regions per country, each with its own gate.
+  const regionsByCountry = useMemo(() => {
+    if (simView) return {};
+    const out: Record<string, { code: string; name: string; count: number; unlocked: boolean }[]> = {};
+    for (const b of groupByRegion(twins)) {
+      const a2 = b.code.split('-')[0];
+      (out[a2] ??= []).push({ code: b.code, name: regionName(b.code), count: b.count, unlocked: b.unlocked });
+    }
+    return out;
+  }, [simView, twins]);
 
   // Reveal rules ("answer first, see later"):
   //  - simulation: numbers visible, loudly labeled as fake
@@ -312,6 +324,7 @@ export default function HomePage() {
             hint={tx(lang, 'wg_hint')}
             lockedLabel={ntx(lang, 'rg_until')}
             supportLabel={`${tx(lang, 'support')} · ${tx(lang, 'dq_label')}`}
+            regions={regionsByCountry}
           />
         </div>
 
