@@ -8,11 +8,11 @@ export const metadata: Metadata = {
 // ⚠️ PLATZHALTER: Vor der Veröffentlichung Name, Anschrift und E-Mail eintragen.
 // Ein Impressum ist für öffentlich betriebene Websites in Deutschland Pflicht (§ 5 DDG).
 const OPERATOR = {
-  name: '[VOR- UND NACHNAME EINTRAGEN]',
-  street: '[STRASSE UND HAUSNUMMER]',
-  city: '[PLZ UND ORT]',
+  name: 'Elias König',
+  street: 'Fellhornstraße 5',
+  city: '[PLZ UND ORT EINTRAGEN]', // ⚠️ noch offen — ohne PLZ/Ort ist das Impressum unvollständig
   country: 'Deutschland',
-  email: '[KONTAKT-E-MAIL]',
+  email: 'eliaskoenig24@icloud.com',
 };
 
 export default function ImpressumPage() {
