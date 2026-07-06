@@ -40,6 +40,12 @@ const TX = {
   shared:     { de: '✓ Zwilling ist im Netzwerk', en: '✓ Twin is in the network', es: '✓ Gemelo está en la red', fr: '✓ Jumeau dans le réseau', pt: '✓ Gêmeo na rede', ar: '✓ التوأم في الشبكة', zh: '✓ 孪生已在网络中', ja: '✓ ツインはネットワーク上', hi: '✓ जुड़वां नेटवर्क में है', ru: '✓ Двойник в сети', id: '✓ Kembaran ada di jaringan', tr: '✓ İkiz ağda', ko: '✓ 트윈이 네트워크에 있음', it: '✓ Gemello nella rete', nl: '✓ Tweeling in netwerk', pl: '✓ Bliźniak jest w sieci', uk: '✓ Двійник у мережі', vi: '✓ Sinh đôi đã trong mạng', bn: '✓ যমজ নেটওয়ার্কে আছে', fa: '✓ دوقلو در شبکه است' },
   sharing:    { de: 'Wird geteilt…', en: 'Sharing…', es: 'Compartiendo…', fr: 'Partage…', pt: 'Compartilhando…', ar: 'جارٍ المشاركة…', zh: '共享中…', ja: '共有中…', hi: 'साझा हो रहा है…', ru: 'Публикуется…', id: 'Berbagi…', tr: 'Paylaşılıyor…', ko: '공유 중…', it: 'Condivisione…', nl: 'Delen…', pl: 'Udostępnianie…', uk: 'Публікація…', vi: 'Đang chia sẻ…', bn: 'শেয়ার হচ্ছে…', fa: 'در حال اشتراک‌گذاری…' },
   share_hint: { de: 'Dein Profil wird anonym via Nostr geteilt — kein Name, kein Login.', en: 'Your profile is shared anonymously via Nostr — no name, no login.', es: 'Tu perfil se comparte de forma anónima a través de Nostr — sin nombre, sin inicio de sesión.', fr: 'Ton profil est partagé anonymement via Nostr — sans nom, sans connexion.', pt: 'Seu perfil é compartilhado anonimamente via Nostr — sem nome, sem login.', ar: 'ملفك الشخصي يُشارك بشكل مجهول عبر نوسترا — بدون اسم، بدون تسجيل دخول.', zh: '您的档案通过Nostr匿名共享——无姓名，无登录。', ja: 'プロフィールはNostr経由で匿名共有されます — 名前なし、ログインなし。', hi: 'आपका प्रोफ़ाइल Nostr के माध्यम से गुमनाम रूप से साझा किया जाता है — कोई नाम नहीं, कोई लॉगिन नहीं।', ru: 'Ваш профиль анонимно публикуется через Nostr — без имени, без входа.', id: 'Profil Anda dibagikan secara anonim melalui Nostr — tanpa nama, tanpa login.', tr: 'Profiliniz Nostr aracılığıyla anonim olarak paylaşılır — isim yok, giriş yok.', ko: '프로필이 Nostr를 통해 익명으로 공유됩니다 — 이름 없음, 로그인 없음.', it: 'Il tuo profilo viene condiviso anonimamente tramite Nostr — nessun nome, nessun login.', nl: 'Je profiel wordt anoniem gedeeld via Nostr — geen naam, geen login.', pl: 'Twój profil jest udostępniany anonimowo przez Nostr — bez nazwy, bez logowania.', uk: 'Ваш профіль анонімно публікується через Nostr — без імені, без входу.', vi: 'Hồ sơ của bạn được chia sẻ ẩn danh qua Nostr — không tên, không đăng nhập.', bn: 'তোমার প্রোফাইল Nostr এর মাধ্যমে বেনামে শেয়ার করা হয় — কোনো নাম নেই, কোনো লগইন নেই।', fa: 'پروفایل شما به صورت ناشناس از طریق Nostr به اشتراک گذاشته می‌شود — بدون نام، بدون ورود.' },
+  cal_label: { de: 'Kalibrierung', en: 'Calibration', es: 'Calibración', fr: 'Calibrage', pt: 'Calibração', ar: 'معايرة', zh: '校准', ja: 'キャリブレーション', hi: 'अंशांकन', ru: 'Калибровка', id: 'Kalibrasi', tr: 'Kalibrasyon', ko: '보정', it: 'Calibrazione', nl: 'Kalibratie', pl: 'Kalibracja', uk: 'Калібрування', vi: 'Hiệu chỉnh', bn: 'ক্যালিব্রেশন', fa: 'کالیبراسیون' },
+  cal_q: { de: 'Sieht dein Zwilling das richtig?', en: 'Does your twin get this right?', es: '¿Tu gemelo acierta?', fr: 'Ton jumeau voit-il juste ?', pt: 'Seu gêmeo acerta?', ar: 'هل يصيب توأمك؟', zh: '你的孪生猜对了吗？', ja: 'ツインは正しい？', hi: 'क्या आपका जुड़वां सही है?', ru: 'Двойник прав?', id: 'Apakah kembaranmu benar?', tr: 'İkizin doğru mu biliyor?', ko: '트윈이 맞았나요?', it: 'Il tuo gemello ci azzecca?', nl: 'Heeft je tweeling het goed?', pl: 'Czy bliźniak ma rację?', uk: 'Двійник має рацію?', vi: 'Sinh đôi đoán đúng chứ?', bn: 'যমজ কি ঠিক বলছে?', fa: 'دوقلوی شما درست می‌گوید؟' },
+  cal_yes: { de: 'Stimmt', en: 'Correct', es: 'Correcto', fr: 'Exact', pt: 'Correto', ar: 'صحيح', zh: '对', ja: '正しい', hi: 'सही', ru: 'Верно', id: 'Benar', tr: 'Doğru', ko: '맞음', it: 'Esatto', nl: 'Klopt', pl: 'Zgadza się', uk: 'Вірно', vi: 'Đúng', bn: 'ঠিক', fa: 'درست' },
+  cal_no: { de: 'Stimmt nicht', en: 'Wrong', es: 'Incorrecto', fr: 'Faux', pt: 'Errado', ar: 'خطأ', zh: '不对', ja: '違う', hi: 'गलत', ru: 'Неверно', id: 'Salah', tr: 'Yanlış', ko: '틀림', it: 'Sbagliato', nl: 'Klopt niet', pl: 'Nie zgadza się', uk: 'Невірно', vi: 'Sai', bn: 'ভুল', fa: 'نادرست' },
+  cal_adjusted: { de: 'Zwilling angepasst — sieh dir das Radar an', en: 'Twin adjusted — watch the radar', es: 'Gemelo ajustado — mira el radar', fr: 'Jumeau ajusté — regarde le radar', pt: 'Gêmeo ajustado — veja o radar', ar: 'عُدّل التوأم — انظر إلى الرادار', zh: '孪生已调整——看雷达图', ja: 'ツインを調整 — レーダーを見て', hi: 'जुड़वां समायोजित — रडार देखें', ru: 'Двойник скорректирован — взгляните на радар', id: 'Kembaran disesuaikan — lihat radarnya', tr: 'İkiz ayarlandı — radara bak', ko: '트윈 조정됨 — 레이더를 보세요', it: 'Gemello regolato — guarda il radar', nl: 'Tweeling aangepast — kijk naar de radar', pl: 'Bliźniak dostosowany — spójrz na radar', uk: 'Двійника скориговано — подивіться на радар', vi: 'Đã điều chỉnh — xem radar', bn: 'যমজ সমন্বিত — রাডার দেখুন', fa: 'دوقلو تنظیم شد — رادار را ببینید' },
+  cal_done: { de: 'Kalibrierung abgeschlossen ✓ Dein Zwilling kennt dich jetzt besser.', en: 'Calibration complete ✓ Your twin knows you better now.', es: 'Calibración completa ✓ Tu gemelo te conoce mejor.', fr: 'Calibrage terminé ✓ Ton jumeau te connaît mieux.', pt: 'Calibração concluída ✓ Seu gêmeo conhece você melhor.', ar: 'اكتملت المعايرة ✓ توأمك يعرفك الآن أفضل.', zh: '校准完成 ✓ 你的孪生更了解你了。', ja: '完了 ✓ ツインはあなたをより深く理解しました。', hi: 'अंशांकन पूर्ण ✓ जुड़वां अब आपको बेहतर जानता है।', ru: 'Калибровка завершена ✓ Двойник знает вас лучше.', id: 'Kalibrasi selesai ✓ Kembaranmu kini lebih mengenalmu.', tr: 'Kalibrasyon tamam ✓ İkizin seni daha iyi tanıyor.', ko: '보정 완료 ✓ 트윈이 당신을 더 잘 압니다.', it: 'Calibrazione completata ✓ Il tuo gemello ti conosce meglio.', nl: 'Kalibratie voltooid ✓ Je tweeling kent je nu beter.', pl: 'Kalibracja zakończona ✓ Bliźniak zna cię lepiej.', uk: 'Калібрування завершено ✓ Двійник знає вас краще.', vi: 'Hoàn tất ✓ Sinh đôi hiểu bạn hơn rồi.', bn: 'সম্পন্ন ✓ যমজ আপনাকে আরো ভালো চেনে।', fa: 'کامل شد ✓ دوقلو شما را بهتر می‌شناسد.' },
   backup_title: { de: 'Wichtig: Schlüssel sichern', en: 'Important: back up your key', es: 'Importante: guarda tu clave', fr: 'Important : sauvegarde ta clé', pt: 'Importante: faça backup da chave', ar: 'مهم: انسخ مفتاحك احتياطيًا', zh: '重要：请备份你的密钥', ja: '重要：鍵をバックアップして', hi: 'महत्वपूर्ण: कुंजी का बैकअप लें', ru: 'Важно: сохраните копию ключа', id: 'Penting: cadangkan kuncimu', tr: 'Önemli: anahtarını yedekle', ko: '중요: 키를 백업하세요', it: 'Importante: fai il backup della chiave', nl: 'Belangrijk: back-up je sleutel', pl: 'Ważne: zrób kopię klucza', uk: 'Важливо: збережіть копію ключа', vi: 'Quan trọng: sao lưu khóa của bạn', bn: 'গুরুত্বপূর্ণ: কী ব্যাকআপ করুন', fa: 'مهم: از کلیدتان پشتیبان بگیرید' },
   backup_body: { de: 'Dein Zwilling ist im Netzwerk — aber dein Schlüssel existiert nur auf diesem Gerät. Werden die Browserdaten gelöscht (iPhone macht das nach 7 Tagen ohne Besuch automatisch!), kannst du deinen Zwilling nie wieder ändern. Sichern dauert 30 Sekunden.', en: 'Your twin is in the network — but your key exists only on this device. If browser data is cleared (iPhone does this automatically after 7 days without a visit!), you can never change your twin again. Backing up takes 30 seconds.', es: 'Tu gemelo está en la red, pero tu clave solo existe en este dispositivo. Si se borran los datos del navegador (¡el iPhone lo hace automáticamente tras 7 días sin visitas!), nunca podrás volver a cambiar tu gemelo. La copia tarda 30 segundos.', fr: 'Ton jumeau est dans le réseau — mais ta clé n’existe que sur cet appareil. Si les données du navigateur sont effacées (l’iPhone le fait automatiquement après 7 jours sans visite !), tu ne pourras plus jamais modifier ton jumeau. La sauvegarde prend 30 secondes.', pt: 'Seu gêmeo está na rede — mas sua chave existe apenas neste dispositivo. Se os dados do navegador forem apagados (o iPhone faz isso automaticamente após 7 dias sem visitas!), você nunca mais poderá alterar seu gêmeo. O backup leva 30 segundos.', ar: 'توأمك في الشبكة — لكن مفتاحك موجود على هذا الجهاز فقط. إذا حُذفت بيانات المتصفح (يفعل الآيفون ذلك تلقائيًا بعد 7 أيام دون زيارة!) فلن تتمكن أبدًا من تغيير توأمك. النسخ الاحتياطي يستغرق 30 ثانية.', zh: '你的孪生已在网络中——但你的密钥只存在于此设备上。如果浏览器数据被清除（iPhone 在 7 天未访问后会自动清除！），你将永远无法再修改你的孪生。备份只需 30 秒。', ja: 'ツインはネットワーク上にありますが、鍵はこのデバイスにしか存在しません。ブラウザデータが消去されると（iPhoneは7日間アクセスがないと自動的に消去します！）、ツインを二度と変更できなくなります。バックアップは30秒で完了します。', hi: 'आपका जुड़वां नेटवर्क में है — लेकिन आपकी कुंजी केवल इस डिवाइस पर है। ब्राउज़र डेटा हटने पर (iPhone 7 दिन बिना विज़िट के इसे अपने आप हटा देता है!) आप अपना जुड़वां फिर कभी नहीं बदल पाएंगे। बैकअप में 30 सेकंड लगते हैं।', ru: 'Ваш двойник в сети — но ключ существует только на этом устройстве. Если данные браузера будут удалены (iPhone делает это автоматически после 7 дней без посещений!), вы больше никогда не сможете изменить своего двойника. Копирование занимает 30 секунд.', id: 'Kembaranmu ada di jaringan — tetapi kuncimu hanya ada di perangkat ini. Jika data browser dihapus (iPhone melakukannya otomatis setelah 7 hari tanpa kunjungan!), kamu tak akan pernah bisa mengubah kembaranmu lagi. Pencadangan hanya butuh 30 detik.', tr: 'İkizin ağda — ama anahtarın yalnızca bu cihazda var. Tarayıcı verileri silinirse (iPhone bunu 7 gün ziyaret olmayınca otomatik yapar!), ikizini bir daha asla değiştiremezsin. Yedekleme 30 saniye sürer.', ko: '트윈은 네트워크에 있지만 키는 이 기기에만 존재합니다. 브라우저 데이터가 삭제되면(iPhone은 7일간 방문이 없으면 자동 삭제합니다!) 트윈을 다시는 변경할 수 없습니다. 백업은 30초면 됩니다.', it: 'Il tuo gemello è nella rete — ma la tua chiave esiste solo su questo dispositivo. Se i dati del browser vengono cancellati (l’iPhone lo fa automaticamente dopo 7 giorni senza visite!), non potrai mai più modificare il tuo gemello. Il backup richiede 30 secondi.', nl: 'Je tweeling is in het netwerk — maar je sleutel bestaat alleen op dit apparaat. Als browserdata wordt gewist (iPhone doet dat automatisch na 7 dagen zonder bezoek!), kun je je tweeling nooit meer wijzigen. Back-uppen duurt 30 seconden.', pl: 'Twój bliźniak jest w sieci — ale klucz istnieje tylko na tym urządzeniu. Jeśli dane przeglądarki zostaną usunięte (iPhone robi to automatycznie po 7 dniach bez wizyty!), nigdy więcej nie zmienisz swojego bliźniaka. Kopia zajmuje 30 sekund.', uk: 'Ваш двійник у мережі — але ключ існує лише на цьому пристрої. Якщо дані браузера буде видалено (iPhone робить це автоматично після 7 днів без відвідувань!), ви більше ніколи не зможете змінити свого двійника. Копіювання триває 30 секунд.', vi: 'Sinh đôi của bạn đã ở trong mạng — nhưng khóa chỉ tồn tại trên thiết bị này. Nếu dữ liệu trình duyệt bị xóa (iPhone tự động xóa sau 7 ngày không truy cập!), bạn sẽ không bao giờ thay đổi được sinh đôi nữa. Sao lưu chỉ mất 30 giây.', bn: 'আপনার যমজ নেটওয়ার্কে আছে — কিন্তু কী শুধু এই ডিভাইসে আছে। ব্রাউজার ডেটা মুছে গেলে (iPhone ৭ দিন ভিজিট না হলে স্বয়ংক্রিয়ভাবে মুছে দেয়!) আপনি আর কখনো যমজ বদলাতে পারবেন না। ব্যাকআপে ৩০ সেকেন্ড লাগে।', fa: 'دوقلوی شما در شبکه است — اما کلیدتان فقط روی این دستگاه وجود دارد. اگر داده‌های مرورگر پاک شود (آیفون پس از ۷ روز بدون بازدید خودکار این کار را می‌کند!) دیگر هرگز نمی‌توانید دوقلوی خود را تغییر دهید. پشتیبان‌گیری ۳۰ ثانیه طول می‌کشد.' },
   backup_btn: { de: 'Schlüssel jetzt sichern →', en: 'Back up key now →', es: 'Guardar clave ahora →', fr: 'Sauvegarder la clé →', pt: 'Fazer backup agora →', ar: 'انسخ المفتاح الآن ←', zh: '立即备份密钥 →', ja: '今すぐバックアップ →', hi: 'अभी बैकअप लें →', ru: 'Сохранить ключ →', id: 'Cadangkan sekarang →', tr: 'Şimdi yedekle →', ko: '지금 백업하기 →', it: 'Salva la chiave ora →', nl: 'Nu back-uppen →', pl: 'Zapisz klucz teraz →', uk: 'Зберегти ключ →', vi: 'Sao lưu ngay →', bn: 'এখনই ব্যাকআপ করুন →', fa: 'همین حالا پشتیبان بگیرید ←' },
@@ -70,6 +76,8 @@ export default function TwinPage() {
   const [confirming, setConfirming] = useState(false);
   const [mining, setMining] = useState(false);
   const [cardBusy, setCardBusy] = useState(false);
+  const [calibrated, setCalibrated] = useState<string[]>([]);
+  const [calMsg, setCalMsg] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editVals, setEditVals] = useState<Record<TopicKey, number>>(
     Object.fromEntries(TOPICS.map(k => [k, 50])) as Record<TopicKey, number>
@@ -82,7 +90,11 @@ export default function TwinPage() {
       if (t) setEditVals(Object.fromEntries(TOPICS.map(k => [k, Math.round(t[k] * 100)])) as Record<TopicKey, number>);
       setLoading(false);
     });
+    queueMicrotask(() => {
+      try { setCalibrated(JSON.parse(localStorage.getItem('nk-calibrated') ?? '[]')); } catch { /* fresh start */ }
+    });
   }, []);
+
 
   const archetype = useMemo(() => twin ? classifyTwin(twin) : null, [twin]);
   const archetypeLabel = archetype ? (ARCHETYPE_NAMES[archetype]?.[lang] ?? ARCHETYPE_NAMES[archetype]?.en ?? '') : '';
@@ -97,6 +109,41 @@ export default function TwinPage() {
       .sort((a, b) => Math.abs(b.score - 0.5) - Math.abs(a.score - 0.5))
       .slice(0, 10);
   }, [twin]);
+
+  // ---- Calibration: the twin makes a claim about you; you confirm or correct.
+  // A correction visibly moves the underlying dimensions — the twin LEARNS. ----
+  const CAL_GOAL = 5;
+  const calCandidate = useMemo(
+    () => agendaPositions.find(p => !calibrated.includes(p.item.id)),
+    [agendaPositions, calibrated],
+  );
+
+  function markCalibrated(id: string) {
+    const next = [...calibrated, id];
+    setCalibrated(next);
+    localStorage.setItem('nk-calibrated', JSON.stringify(next));
+  }
+
+  async function handleCalibrate(correct: boolean) {
+    if (!twin || !calCandidate) return;
+    const { item, score } = calCandidate;
+    if (!correct) {
+      // Move each involved dimension against the wrong inference — bounded nudge
+      const step = score >= 0.5 ? -0.08 : 0.08;
+      const vals = Object.fromEntries(TOPICS.map(k => [k, twin[k]])) as Record<TopicKey, number>;
+      for (const [topic, weight] of Object.entries(item.topicWeights) as [TopicKey, number][]) {
+        vals[topic] = Math.max(0, Math.min(1, vals[topic] + Math.sign(weight) * step));
+      }
+      const updated = createTwinFromValues(vals);
+      await saveMyTwin(updated);
+      setTwin(updated);
+      setEditVals(Object.fromEntries(TOPICS.map(k => [k, Math.round(updated[k] * 100)])) as Record<TopicKey, number>);
+      setSharing('idle'); // the published record is now stale — allow re-sharing
+      setCalMsg(true);
+      setTimeout(() => setCalMsg(false), 2200);
+    }
+    markCalibrated(item.id);
+  }
 
   async function handleSaveEdit() {
     setSaving(true);
@@ -200,6 +247,61 @@ export default function TwinPage() {
             <RadarChart values={twin} size={120} animated />
           </div>
         </div>
+
+        {/* Calibration — the twin claims, you correct, the radar moves */}
+        {!editMode && calibrated.length < CAL_GOAL && (calCandidate || calMsg) && (
+          <div style={{
+            border: '1px solid rgba(96,165,250,0.3)',
+            background: 'rgba(96,165,250,0.05)',
+            padding: '24px 22px',
+            marginBottom: '48px',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '14px', gap: '12px', flexWrap: 'wrap' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.2em', color: '#60a5fa', textTransform: 'uppercase' }}>
+                {tx(lang, 'cal_label')} · {calibrated.length}/{CAL_GOAL}
+              </span>
+              {calMsg && (
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--positive, #22c55e)' }}>
+                  {tx(lang, 'cal_adjusted')}
+                </span>
+              )}
+            </div>
+            {calCandidate && (
+              <>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-3)', marginBottom: '8px', letterSpacing: '0.06em' }}>
+                  {tx(lang, 'cal_q')}
+                </p>
+                <p style={{ fontSize: '15px', lineHeight: 1.5, color: 'var(--text-1)', marginBottom: '8px', maxWidth: '560px' }}>
+                  {calCandidate.item.text[lang] ?? calCandidate.item.text['en']}
+                </p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', fontWeight: 700, marginBottom: '18px', color: calCandidate.score >= 0.5 ? 'var(--positive, #22c55e)' : 'var(--negative, #ef4444)' }}>
+                  → {calCandidate.score >= 0.5 ? tx(lang, 'support') : tx(lang, 'oppose')} ({Math.round(calCandidate.score * 100)}%)
+                </p>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                  <button onClick={() => handleCalibrate(true)} style={{
+                    background: 'var(--text-1)', color: '#000', border: 'none',
+                    padding: '12px 28px', fontSize: '12px', fontWeight: 700,
+                    letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer',
+                  }}>
+                    {tx(lang, 'cal_yes')}
+                  </button>
+                  <button onClick={() => handleCalibrate(false)} style={{
+                    background: 'transparent', color: 'var(--text-1)', border: '1px solid var(--text-1)',
+                    padding: '12px 28px', fontSize: '12px', fontWeight: 700,
+                    letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer',
+                  }}>
+                    {tx(lang, 'cal_no')}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+        {!editMode && calibrated.length >= CAL_GOAL && calibrated.length === CAL_GOAL && calMsg && (
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--positive, #22c55e)', marginBottom: '32px' }}>
+            {tx(lang, 'cal_done')}
+          </p>
+        )}
 
         {/* 8 Dimension bars */}
         <div style={{ marginBottom: '64px' }}>
