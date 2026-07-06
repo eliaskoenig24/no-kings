@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 const OPERATOR = {
   name: 'Elias König',
   street: 'Fellhornstraße 5',
-  city: '[PLZ UND ORT EINTRAGEN]', // ⚠️ noch offen — ohne PLZ/Ort ist das Impressum unvollständig
+  city: '86833 Ettringen',
   country: 'Deutschland',
   email: 'eliaskoenig24@icloud.com',
 };
