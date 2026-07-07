@@ -74,7 +74,7 @@ export default function OnboardingOverlay() {
             style={{
               display: 'inline-block',
               background: 'var(--text-1)',
-              color: '#080808',
+              color: 'var(--bg)',
               padding: '10px 24px',
               fontSize: '13px',
               fontWeight: 700,

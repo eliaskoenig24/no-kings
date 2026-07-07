@@ -363,7 +363,7 @@ export default function TrustPage() {
           <Link href="/identity" style={{
             display: 'inline-block',
             background: 'var(--text-1)',
-            color: '#000',
+            color: 'var(--bg)',
             padding: '13px 28px',
             fontSize: '12px',
             fontWeight: 700,

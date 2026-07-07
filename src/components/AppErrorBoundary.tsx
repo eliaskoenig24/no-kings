@@ -32,7 +32,7 @@ export default class AppErrorBoundary extends Component<
           <button
             onClick={() => window.location.reload()}
             style={{
-              background: 'var(--text-1)', color: '#000', border: 'none',
+              background: 'var(--text-1)', color: 'var(--bg)', border: 'none',
               padding: '12px 28px', fontSize: '12px', fontWeight: 700,
               letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer',
             }}

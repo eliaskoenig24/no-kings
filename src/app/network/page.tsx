@@ -379,7 +379,7 @@ export default function NetworkPage() {
               <Link href={myTwin ? '/twin' : '/training'} style={{
                 display: 'inline-block',
                 background: 'var(--text-1)',
-                color: '#000',
+                color: 'var(--bg)',
                 padding: '14px 32px',
                 fontSize: '13px',
                 fontWeight: 700,
@@ -764,7 +764,7 @@ export default function NetworkPage() {
           <Link href="/training" style={{
             display: 'inline-block',
             background: 'var(--text-1)',
-            color: '#000',
+            color: 'var(--bg)',
             padding: '14px 32px',
             fontSize: '13px',
             fontWeight: 700,

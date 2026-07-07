@@ -21,6 +21,8 @@ import { regionName } from '@/data/regions';
 import type { TwinProfile } from '@/types';
 
 const TX = {
+  hero_title: { de: 'Zeig der Welt, was sie wirklich denkt.', en: 'Show the world what it really thinks.', es: 'Muestra al mundo lo que realmente piensa.', fr: 'Montre au monde ce qu’il pense vraiment.', pt: 'Mostre ao mundo o que ele realmente pensa.', ar: 'أرِ العالم ما يفكر فيه حقًا.', zh: '让世界看见自己真正的想法。', ja: '世界が本当に考えていることを、世界に見せよう。', hi: 'दुनिया को दिखाओ कि वह सच में क्या सोचती है।', ru: 'Покажи миру, что он думает на самом деле.', id: 'Tunjukkan pada dunia apa yang sebenarnya dipikirkannya.', tr: 'Dünyaya gerçekte ne düşündüğünü göster.', ko: '세상이 진짜로 생각하는 것을 보여주세요.', it: 'Mostra al mondo ciò che pensa davvero.', nl: 'Laat de wereld zien wat ze écht denkt.', pl: 'Pokaż światu, co naprawdę myśli.', uk: 'Покажи світові, що він думає насправді.', vi: 'Cho thế giới thấy điều nó thực sự nghĩ.', bn: 'বিশ্বকে দেখাও সে আসলে কী ভাবে।', fa: 'به جهان نشان بده واقعاً چه فکر می‌کند.' },
+  hero_body: { de: 'Wahlen stellen dir alle vier Jahre eine einzige Frage. no kings zeigt kontinuierlich, was Menschen wirklich wollen — anonym, unbestechlich, ohne Konzerne und ohne Könige. Dein digitaler Zwilling ist deine Stimme darin.', en: 'Elections ask you one question every four years. no kings shows continuously what people actually want — anonymous, incorruptible, with no corporations and no kings. Your digital twin is your voice in it.', es: 'Las elecciones te hacen una sola pregunta cada cuatro años. no kings muestra continuamente lo que la gente quiere de verdad — anónimo, incorruptible, sin corporaciones y sin reyes. Tu gemelo digital es tu voz.', fr: 'Les élections te posent une seule question tous les quatre ans. no kings montre en continu ce que les gens veulent vraiment — anonyme, incorruptible, sans multinationales et sans rois. Ton jumeau numérique y est ta voix.', pt: 'As eleições te fazem uma única pergunta a cada quatro anos. no kings mostra continuamente o que as pessoas realmente querem — anônimo, incorruptível, sem corporações e sem reis. Seu gêmeo digital é a sua voz.', ar: 'الانتخابات تسألك سؤالًا واحدًا كل أربع سنوات. يُظهر no kings باستمرار ما يريده الناس حقًا — مجهول الهوية، غير قابل للفساد، بلا شركات وبلا ملوك. توأمك الرقمي هو صوتك فيه.', zh: '选举每四年只问你一个问题。no kings 持续展示人们真正想要什么——匿名、不可篡改、没有大公司、没有国王。你的数字孪生就是你的声音。', ja: '選挙が問うのは4年に一度、たった一つの質問。no kingsは人々が本当に望むものを継続的に映し出す — 匿名で、改ざん不能で、企業も王もなしに。あなたのデジタルツインがそこでのあなたの声だ。', hi: 'चुनाव हर चार साल में तुमसे एक ही सवाल पूछते हैं। no kings लगातार दिखाता है कि लोग सच में क्या चाहते हैं — गुमनाम, अभेद्य, बिना कंपनियों और बिना राजाओं के। तुम्हारा डिजिटल जुड़वां उसमें तुम्हारी आवाज़ है।', ru: 'Выборы задают тебе один вопрос раз в четыре года. no kings непрерывно показывает, чего люди хотят на самом деле — анонимно, неподкупно, без корпораций и без королей. Твой цифровой двойник — твой голос в этом.', id: 'Pemilu hanya menanyakan satu pertanyaan setiap empat tahun. no kings terus-menerus menunjukkan apa yang benar-benar diinginkan orang — anonim, tak bisa dikorupsi, tanpa korporasi dan tanpa raja. Kembaran digitalmu adalah suaramu di dalamnya.', tr: 'Seçimler sana dört yılda bir tek soru sorar. no kings insanların gerçekte ne istediğini sürekli gösterir — anonim, bozulamaz, şirketsiz ve kralsız. Dijital ikizin oradaki sesindir.', ko: '선거는 4년에 한 번, 단 하나의 질문만 던집니다. no kings는 사람들이 진짜 원하는 것을 계속 보여줍니다 — 익명으로, 조작 불가능하게, 기업도 왕도 없이. 당신의 디지털 트윈이 그 안의 당신 목소리입니다.', it: 'Le elezioni ti fanno una sola domanda ogni quattro anni. no kings mostra continuamente ciò che le persone vogliono davvero — anonimo, incorruttibile, senza corporation e senza re. Il tuo gemello digitale è la tua voce.', nl: 'Verkiezingen stellen je één vraag per vier jaar. no kings laat doorlopend zien wat mensen écht willen — anoniem, onomkoopbaar, zonder bedrijven en zonder koningen. Jouw digitale tweeling is daarin jouw stem.', pl: 'Wybory zadają ci jedno pytanie co cztery lata. no kings nieustannie pokazuje, czego ludzie naprawdę chcą — anonimowo, nieprzekupnie, bez korporacji i bez królów. Twój cyfrowy bliźniak jest tam twoim głosem.', uk: 'Вибори ставлять тобі одне питання раз на чотири роки. no kings безперервно показує, чого люди хочуть насправді — анонімно, непідкупно, без корпорацій і без королів. Твій цифровий двійник — твій голос у цьому.', vi: 'Bầu cử chỉ hỏi bạn một câu mỗi bốn năm. no kings liên tục cho thấy điều mọi người thực sự muốn — ẩn danh, không thể mua chuộc, không tập đoàn, không vua chúa. Sinh đôi kỹ thuật số là tiếng nói của bạn trong đó.', bn: 'নির্বাচন প্রতি চার বছরে তোমাকে একটাই প্রশ্ন করে। no kings অবিরাম দেখায় মানুষ আসলে কী চায় — বেনামি, অদম্য, করপোরেশন ছাড়া, রাজা ছাড়া। তোমার ডিজিটাল যমজ সেখানে তোমার কণ্ঠ।', fa: 'انتخابات هر چهار سال فقط یک سؤال از تو می‌پرسد. no kings پیوسته نشان می‌دهد مردم واقعاً چه می‌خواهند — ناشناس، فسادناپذیر، بدون شرکت‌ها و بدون پادشاهان. دوقلوی دیجیتال تو صدای تو در آن است.' },
   label:    { de: 'DER GLOBALE PULS', en: 'THE GLOBAL PULSE', es: 'EL PULSO GLOBAL', fr: 'LE POULS MONDIAL', pt: 'O PULSO GLOBAL', ar: 'النبض العالمي', zh: '全球脉搏', ja: 'グローバルな鼓動', hi: 'वैश्विक नाड़ी', ru: 'ГЛОБАЛЬНЫЙ ПУЛЬС', id: 'DENYUT GLOBAL', tr: 'KÜRESEL NABIZ', ko: '글로벌 맥박', it: 'IL POLSO GLOBALE', nl: 'DE GLOBALE POLS', pl: 'GLOBALNY PULS', uk: 'ГЛОБАЛЬНИЙ ПУЛЬС', vi: 'NHỊP ĐẬP TOÀN CẦU', bn: 'বৈশ্বিক স্পন্দন', fa: 'نبض جهانی' },
   title:    { de: 'Was will die Welt?', en: 'What does the world want?', es: '¿Qué quiere el mundo?', fr: 'Que veut le monde?', pt: 'O que o mundo quer?', ar: 'ماذا يريد العالم؟', zh: '世界想要什么？', ja: '世界は何を望んでいるか？', hi: 'दुनिया क्या चाहती है?', ru: 'Чего хочет мир?', id: 'Apa yang dunia inginkan?', tr: 'Dünya ne istiyor?', ko: '세계는 무엇을 원하는가?', it: 'Cosa vuole il mondo?', nl: 'Wat wil de wereld?', pl: 'Czego chce świat?', uk: 'Чого хоче світ?', vi: 'Thế giới muốn gì?', bn: 'বিশ্ব কী চায়?', fa: 'جهان چه می‌خواهد؟' },
   you:      { de: 'Du', en: 'You', es: 'Tú', fr: 'Toi', pt: 'Tu', ar: 'أنت', zh: '你', ja: 'あなた', hi: 'आप', ru: 'Вы', id: 'Anda', tr: 'Sen', ko: '당신', it: 'Tu', nl: 'Jij', pl: 'Ty', uk: 'Ви', vi: 'Bạn', bn: 'আপনি', fa: 'شما' },
@@ -150,6 +152,27 @@ export default function HomePage() {
 
         {simView && <SimulationBanner lang={lang} onExit={() => setSimView(false)} />}
 
+        {/* The vision, first — visitors must know WHY before anything else */}
+        {loaded && !myTwin && (
+          <div style={{ padding: '16px 0 44px', borderBottom: '1px solid var(--divider)', marginBottom: '44px' }}>
+            <h1 style={{ fontSize: 'clamp(1.9rem, 5.5vw, 3.2rem)', fontWeight: 600, lineHeight: 1.12, letterSpacing: '-0.02em', marginBottom: '18px', maxWidth: '16ch' }}>
+              {tx(lang, 'hero_title')}
+            </h1>
+            <p style={{ fontSize: '16px', lineHeight: 1.7, color: 'var(--text-2)', maxWidth: '580px', marginBottom: '26px' }}>
+              {tx(lang, 'hero_body')}
+            </p>
+            <Link href="/training" style={{
+              display: 'inline-block',
+              background: 'var(--text-1)', color: 'var(--bg)',
+              padding: '15px 34px', fontSize: '13px', fontWeight: 700,
+              letterSpacing: '0.08em', textTransform: 'uppercase',
+              textDecoration: 'none',
+            }}>
+              {tx(lang, 'cta')}
+            </Link>
+          </div>
+        )}
+
         {/* Header */}
         <div style={{
           display: 'flex',
@@ -202,7 +225,7 @@ export default function HomePage() {
           {!todayEntry && dqStance === null && (
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               <button onClick={() => setDqStance('for')} style={{
-                background: 'var(--text-1)', color: '#000', border: 'none',
+                background: 'var(--text-1)', color: 'var(--bg)', border: 'none',
                 padding: '13px 32px', fontSize: '13px', fontWeight: 700,
                 letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer',
               }}>
@@ -247,7 +270,7 @@ export default function HomePage() {
                 </span>
               </label>
               <button onClick={lockDaily} style={{
-                background: 'var(--text-1)', color: '#000', border: 'none',
+                background: 'var(--text-1)', color: 'var(--bg)', border: 'none',
                 padding: '12px 28px', fontSize: '12px', fontWeight: 700,
                 letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer',
               }}>
@@ -459,7 +482,7 @@ export default function HomePage() {
           <div style={{ marginTop: '64px', paddingTop: '48px', borderTop: '1px solid var(--divider)' }}>
             <Link href="/training" style={{
               display: 'inline-block',
-              background: 'var(--text-1)', color: '#000',
+              background: 'var(--text-1)', color: 'var(--bg)',
               padding: '16px 36px', fontSize: '13px', fontWeight: 700,
               letterSpacing: '0.08em', textTransform: 'uppercase',
               textDecoration: 'none',

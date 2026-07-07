@@ -103,7 +103,7 @@ export default function TwinOGImage() {
             </div>
             <div style={{
               background: '#F0F0F0',
-              color: '#080808',
+              color: 'var(--bg)',
               padding: '10px 20px',
               fontSize: 11,
               fontFamily: 'monospace',

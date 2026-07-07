@@ -215,7 +215,7 @@ export default function TwinPage() {
           {tx(lang, 'no_twin')}
         </p>
         <Link href="/training" style={{
-          display: 'inline-block', background: 'var(--text-1)', color: '#000',
+          display: 'inline-block', background: 'var(--text-1)', color: 'var(--bg)',
           padding: '14px 32px', fontSize: '13px', fontWeight: 700,
           letterSpacing: '0.08em', textTransform: 'uppercase', textDecoration: 'none',
         }}>
@@ -278,7 +278,7 @@ export default function TwinPage() {
                 </p>
                 <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                   <button onClick={() => handleCalibrate(true)} style={{
-                    background: 'var(--text-1)', color: '#000', border: 'none',
+                    background: 'var(--text-1)', color: 'var(--bg)', border: 'none',
                     padding: '12px 28px', fontSize: '12px', fontWeight: 700,
                     letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer',
                   }}>
@@ -372,7 +372,7 @@ export default function TwinPage() {
               <button onClick={() => setEditMode(false)} style={{ background: 'none', border: '1px solid var(--border)', color: 'var(--text-3)', padding: '10px 20px', fontSize: '12px', cursor: 'pointer', fontFamily: 'var(--font-mono)' }}>
                 {tx(lang, 'cancel')}
               </button>
-              <button onClick={handleSaveEdit} disabled={saving} style={{ background: 'var(--text-1)', color: '#000', border: 'none', padding: '10px 24px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', letterSpacing: '0.06em', textTransform: 'uppercase', fontFamily: 'var(--font-sans)' }}>
+              <button onClick={handleSaveEdit} disabled={saving} style={{ background: 'var(--text-1)', color: 'var(--bg)', border: 'none', padding: '10px 24px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', letterSpacing: '0.06em', textTransform: 'uppercase', fontFamily: 'var(--font-sans)' }}>
                 {saving ? '…' : tx(lang, 'save')}
               </button>
             </div>
@@ -498,7 +498,7 @@ export default function TwinPage() {
                 </p>
                 <Link href="/identity" style={{
                   display: 'inline-block',
-                  background: 'var(--text-1)', color: '#000',
+                  background: 'var(--text-1)', color: 'var(--bg)',
                   padding: '10px 22px', fontSize: '12px', fontWeight: 700,
                   letterSpacing: '0.06em', textTransform: 'uppercase',
                   textDecoration: 'none',

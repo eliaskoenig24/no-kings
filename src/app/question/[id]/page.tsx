@@ -175,7 +175,7 @@ export default function QuestionPage({ params }: { params: { id: string } }) {
             target="_blank" rel="noopener noreferrer"
             style={{
               display: 'inline-block',
-              background: 'var(--text-1)', color: '#000',
+              background: 'var(--text-1)', color: 'var(--bg)',
               padding: '12px 24px', fontSize: '12px', fontWeight: 700,
               letterSpacing: '0.08em', textTransform: 'uppercase',
               textDecoration: 'none',

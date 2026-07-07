@@ -54,6 +54,9 @@ export default function WorldGlobe({
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState(360);
   const rotationRef = useRef<[number, number]>([-10, -20]);
+  const zoomRef = useRef(1); // 1–4, pinch or wheel
+  const pointersRef = useRef(new Map<number, { x: number; y: number }>());
+  const pinchDistRef = useRef<number | null>(null);
   const draggingRef = useRef<{ x: number; y: number; moved: boolean } | null>(null);
   const [selected, setSelected] = useState<{ name: string; a2?: string } | null>(null);
   const autoSpinRef = useRef(true);
@@ -61,6 +64,13 @@ export default function WorldGlobe({
     () => typeof window !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches,
     [],
   );
+
+  const makeProjection = useCallback(() => {
+    const p = geoOrthographic()
+      .fitExtent([[6, 6], [size - 6, size - 6]], { type: 'Sphere' })
+      .rotate(rotationRef.current);
+    return p.scale(p.scale() * zoomRef.current);
+  }, [size]);
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
@@ -75,17 +85,15 @@ export default function WorldGlobe({
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, size, size);
 
-    const projection = geoOrthographic()
-      .fitExtent([[6, 6], [size - 6, size - 6]], { type: 'Sphere' })
-      .rotate(rotationRef.current);
+    const projection = makeProjection();
     const path = geoPath(projection, ctx);
 
     // sphere
     ctx.beginPath();
     path({ type: 'Sphere' });
-    ctx.fillStyle = '#0b0b0b';
+    ctx.fillStyle = '#0e1116';
     ctx.fill();
-    ctx.strokeStyle = '#2a2a2a';
+    ctx.strokeStyle = '#3a4150';
     ctx.lineWidth = 1;
     ctx.stroke();
 
@@ -97,15 +105,15 @@ export default function WorldGlobe({
       path(f);
       if (unlocked) {
         // one hue, intensity = support share
-        ctx.fillStyle = `rgba(75,158,255,${(0.25 + d!.support * 0.6).toFixed(3)})`;
+        ctx.fillStyle = `rgba(96,165,250,${(0.4 + d!.support * 0.55).toFixed(3)})`;
       } else if (d && d.count > 0) {
-        ctx.fillStyle = '#20242c'; // someone is here — faintly warmer than empty
+        ctx.fillStyle = '#2c3a55'; // someone is here — clearly warmer than empty
       } else {
-        ctx.fillStyle = '#161616';
+        ctx.fillStyle = '#1c2027';
       }
       ctx.fill();
-      ctx.strokeStyle = selected && a2 && selected.a2 === a2 ? '#F0F0F0' : '#0b0b0b';
-      ctx.lineWidth = selected && a2 && selected.a2 === a2 ? 1.4 : 0.6;
+      ctx.strokeStyle = selected && a2 && selected.a2 === a2 ? '#FFFFFF' : '#0e1116';
+      ctx.lineWidth = selected && a2 && selected.a2 === a2 ? 1.6 : 0.7;
       ctx.stroke();
     }
   }, [size, data, selected]);
@@ -141,10 +149,31 @@ export default function WorldGlobe({
 
   function onPointerDown(e: React.PointerEvent<HTMLCanvasElement>) {
     (e.target as HTMLCanvasElement).setPointerCapture(e.pointerId);
+    pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointersRef.current.size === 2) {
+      const [a, b] = [...pointersRef.current.values()];
+      pinchDistRef.current = Math.hypot(a.x - b.x, a.y - b.y);
+      draggingRef.current = null; // two fingers = zoom, not rotate
+      autoSpinRef.current = false;
+      return;
+    }
     draggingRef.current = { x: e.clientX, y: e.clientY, moved: false };
   }
 
   function onPointerMove(e: React.PointerEvent<HTMLCanvasElement>) {
+    const pointers = pointersRef.current;
+    if (pointers.has(e.pointerId)) pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    // pinch zoom
+    if (pointers.size === 2 && pinchDistRef.current !== null) {
+      const [a, b] = [...pointers.values()];
+      const dist = Math.hypot(a.x - b.x, a.y - b.y);
+      zoomRef.current = Math.max(1, Math.min(4, zoomRef.current * (dist / pinchDistRef.current)));
+      pinchDistRef.current = dist;
+      if (reducedMotion) draw();
+      return;
+    }
+
     const drag = draggingRef.current;
     if (!drag) return;
     const dx = e.clientX - drag.x;
@@ -155,12 +184,21 @@ export default function WorldGlobe({
     }
     drag.x = e.clientX;
     drag.y = e.clientY;
+    const speed = 0.45 / zoomRef.current; // finer control when zoomed in
     const [l, p] = rotationRef.current;
-    rotationRef.current = [l + dx * 0.45, Math.max(-80, Math.min(80, p - dy * 0.45))];
+    rotationRef.current = [l + dx * speed, Math.max(-80, Math.min(80, p - dy * speed))];
+    if (reducedMotion) draw();
+  }
+
+  function onWheel(e: React.WheelEvent<HTMLCanvasElement>) {
+    autoSpinRef.current = false;
+    zoomRef.current = Math.max(1, Math.min(4, zoomRef.current * (e.deltaY < 0 ? 1.12 : 0.89)));
     if (reducedMotion) draw();
   }
 
   function onPointerUp(e: React.PointerEvent<HTMLCanvasElement>) {
+    pointersRef.current.delete(e.pointerId);
+    if (pointersRef.current.size < 2) pinchDistRef.current = null;
     const drag = draggingRef.current;
     draggingRef.current = null;
     if (!drag || drag.moved) return;
@@ -168,10 +206,7 @@ export default function WorldGlobe({
     const rect = (e.target as HTMLCanvasElement).getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * size;
     const y = ((e.clientY - rect.top) / rect.height) * size;
-    const projection = geoOrthographic()
-      .fitExtent([[6, 6], [size - 6, size - 6]], { type: 'Sphere' })
-      .rotate(rotationRef.current);
-    const coords = projection.invert?.([x, y]);
+    const coords = makeProjection().invert?.([x, y]);
     if (!coords) return;
     const hitF = COUNTRIES.find(f => geoContains(f, coords));
     if (hitF) {
@@ -193,6 +228,8 @@ export default function WorldGlobe({
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        onWheel={onWheel}
         role="img"
         aria-label={hint}
       />

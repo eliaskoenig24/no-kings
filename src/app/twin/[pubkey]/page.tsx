@@ -444,7 +444,7 @@ export default function TwinByPubkeyPage({
             <Link href="/compare" style={{
               display: 'inline-block',
               background: 'var(--text-1)',
-              color: '#000',
+              color: 'var(--bg)',
               padding: '14px 28px',
               fontSize: '13px',
               fontWeight: 700,
@@ -458,7 +458,7 @@ export default function TwinByPubkeyPage({
             <Link href="/training" style={{
               display: 'inline-block',
               background: 'var(--text-1)',
-              color: '#000',
+              color: 'var(--bg)',
               padding: '14px 28px',
               fontSize: '13px',
               fontWeight: 700,
@@ -514,7 +514,7 @@ export default function TwinByPubkeyPage({
             <Link href="/training" style={{
               display: 'inline-block',
               background: 'var(--text-1)',
-              color: '#000',
+              color: 'var(--bg)',
               padding: '12px 28px',
               fontSize: '13px',
               fontWeight: 700,

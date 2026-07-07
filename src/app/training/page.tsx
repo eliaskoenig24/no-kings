@@ -273,7 +273,7 @@ export default function TrainingPage() {
             onClick={handleSave}
             disabled={saving}
             style={{
-              background: 'var(--text-1)', color: '#000',
+              background: 'var(--text-1)', color: 'var(--bg)',
               border: 'none', padding: '16px 40px',
               fontSize: '13px', fontWeight: 700,
               letterSpacing: '0.08em', textTransform: 'uppercase',

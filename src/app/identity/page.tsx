@@ -237,7 +237,7 @@ export default function IdentityPage() {
                 <button
                   onClick={handleCopySecret}
                   style={{
-                    background: 'var(--text-1)', color: '#000', border: 'none',
+                    background: 'var(--text-1)', color: 'var(--bg)', border: 'none',
                     padding: '10px 20px', fontSize: '12px', fontWeight: 700,
                     letterSpacing: '0.06em', textTransform: 'uppercase', cursor: 'pointer',
                   }}
@@ -287,7 +287,7 @@ export default function IdentityPage() {
               onClick={handleImport}
               disabled={importState === 'busy' || importVal.trim().length === 0}
               style={{
-                background: 'var(--text-1)', color: '#000', border: 'none',
+                background: 'var(--text-1)', color: 'var(--bg)', border: 'none',
                 padding: '12px 24px', fontSize: '12px', fontWeight: 700,
                 letterSpacing: '0.06em', textTransform: 'uppercase',
                 cursor: importState === 'busy' ? 'default' : 'pointer',
