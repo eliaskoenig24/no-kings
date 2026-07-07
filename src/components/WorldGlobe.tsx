@@ -54,7 +54,8 @@ export default function WorldGlobe({
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const [size, setSize] = useState(360);
   const rotationRef = useRef<[number, number]>([-10, -20]);
-  const zoomRef = useRef(1); // 1–4, pinch or wheel
+  const zoomRef = useRef(1);        // rendered zoom (smoothed)
+  const zoomTargetRef = useRef(1);  // 1–12, pinch or wheel sets this; rAF glides toward it
   const pointersRef = useRef(new Map<number, { x: number; y: number }>());
   const pinchDistRef = useRef<number | null>(null);
   const draggingRef = useRef<{ x: number; y: number; moved: boolean } | null>(null);
@@ -65,12 +66,19 @@ export default function WorldGlobe({
     [],
   );
 
-  const makeProjection = useCallback(() => {
-    const p = geoOrthographic()
-      .fitExtent([[6, 6], [size - 6, size - 6]], { type: 'Sphere' })
-      .rotate(rotationRef.current);
-    return p.scale(p.scale() * zoomRef.current);
+  const baseScaleRef = useRef(1);
+  const projectionRef = useRef(geoOrthographic());
+  useEffect(() => {
+    const p = geoOrthographic().fitExtent([[6, 6], [size - 6, size - 6]], { type: 'Sphere' });
+    baseScaleRef.current = p.scale();
+    projectionRef.current = p;
   }, [size]);
+
+  const makeProjection = useCallback(() => {
+    return projectionRef.current
+      .rotate(rotationRef.current)
+      .scale(baseScaleRef.current * zoomRef.current);
+  }, []);
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
@@ -91,9 +99,9 @@ export default function WorldGlobe({
     // sphere
     ctx.beginPath();
     path({ type: 'Sphere' });
-    ctx.fillStyle = '#0e1116';
+    ctx.fillStyle = '#0a1022'; // ocean: deep blue, unmistakably water
     ctx.fill();
-    ctx.strokeStyle = '#3a4150';
+    ctx.strokeStyle = '#2c3a5e';
     ctx.lineWidth = 1;
     ctx.stroke();
 
@@ -107,12 +115,12 @@ export default function WorldGlobe({
         // one hue, intensity = support share
         ctx.fillStyle = `rgba(96,165,250,${(0.4 + d!.support * 0.55).toFixed(3)})`;
       } else if (d && d.count > 0) {
-        ctx.fillStyle = '#2c3a55'; // someone is here — clearly warmer than empty
+        ctx.fillStyle = '#3d5b94'; // someone is here — clearly warmer than empty land
       } else {
-        ctx.fillStyle = '#1c2027';
+        ctx.fillStyle = '#3a3f47'; // land without people: clearly lighter than the ocean
       }
       ctx.fill();
-      ctx.strokeStyle = selected && a2 && selected.a2 === a2 ? '#FFFFFF' : '#0e1116';
+      ctx.strokeStyle = selected && a2 && selected.a2 === a2 ? '#FFFFFF' : '#0a1022';
       ctx.lineWidth = selected && a2 && selected.a2 === a2 ? 1.6 : 0.7;
       ctx.stroke();
     }
@@ -138,6 +146,9 @@ export default function WorldGlobe({
       if (autoSpinRef.current && !draggingRef.current) {
         rotationRef.current = [rotationRef.current[0] + dt * 4, rotationRef.current[1]];
       }
+      // glide toward the zoom target — this is what makes zooming feel fluid
+      const dz = zoomTargetRef.current - zoomRef.current;
+      if (Math.abs(dz) > 0.001) zoomRef.current += dz * Math.min(1, dt * 12);
       draw();
       raf = requestAnimationFrame(tick);
     };
@@ -168,9 +179,9 @@ export default function WorldGlobe({
     if (pointers.size === 2 && pinchDistRef.current !== null) {
       const [a, b] = [...pointers.values()];
       const dist = Math.hypot(a.x - b.x, a.y - b.y);
-      zoomRef.current = Math.max(1, Math.min(4, zoomRef.current * (dist / pinchDistRef.current)));
+      zoomTargetRef.current = Math.max(1, Math.min(12, zoomTargetRef.current * (dist / pinchDistRef.current)));
       pinchDistRef.current = dist;
-      if (reducedMotion) draw();
+      if (reducedMotion) { zoomRef.current = zoomTargetRef.current; draw(); }
       return;
     }
 
@@ -190,11 +201,19 @@ export default function WorldGlobe({
     if (reducedMotion) draw();
   }
 
-  function onWheel(e: React.WheelEvent<HTMLCanvasElement>) {
-    autoSpinRef.current = false;
-    zoomRef.current = Math.max(1, Math.min(4, zoomRef.current * (e.deltaY < 0 ? 1.12 : 0.89)));
-    if (reducedMotion) draw();
-  }
+  // native listener: React's synthetic wheel is passive, so the page would scroll while zooming
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const onWheelNative = (e: WheelEvent) => {
+      e.preventDefault();
+      autoSpinRef.current = false;
+      zoomTargetRef.current = Math.max(1, Math.min(12, zoomTargetRef.current * (e.deltaY < 0 ? 1.15 : 0.87)));
+      if (reducedMotion) { zoomRef.current = zoomTargetRef.current; draw(); }
+    };
+    canvas.addEventListener('wheel', onWheelNative, { passive: false });
+    return () => canvas.removeEventListener('wheel', onWheelNative);
+  }, [draw, reducedMotion]);
 
   function onPointerUp(e: React.PointerEvent<HTMLCanvasElement>) {
     pointersRef.current.delete(e.pointerId);
@@ -229,7 +248,6 @@ export default function WorldGlobe({
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
-        onWheel={onWheel}
         role="img"
         aria-label={hint}
       />
