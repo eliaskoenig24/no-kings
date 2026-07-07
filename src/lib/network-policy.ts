@@ -13,6 +13,14 @@
  */
 export const MIN_AGGREGATE_PERSONS = 25;
 
+/**
+ * Tiered k-anonymity: a single yes/no answer to the daily question reveals
+ * far less about a person than a full 8-dimension profile, so its reveal
+ * threshold can be lower without endangering anyone. Full-profile and
+ * regional aggregates stay at MIN_AGGREGATE_PERSONS.
+ */
+export const DAILY_MIN_PERSONS = 10;
+
 export type NetworkPhase = 'founding' | 'live';
 
 export function networkPhase(persons: number): NetworkPhase {
