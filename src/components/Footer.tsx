@@ -48,6 +48,7 @@ export default function Footer() {
           <Link href="/about"    style={{ fontSize: '12px', color: 'var(--text-3)', textDecoration: 'none' }}>About</Link>
           <Link href="/impressum"   style={{ fontSize: '12px', color: 'var(--text-3)', textDecoration: 'none' }}>Impressum</Link>
           <Link href="/datenschutz" style={{ fontSize: '12px', color: 'var(--text-3)', textDecoration: 'none' }}>Datenschutz</Link>
+          <a href="https://github.com/eliaskoenig24/no-kings" target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', color: 'var(--text-3)', textDecoration: 'none', fontFamily: 'var(--font-mono)' }}>Code ↗</a>
         </nav>
         <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-3)' }}>
           © {year} no kings · Open Source

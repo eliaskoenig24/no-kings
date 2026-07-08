@@ -72,5 +72,6 @@ Key modules:
 
 ## License
 
-Not yet licensed (all rights reserved until a license is chosen). The intent is
-an open-source license — the platform's "auditable by anyone" claim depends on it.
+**AGPL-3.0** — anyone may inspect, fork, and self-host this platform; nobody may
+run a closed, modified copy as a service. That is the legal backbone of the
+"auditable by anyone, shut-down-proof" promise.
