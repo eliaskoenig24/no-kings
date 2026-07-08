@@ -11,12 +11,12 @@
   --text-2: #4A4A4A;
   --text-3: #8A8A8A;
 
-  --accent:   #1A1A8C;
+  --accent:   #96621B; /* warm light of the globe, mixed for paper */
   --positive: #1B5E20;
   --negative: #7B0000;
 
   --font-sans:  system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-serif: Georgia, "Times New Roman", serif;
+  --font-serif: "Iowan Old Style", "Palatino Nova", Palatino, Georgia, "Times New Roman", serif;
   --font-mono:  ui-monospace, "SF Mono", "Fira Code", monospace;
 }
 
@@ -100,7 +100,7 @@ a[href="#main-content"]:focus {
   height: auto;
   padding: 8px 16px;
   background: var(--accent);
-  color: #000;
+  color: #fff;
   font-size: 13px;
   font-family: var(--font-mono);
 }
@@ -108,7 +108,7 @@ a[href="#main-content"]:focus {
 /* Selection */
 ::selection {
   background: var(--accent);
-  color: #000;
+  color: #fff;
 }
 
 /* Utility classes used across pages */

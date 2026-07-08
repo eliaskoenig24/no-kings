@@ -278,7 +278,7 @@ export default function WorldGlobe({
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '12px', flexWrap: 'wrap' }}>
             <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text-1)' }}>{selected.name}</span>
             {selUnlocked ? (
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', fontWeight: 700, color: 'var(--accent, #4B9EFF)' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '13px', fontWeight: 700, color: 'var(--accent)' }}>
                 {Math.round(sel!.support * 100)}% <span style={{ fontWeight: 400, fontSize: '10px', color: 'var(--text-3)' }}>{supportLabel} · n={sel!.count}</span>
               </span>
             ) : (

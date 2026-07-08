@@ -458,12 +458,12 @@ export default function NetworkPage() {
                   <span style={{
                     fontFamily: 'var(--font-mono)',
                     fontSize: '11px',
-                    color: '#4B9EFF',
+                    color: 'var(--accent)',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '6px',
                   }}>
-                    <span style={{ display: 'inline-block', width: '16px', height: '2px', background: '#4B9EFF' }} />
+                    <span style={{ display: 'inline-block', width: '16px', height: '2px', background: 'var(--accent)' }} />
                     {t(lang, 'nav_twin')}
                   </span>
                   <span style={{
@@ -660,15 +660,15 @@ export default function NetworkPage() {
                     : [];
                   return (
                     <div key={row.code} style={{
-                      border: row.mine ? '1px solid rgba(96,165,250,0.3)' : '1px solid var(--divider)',
-                      background: row.mine ? 'rgba(96,165,250,0.04)' : 'transparent',
+                      border: row.mine ? '1px solid rgba(150,98,27,0.3)' : '1px solid var(--divider)',
+                      background: row.mine ? 'rgba(150,98,27,0.04)' : 'transparent',
                       padding: '16px 18px',
                     }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '12px', flexWrap: 'wrap', marginBottom: '10px' }}>
                         <span style={{ fontSize: '14px', color: 'var(--text-1)', fontWeight: 500 }}>
                           {regionName(row.code)}
                           {row.mine && (
-                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: '#60a5fa', marginLeft: '10px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', color: 'var(--accent)', marginLeft: '10px', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                               {nx(lang, 'rg_yours')}
                             </span>
                           )}

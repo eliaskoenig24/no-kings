@@ -113,7 +113,7 @@ export default async function TwinPubkeyOGImage({
           })}
           {/* Profile fill */}
           {mainPts && (
-            <polygon points={mainPts} fill="rgba(75,158,255,0.15)" stroke="#4B9EFF" strokeWidth="2.5" strokeLinejoin="round" />
+            <polygon points={mainPts} fill="rgba(75,158,255,0.15)" stroke="#E9CF9A" strokeWidth="2.5" strokeLinejoin="round" />
           )}
           {/* Default polygon if no values */}
           {!mainPts && (
@@ -138,14 +138,14 @@ export default async function TwinPubkeyOGImage({
             const angle = (i / TOPICS.length) * 360;
             const r = (values[t] ?? 0.5) * maxR;
             const { x, y } = polarToCartesian(cx, cy, r, angle);
-            return <circle key={t} cx={x} cy={y} r="5" fill="#4B9EFF" />;
+            return <circle key={t} cx={x} cy={y} r="5" fill="#E9CF9A" />;
           })}
         </svg>
 
         {/* Right: Info */}
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%' }}>
           {/* Header */}
-          <div style={{ color: '#4B9EFF', fontSize: 13, fontFamily: 'monospace', letterSpacing: '0.18em', marginBottom: '28px' }}>
+          <div style={{ color: '#E9CF9A', fontSize: 13, fontFamily: 'monospace', letterSpacing: '0.18em', marginBottom: '28px' }}>
             NO KINGS — DIGITAL TWIN
           </div>
 
@@ -159,7 +159,7 @@ export default async function TwinPubkeyOGImage({
             }}>
               <div style={{
                 background: 'rgba(75,158,255,0.12)',
-                border: '1px solid rgba(75,158,255,0.25)',
+                border: '1px solid rgba(233,207,154,0.25)',
                 padding: '5px 14px',
                 fontSize: 13,
                 fontFamily: 'monospace',

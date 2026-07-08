@@ -19,7 +19,7 @@ import { AGENDA } from '@/data/agenda';
 import { inferPosition } from '@/lib/inference';
 // Positions are shown in ONE neutral color: high/low is a stance, not a score.
 // (Red-to-green coloring silently frames one pole as "good" — a neutrality bug.)
-const POSITION_COLOR = '#4B9EFF';
+const POSITION_COLOR = 'var(--accent)';
 
 const tx = makeTx(TX);
 
@@ -208,13 +208,13 @@ export default function TwinPage() {
         {/* Calibration — the twin claims, you correct, the radar moves */}
         {!editMode && calibrated.length < CAL_GOAL && (calCandidate || calMsg) && (
           <div style={{
-            border: '1px solid rgba(96,165,250,0.3)',
-            background: 'rgba(96,165,250,0.05)',
+            border: '1px solid rgba(150,98,27,0.3)',
+            background: 'rgba(150,98,27,0.05)',
             padding: '24px 22px',
             marginBottom: '48px',
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '14px', gap: '12px', flexWrap: 'wrap' }}>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.2em', color: '#60a5fa', textTransform: 'uppercase' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.2em', color: 'var(--accent)', textTransform: 'uppercase' }}>
                 {tx(lang, 'cal_label')} · {calibrated.length}/{CAL_GOAL}
               </span>
               {calMsg && (

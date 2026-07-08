@@ -45,7 +45,7 @@ export default function QuestionOGImage({ params }: { params: { id: string } }) 
   if (!item) {
     return new ImageResponse(
       <div style={{ width: '100%', height: '100%', background: '#080808', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ color: '#4B9EFF', fontFamily: 'monospace', fontSize: 24 }}>NO KINGS</div>
+        <div style={{ color: '#E9CF9A', fontFamily: 'monospace', fontSize: 24 }}>NO KINGS</div>
       </div>,
       { ...size }
     );
@@ -69,7 +69,7 @@ export default function QuestionOGImage({ params }: { params: { id: string } }) 
       }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '36px' }}>
-          <div style={{ fontFamily: 'monospace', fontSize: 12, letterSpacing: '0.18em', color: '#4B9EFF' }}>
+          <div style={{ fontFamily: 'monospace', fontSize: 12, letterSpacing: '0.18em', color: '#E9CF9A' }}>
             NO KINGS
           </div>
           <div style={{ fontFamily: 'monospace', fontSize: 10, letterSpacing: '0.1em', color: '#2A2A2A' }}>

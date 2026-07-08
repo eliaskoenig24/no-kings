@@ -308,7 +308,7 @@ export default function ComparePage() {
                   <div style={{
                     width: '20px',
                     height: '2px',
-                    background: '#4B9EFF',
+                    background: 'var(--accent)',
                   }} />
                   <span style={{ fontSize: '12px', color: 'var(--text-2)' }}>
                     {t(lang, 'nav_twin')}
@@ -369,7 +369,7 @@ export default function ComparePage() {
                     fontFamily: 'var(--font-mono)',
                     fontSize: '13px',
                     fontWeight: 600,
-                    color: delta > 0 ? '#4B9EFF' : '#ef4444',
+                    color: delta > 0 ? 'var(--accent)' : '#ef4444',
                     whiteSpace: 'nowrap',
                   }}>
                     {delta > 0 ? '+' : ''}{Math.round(delta * 100)}%
@@ -410,8 +410,8 @@ export default function ComparePage() {
                         gridTemplateColumns: '28px 1fr auto',
                         alignItems: 'center',
                         gap: '12px',
-                        background: isTop ? 'rgba(96,165,250,0.04)' : 'var(--surface)',
-                        border: isTop ? '1px solid rgba(96,165,250,0.25)' : '1px solid var(--border)',
+                        background: isTop ? 'rgba(150,98,27,0.04)' : 'var(--surface)',
+                        border: isTop ? '1px solid rgba(150,98,27,0.25)' : '1px solid var(--border)',
                         padding: '12px 16px',
                       }}>
                         <span style={{ fontSize: '18px', textAlign: 'center', lineHeight: 1 }}>{region.flag}</span>
@@ -430,8 +430,8 @@ export default function ComparePage() {
                                 fontSize: '9px',
                                 letterSpacing: '0.10em',
                                 textTransform: 'uppercase',
-                                color: 'rgba(96,165,250,0.9)',
-                                border: '1px solid rgba(96,165,250,0.3)',
+                                color: 'rgba(150,98,27,0.9)',
+                                border: '1px solid rgba(150,98,27,0.3)',
                                 padding: '1px 6px',
                               }}>
                                 {rTx(lang, 'closest')}

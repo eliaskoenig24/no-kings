@@ -119,7 +119,7 @@ export default function TrainingPage() {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
             <RadarChart values={liveValues} animated={false} size={88} />
             {liveArchetype && (
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', color: '#60a5fa' }}>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', color: 'var(--accent)' }}>
                 {archetypeLabel}
               </span>
             )}
@@ -287,7 +287,7 @@ export default function TrainingPage() {
           </span>
           <span style={{
             fontFamily: 'var(--font-mono)', fontSize: '13px', letterSpacing: '0.08em',
-            color: archFlash ? '#fff' : '#60a5fa',
+            color: archFlash ? '#fff' : 'var(--accent)',
             transform: archFlash ? 'scale(1.06)' : 'scale(1)',
             transformOrigin: 'left center',
             transition: 'color 0.25s, transform 0.25s',

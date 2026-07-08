@@ -20,7 +20,7 @@ export default function DatenschutzPage() {
           Datenschutzerklärung
         </h1>
         <p style={{ fontSize: '14px', color: 'var(--text-3)', marginBottom: '8px', fontFamily: 'var(--font-mono)' }}>
-          Stand: Juli 2026 · Verantwortlicher: siehe <a href="/impressum" style={{ color: 'var(--accent, #4B9EFF)' }}>Impressum</a>
+          Stand: Juli 2026 · Verantwortlicher: siehe <a href="/impressum" style={{ color: 'var(--accent)' }}>Impressum</a>
         </p>
 
         <div style={{ fontSize: '15px', lineHeight: 1.9, color: 'var(--text-2)' }}>

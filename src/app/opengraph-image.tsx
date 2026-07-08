@@ -34,7 +34,7 @@ export default function OGImage() {
             fontFamily: 'monospace',
             fontSize: 13,
             letterSpacing: '0.18em',
-            color: '#4B9EFF',
+            color: '#E9CF9A',
             marginBottom: '28px',
           }}>
             NO KINGS

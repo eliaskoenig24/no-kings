@@ -170,8 +170,8 @@ export default function RadarChart({
         {/* Main profile polygon */}
         <polygon
           points={mainPoints}
-          fill="rgba(75, 158, 255, 0.15)"
-          stroke="#4B9EFF"
+          fill="rgba(150,98,27,0.15)"
+          stroke="var(--accent)"
           strokeWidth="1.5"
           strokeLinejoin="round"
           style={animated ? { transition: 'all 0.8s ease' } : undefined}

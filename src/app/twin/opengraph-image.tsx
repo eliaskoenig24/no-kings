@@ -39,7 +39,7 @@ export default function TwinOGImage() {
         {/* Left: header + bars */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px' }}>
-            <div style={{ fontFamily: 'monospace', fontSize: 12, letterSpacing: '0.18em', color: '#4B9EFF' }}>
+            <div style={{ fontFamily: 'monospace', fontSize: 12, letterSpacing: '0.18em', color: '#E9CF9A' }}>
               NO KINGS
             </div>
             <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#2A2A2A' }}>·</div>

@@ -74,11 +74,11 @@ export default function QuestionSearch({
       <div style={{
         display: 'flex', alignItems: 'center', gap: '14px',
         background: 'var(--surface)',
-        border: `1px solid ${focused ? 'var(--accent, #4B9EFF)' : 'var(--border)'}`,
+        border: `1px solid ${focused ? 'var(--accent)' : 'var(--border)'}`,
         borderRadius: '999px',
         padding: '0 22px',
         height: '54px',
-        boxShadow: focused ? '0 4px 24px rgba(75,158,255,0.12)' : '0 2px 12px rgba(0,0,0,0.15)',
+        boxShadow: focused ? '0 4px 24px rgba(150,98,27,0.12)' : '0 2px 12px rgba(0,0,0,0.15)',
         transition: 'border-color 0.15s, box-shadow 0.2s',
       }}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" strokeWidth="2" aria-hidden="true">
@@ -159,7 +159,7 @@ export default function QuestionSearch({
                 <span style={{ flex: 1, fontSize: '14px', lineHeight: 1.45, color: 'var(--text-1)' }}>
                   {item.text[lang] ?? item.text['en']}
                 </span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent, #4B9EFF)', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent)', whiteSpace: 'nowrap', flexShrink: 0 }}>
                   {net !== null
                     ? `${net}% ${tx(lang, 'support')}`
                     : myScore !== null
@@ -177,7 +177,7 @@ export default function QuestionSearch({
               display: 'block', padding: '13px 22px',
               borderTop: '1px solid var(--divider)',
               fontFamily: 'var(--font-mono)', fontSize: '11px',
-              color: 'var(--accent, #4B9EFF)', textDecoration: 'none',
+              color: 'var(--accent)', textDecoration: 'none',
             }}
           >
             {tx(lang, 'propose')}

@@ -51,7 +51,7 @@ export default function ImpressumPage() {
             veröffentlichen, werden auf dezentralen Nostr-Relays Dritter gespeichert,
             auf deren Betrieb der Betreiber dieser Website keinen Einfluss hat.
             Details in der{' '}
-            <a href="/datenschutz" style={{ color: 'var(--accent, #4B9EFF)' }}>Datenschutzerklärung</a>.
+            <a href="/datenschutz" style={{ color: 'var(--accent)' }}>Datenschutzerklärung</a>.
           </p>
 
           <p style={{ fontSize: '12px', color: 'var(--text-3)' }}>

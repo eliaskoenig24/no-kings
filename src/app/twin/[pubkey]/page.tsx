@@ -169,7 +169,7 @@ export default function TwinByPubkeyPage({
             <span style={{
               fontFamily: 'var(--font-mono)',
               fontSize: 'clamp(13px, 2vw, 16px)',
-              color: 'var(--accent, #4B9EFF)',
+              color: 'var(--accent)',
               letterSpacing: '0.06em',
             }}>
               {truncateKey(params.pubkey)}
@@ -181,8 +181,8 @@ export default function TwinByPubkeyPage({
               display: 'inline-flex',
               alignItems: 'center',
               gap: '8px',
-              border: '1px solid rgba(96,165,250,0.25)',
-              background: 'rgba(96,165,250,0.06)',
+              border: '1px solid rgba(150,98,27,0.25)',
+              background: 'rgba(150,98,27,0.06)',
               padding: '6px 14px',
             }}>
               <span style={{
@@ -198,7 +198,7 @@ export default function TwinByPubkeyPage({
                 fontFamily: 'var(--font-serif)',
                 fontSize: '14px',
                 fontWeight: 600,
-                color: 'rgba(96,165,250,0.9)',
+                color: 'rgba(150,98,27,0.9)',
               }}>
                 {archetypeLabel}
               </span>
@@ -229,8 +229,8 @@ export default function TwinByPubkeyPage({
         </div>
         {myTwin && (
           <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', marginBottom: '40px' }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: '#4B9EFF', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ display: 'inline-block', width: '16px', height: '2px', background: '#4B9EFF' }} />
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ display: 'inline-block', width: '16px', height: '2px', background: 'var(--accent)' }} />
               {(TX.twin_of as Record<string, string>)[lang] ?? TX.twin_of.en}
             </span>
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: '6px' }}>

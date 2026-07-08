@@ -28,7 +28,7 @@ function classifySimple(twin: TwinValues): ArchetypeKey {
 
 const ARCHETYPE_COLORS: Record<ArchetypeKey, string> = {
   progressive: '#22c55e', socialdem: '#ef4444', liberal: '#f59e0b',
-  conservative: '#94a3b8', libertarian: '#fb923c', centrist: '#60a5fa'
+  conservative: '#94a3b8', libertarian: '#fb923c', centrist: 'var(--accent)'
 };
 
 const ARCHETYPE_LABELS: Record<ArchetypeKey, string> = {

@@ -116,7 +116,7 @@ export default function IdentityPage() {
           <p style={{
             fontFamily: 'var(--font-mono)',
             fontSize: 'clamp(13px, 2vw, 16px)',
-            color: 'var(--accent, #4B9EFF)',
+            color: 'var(--accent)',
             letterSpacing: '0.06em',
             wordBreak: 'break-all',
             marginBottom: '16px',

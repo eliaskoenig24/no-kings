@@ -71,7 +71,7 @@ export default function EmbedPage() {
         href={`/question/${item.id}`}
         target="_blank"
         rel="noopener noreferrer"
-        style={{ display: 'inline-block', marginTop: '14px', fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', color: 'var(--accent, #4B9EFF)', textDecoration: 'none' }}
+        style={{ display: 'inline-block', marginTop: '14px', fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.1em', color: 'var(--accent)', textDecoration: 'none' }}
       >
         no-kings.world →
       </a>

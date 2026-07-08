@@ -82,14 +82,14 @@ export async function generateShareCard(opts: {
     else ctx.lineTo(x, y);
   }
   ctx.closePath();
-  ctx.fillStyle = 'rgba(75,158,255,0.20)';
+  ctx.fillStyle = 'rgba(233,207,154,0.20)';
   ctx.fill();
-  ctx.strokeStyle = '#4B9EFF';
+  ctx.strokeStyle = '#E9CF9A';
   ctx.lineWidth = 4;
   ctx.stroke();
 
   // Vertex dots
-  ctx.fillStyle = '#4B9EFF';
+  ctx.fillStyle = '#E9CF9A';
   for (let i = 0; i < n; i++) {
     const topic = TOPICS[i];
     const [x, y] = point(i, R * Math.max(0.04, opts.values[topic]));

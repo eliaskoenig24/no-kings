@@ -57,7 +57,7 @@ export default function BottomNav() {
           >
             <span aria-hidden="true" style={{
               width: '14px', height: '2px',
-              background: active ? 'var(--accent, #4B9EFF)' : 'transparent',
+              background: active ? 'var(--accent)' : 'transparent',
             }} />
             <span style={{ fontSize: '11px', letterSpacing: '0.04em', fontFamily: 'var(--font-mono)' }}>
               {(label as Record<string, string>)[lang] ?? (label as Record<string, string>)['en']}

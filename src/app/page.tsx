@@ -128,7 +128,7 @@ export default function HomePage() {
 
         {/* The vision, first — visitors must know WHY before anything else */}
         {loaded && !myTwin && (
-          <div style={{ padding: '16px 0 44px', borderBottom: '1px solid var(--divider)', marginBottom: '44px' }}>
+          <div style={{ padding: '24px 0 56px', borderBottom: '1px solid var(--divider)', marginBottom: '56px' }}>
             <h1 style={{ fontSize: 'clamp(1.9rem, 5.5vw, 3.2rem)', fontWeight: 600, lineHeight: 1.12, letterSpacing: '-0.02em', marginBottom: '18px', maxWidth: '16ch' }}>
               {tx(lang, 'hero_title')}
             </h1>
@@ -180,10 +180,25 @@ export default function HomePage() {
           </div>
         </div>
 
+        {/* The world, lit country by country — dark until enough persons per country */}
+        <div style={{ marginBottom: '72px' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.2em', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: '18px' }}>
+            {tx(lang, 'wg_title')}
+          </p>
+          <WorldGlobe
+            data={countryData}
+            lang={lang}
+            hint={tx(lang, 'wg_hint')}
+            lockedLabel={ntx(lang, 'rg_until')}
+            supportLabel={`${tx(lang, 'support')} · ${tx(lang, 'dq_label')}`}
+            regions={regionsByCountry}
+          />
+        </div>
+
         {/* Question of the day — answer first, then guess the network, then the truth */}
-        <div style={{ border: '1px solid var(--border)', background: 'var(--surface)', padding: '26px 24px', marginBottom: '40px' }}>
+        <div style={{ border: '1px solid var(--border)', background: 'var(--surface)', padding: '28px 26px', marginBottom: '72px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.2em', color: 'var(--accent, #4B9EFF)', textTransform: 'uppercase' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.2em', color: 'var(--accent)', textTransform: 'uppercase' }}>
               {tx(lang, 'dq_label')}
             </span>
             {dqStreak > 0 && (
@@ -237,7 +252,7 @@ export default function HomePage() {
                   type="checkbox"
                   checked={dqPublish}
                   onChange={e => setDqPublish(e.target.checked)}
-                  style={{ marginTop: '3px', accentColor: 'var(--accent, #4B9EFF)' }}
+                  style={{ marginTop: '3px', accentColor: 'var(--accent)' }}
                 />
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-3)', lineHeight: 1.6 }}>
                   {tx(lang, 'dq_publish')}
@@ -289,7 +304,7 @@ export default function HomePage() {
                   const guessed = Math.round(dailyAgg.meanGuess);
                   return (
                     <div style={{ marginTop: '24px', borderTop: '1px solid var(--divider)', paddingTop: '18px' }}>
-                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--accent, #4B9EFF)', marginBottom: '14px' }}>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: '14px' }}>
                         {tx(lang, 'dq_gap')} · n={dailyAgg.n}
                       </p>
                       {[{ label: tx(lang, 'dq_gap_real'), v: real, strong: true }, { label: tx(lang, 'dq_gap_guessed'), v: guessed, strong: false }].map(({ label, v, strong }) => (
@@ -312,23 +327,8 @@ export default function HomePage() {
           })()}
         </div>
 
-        {/* The world, lit country by country — dark until 25 persons per country */}
-        <div style={{ marginBottom: '48px' }}>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.2em', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: '18px' }}>
-            {tx(lang, 'wg_title')}
-          </p>
-          <WorldGlobe
-            data={countryData}
-            lang={lang}
-            hint={tx(lang, 'wg_hint')}
-            lockedLabel={ntx(lang, 'rg_until')}
-            supportLabel={`${tx(lang, 'support')} · ${tx(lang, 'dq_label')}`}
-            regions={regionsByCountry}
-          />
-        </div>
-
         {/* Analysis search — ask the network anything it can answer */}
-        <div style={{ marginBottom: '48px' }}>
+        <div style={{ marginBottom: '72px' }}>
           <QuestionSearch
             lang={lang}
             myTwin={myTwin}
@@ -347,8 +347,8 @@ export default function HomePage() {
           <div style={{
             padding: '14px 20px',
             marginBottom: '40px',
-            background: myTwin ? 'rgba(96,165,250,0.06)' : 'var(--surface)',
-            border: myTwin ? '1px solid rgba(96,165,250,0.2)' : '1px solid var(--border)',
+            background: myTwin ? 'rgba(150,98,27,0.06)' : 'var(--surface)',
+            border: myTwin ? '1px solid rgba(150,98,27,0.2)' : '1px solid var(--border)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -358,8 +358,8 @@ export default function HomePage() {
             {myTwin ? (
               <>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ width: '6px', height: '6px', background: '#60a5fa', borderRadius: '50%', boxShadow: '0 0 6px #60a5fa' }} />
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: '#60a5fa', letterSpacing: '0.06em' }}>
+                  <div style={{ width: '6px', height: '6px', background: 'var(--accent)', borderRadius: '50%', boxShadow: '0 0 6px var(--accent)' }} />
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--accent)', letterSpacing: '0.06em' }}>
                     {tx(lang, 'active')}
                   </span>
                 </div>
@@ -422,7 +422,7 @@ export default function HomePage() {
                         <div style={{
                           position: 'absolute', left: `${myPct}%`,
                           top: '-4px', transform: 'translateX(-50%)',
-                          width: '3px', height: '13px', background: '#60a5fa',
+                          width: '3px', height: '13px', background: 'var(--accent)',
                         }} />
                       )}
                     </div>
@@ -443,7 +443,7 @@ export default function HomePage() {
                       </span>
                       {myPct !== null && (
                         <span style={{
-                          fontFamily: 'var(--font-mono)', fontSize: '11px', color: '#60a5fa',
+                          fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--accent)',
                           whiteSpace: 'nowrap',
                         }}>
                           {tx(lang, 'you')}: {myPct}%
