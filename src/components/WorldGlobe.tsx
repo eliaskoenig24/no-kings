@@ -27,7 +27,19 @@ const NUMERIC_TO_A2: Record<string, string> = Object.fromEntries(
 type CountryFeature = Feature<Geometry, { name?: string }> & { id?: string | number };
 
 const world = worldData as unknown as Topology<{ countries: GeometryCollection<{ name?: string }> }>;
-const COUNTRIES = (feature(world, world.objects.countries) as unknown as { features: CountryFeature[] }).features;
+let COUNTRIES = (feature(world, world.objects.countries) as unknown as { features: CountryFeature[] }).features;
+
+// The 110m atlas keeps the initial load light; zooming in swaps in the 50m
+// atlas once, so borders stay smooth instead of turning polygonal.
+let hiResRequested = false;
+function ensureHiRes(zoom: number) {
+  if (hiResRequested || zoom < 2.2) return;
+  hiResRequested = true;
+  import('world-atlas/countries-50m.json').then((mod) => {
+    const w = (mod.default ?? mod) as unknown as Topology<{ countries: GeometryCollection<{ name?: string }> }>;
+    COUNTRIES = (feature(w, w.objects.countries) as unknown as { features: CountryFeature[] }).features;
+  }).catch(() => { /* keep 110m */ });
+}
 
 function alpha2Of(f: CountryFeature): string | undefined {
   return NUMERIC_TO_A2[String(f.id ?? '').padStart(3, '0')];
@@ -99,9 +111,9 @@ export default function WorldGlobe({
     // sphere
     ctx.beginPath();
     path({ type: 'Sphere' });
-    ctx.fillStyle = '#0a1022'; // ocean: deep blue, unmistakably water
+    ctx.fillStyle = '#04060c'; // ocean: near-black night
     ctx.fill();
-    ctx.strokeStyle = '#2c3a5e';
+    ctx.strokeStyle = 'rgba(140,160,200,0.22)';
     ctx.lineWidth = 1;
     ctx.stroke();
 
@@ -112,16 +124,22 @@ export default function WorldGlobe({
       ctx.beginPath();
       path(f);
       if (unlocked) {
-        // one hue, intensity = support share
-        ctx.fillStyle = `rgba(96,165,250,${(0.4 + d!.support * 0.55).toFixed(3)})`;
+        // earth at night: inhabited countries glow warm; brightness = support
+        ctx.save();
+        ctx.shadowColor = 'rgba(255,228,170,0.65)';
+        ctx.shadowBlur = 14;
+        ctx.fillStyle = `rgba(255,234,190,${(0.4 + d!.support * 0.5).toFixed(3)})`;
+        ctx.fill();
+        ctx.restore();
       } else if (d && d.count > 0) {
-        ctx.fillStyle = '#3d5b94'; // someone is here — clearly warmer than empty land
+        ctx.fillStyle = '#57503a'; // first embers — people have arrived
+        ctx.fill();
       } else {
-        ctx.fillStyle = '#3a3f47'; // land without people: clearly lighter than the ocean
+        ctx.fillStyle = '#23262d'; // uninhabited land: graphite, clearly above the ocean
+        ctx.fill();
       }
-      ctx.fill();
-      ctx.strokeStyle = selected && a2 && selected.a2 === a2 ? '#FFFFFF' : '#0a1022';
-      ctx.lineWidth = selected && a2 && selected.a2 === a2 ? 1.6 : 0.7;
+      ctx.strokeStyle = selected && a2 && selected.a2 === a2 ? '#FFFFFF' : 'rgba(0,0,0,0.55)';
+      ctx.lineWidth = selected && a2 && selected.a2 === a2 ? 1.6 : 0.6;
       ctx.stroke();
     }
   }, [size, data, selected]);
@@ -149,6 +167,7 @@ export default function WorldGlobe({
       // glide toward the zoom target — this is what makes zooming feel fluid
       const dz = zoomTargetRef.current - zoomRef.current;
       if (Math.abs(dz) > 0.001) zoomRef.current += dz * Math.min(1, dt * 12);
+      ensureHiRes(zoomRef.current);
       draw();
       raf = requestAnimationFrame(tick);
     };
@@ -181,7 +200,7 @@ export default function WorldGlobe({
       const dist = Math.hypot(a.x - b.x, a.y - b.y);
       zoomTargetRef.current = Math.max(1, Math.min(12, zoomTargetRef.current * (dist / pinchDistRef.current)));
       pinchDistRef.current = dist;
-      if (reducedMotion) { zoomRef.current = zoomTargetRef.current; draw(); }
+      if (reducedMotion) { zoomRef.current = zoomTargetRef.current; ensureHiRes(zoomRef.current); draw(); }
       return;
     }
 
