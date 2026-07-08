@@ -7,6 +7,7 @@ import { makeTx } from '@/lib/tx';
 import { DEMO_TWINS_TAGGED } from '@/data/demo-twins';
 
 const WorldGlobe = dynamic(() => import('@/components/WorldGlobe'), { ssr: false });
+const QuestionSearch = dynamic(() => import('@/components/QuestionSearch'), { ssr: false });
 import { useLang } from '@/context/LangContext';
 import { AGENDA } from '@/data/agenda';
 import { aggregateForItem, inferPosition } from '@/lib/inference';
@@ -32,7 +33,7 @@ const TX = {
   dq_label: { de: 'Frage des Tages', en: 'Question of the day', es: 'Pregunta del día', fr: 'Question du jour', pt: 'Pergunta do dia', ar: 'سؤال اليوم', zh: '每日一问', ja: '今日の質問', hi: 'आज का प्रश्न', ru: 'Вопрос дня', id: 'Pertanyaan hari ini', tr: 'Günün sorusu', ko: '오늘의 질문', it: 'Domanda del giorno', nl: 'Vraag van de dag', pl: 'Pytanie dnia', uk: 'Питання дня', vi: 'Câu hỏi trong ngày', bn: 'আজকের প্রশ্ন', fa: 'پرسش روز' },
   dq_guess: { de: 'Schätze: Wie viel % des Netzwerks sind dafür?', en: 'Guess: what % of the network supports this?', es: 'Adivina: ¿qué % de la red está a favor?', fr: 'Devine : quel % du réseau est pour ?', pt: 'Adivinhe: que % da rede é a favor?', ar: 'خمّن: كم % من الشبكة مؤيد؟', zh: '猜猜：网络中有多少%支持？', ja: '推測：ネットワークの何%が支持？', hi: 'अनुमान: नेटवर्क का कितना % पक्ष में है?', ru: 'Угадайте: сколько % сети за?', id: 'Tebak: berapa % jaringan yang mendukung?', tr: 'Tahmin et: ağın yüzde kaçı destekliyor?', ko: '추측: 네트워크의 몇 %가 찬성할까요?', it: 'Indovina: che % della rete è a favore?', nl: 'Gok: hoeveel % van het netwerk is voor?', pl: 'Zgadnij: ile % sieci jest za?', uk: 'Вгадайте: скільки % мережі за?', vi: 'Đoán: bao nhiêu % mạng ủng hộ?', bn: 'অনুমান: নেটওয়ার্কের কত % পক্ষে?', fa: 'حدس بزنید: چند درصد شبکه موافق است؟' },
   dq_lock:  { de: 'Schätzung einloggen', en: 'Lock in guess', es: 'Fijar estimación', fr: 'Valider', pt: 'Confirmar palpite', ar: 'تثبيت التخمين', zh: '锁定猜测', ja: '確定する', hi: 'अनुमान लॉक करें', ru: 'Зафиксировать', id: 'Kunci tebakan', tr: 'Tahmini kilitle', ko: '확정', it: 'Blocca stima', nl: 'Vastleggen', pl: 'Zatwierdź', uk: 'Зафіксувати', vi: 'Chốt dự đoán', bn: 'অনুমান লক করুন', fa: 'ثبت حدس' },
-  dq_wait:  { de: 'Gespeichert. Die Auflösung kommt, sobald 10 echte Antworten da sind.', en: 'Saved. The reveal comes once there are 10 real answers.', es: 'Guardado. La revelación llegará cuando la red esté viva (10 personas).', fr: 'Enregistré. La réponse viendra quand le réseau sera actif (10 personnes).', pt: 'Salvo. A revelação virá quando a rede estiver ativa (10 pessoas).', ar: 'حُفظ. سيظهر الحل عندما تصبح الشبكة نشطة (10 شخصًا).', zh: '已保存。网络达到10人后即可揭晓。', ja: '保存しました。ネットワークが10人になったら答え合わせ。', hi: 'सहेजा गया। नेटवर्क लाइव (10 व्यक्ति) होते ही खुलासा।', ru: 'Сохранено. Ответ появится, когда сеть оживёт (10 человек).', id: 'Tersimpan. Jawaban muncul saat jaringan aktif (10 orang).', tr: 'Kaydedildi. Ağ canlanınca (10 kişi) sonuç açıklanır.', ko: '저장됨. 네트워크가 활성화되면(10명) 공개됩니다.', it: 'Salvato. La risposta arriva quando la rete sarà attiva (10 persone).', nl: 'Opgeslagen. De onthulling volgt zodra het netwerk live is (10 personen).', pl: 'Zapisano. Wynik pojawi się, gdy sieć ożyje (10 osób).', uk: 'Збережено. Відповідь зʼявиться, коли мережа оживе (10 осіб).', vi: 'Đã lưu. Kết quả sẽ hiện khi mạng hoạt động (10 người).', bn: 'সংরক্ষিত। নেটওয়ার্ক লাইভ হলে (১০ জন) ফলাফল আসবে।', fa: 'ذخیره شد. با فعال شدن شبکه (۱۰ نفر) نتیجه اعلام می‌شود.' },
+  dq_wait:  { de: 'Gespeichert. Die Auflösung erscheint, sobald genug echte Antworten zusammenkommen.', en: 'Saved. The reveal appears once enough real answers come in.', es: 'Guardado. La revelación aparecerá cuando haya suficientes respuestas reales.', fr: 'Enregistré. La réponse apparaîtra quand il y aura assez de réponses réelles.', pt: 'Salvo. A revelação aparece quando houver respostas reais suficientes.', ar: 'حُفظ. سيظهر الحل عند تجمّع إجابات حقيقية كافية.', zh: '已保存。等到有足够的真实回答时即揭晓。', ja: '保存しました。十分な回答が集まり次第、答え合わせが表示されます。', hi: 'सहेजा गया। पर्याप्त वास्तविक उत्तर आने पर खुलासा दिखेगा।', ru: 'Сохранено. Ответ появится, когда наберётся достаточно реальных ответов.', id: 'Tersimpan. Jawaban muncul saat cukup banyak jawaban nyata terkumpul.', tr: 'Kaydedildi. Yeterince gerçek yanıt toplanınca sonuç görünür.', ko: '저장됨. 충분한 실제 답변이 모이면 공개됩니다.', it: 'Salvato. La risposta apparirà quando ci saranno abbastanza risposte reali.', nl: 'Opgeslagen. De onthulling verschijnt zodra er genoeg echte antwoorden zijn.', pl: 'Zapisano. Wynik pojawi się, gdy zbierze się dość prawdziwych odpowiedzi.', uk: 'Збережено. Відповідь зʼявиться, коли набереться достатньо реальних відповідей.', vi: 'Đã lưu. Kết quả hiện ra khi có đủ câu trả lời thật.', bn: 'সংরক্ষিত। যথেষ্ট আসল উত্তর জমলে ফলাফল দেখা যাবে।', fa: 'ذخیره شد. با جمع شدن پاسخ‌های واقعی کافی نتیجه نمایان می‌شود.' },
   dq_net:   { de: 'Netzwerk', en: 'Network', es: 'Red', fr: 'Réseau', pt: 'Rede', ar: 'الشبكة', zh: '网络', ja: 'ネットワーク', hi: 'नेटवर्क', ru: 'Сеть', id: 'Jaringan', tr: 'Ağ', ko: '네트워크', it: 'Rete', nl: 'Netwerk', pl: 'Sieć', uk: 'Мережа', vi: 'Mạng', bn: 'নেটওয়ার্ক', fa: 'شبکه' },
   dq_yourguess: { de: 'Deine Schätzung', en: 'Your guess', es: 'Tu estimación', fr: 'Ton estimation', pt: 'Seu palpite', ar: 'تخمينك', zh: '你的猜测', ja: 'あなたの推測', hi: 'आपका अनुमान', ru: 'Ваша догадка', id: 'Tebakanmu', tr: 'Tahminin', ko: '내 추측', it: 'La tua stima', nl: 'Jouw gok', pl: 'Twój strzał', uk: 'Ваш здогад', vi: 'Dự đoán của bạn', bn: 'আপনার অনুমান', fa: 'حدس شما' },
   dq_off:   { de: 'Punkte daneben', en: 'points off', es: 'puntos de diferencia', fr: 'points d’écart', pt: 'pontos de diferença', ar: 'نقاط فرق', zh: '个百分点误差', ja: 'ポイントのずれ', hi: 'अंक का अंतर', ru: 'пунктов мимо', id: 'poin meleset', tr: 'puan fark', ko: '포인트 차이', it: 'punti di scarto', nl: 'punten ernaast', pl: 'punktów obok', uk: 'пунктів різниці', vi: 'điểm chênh lệch', bn: 'পয়েন্ট পার্থক্য', fa: 'واحد اختلاف' },
@@ -350,6 +351,16 @@ export default function HomePage() {
             lockedLabel={ntx(lang, 'rg_until')}
             supportLabel={`${tx(lang, 'support')} · ${tx(lang, 'dq_label')}`}
             regions={regionsByCountry}
+          />
+        </div>
+
+        {/* Analysis search — ask the network anything it can answer */}
+        <div style={{ marginBottom: '48px' }}>
+          <QuestionSearch
+            lang={lang}
+            myTwin={myTwin}
+            revealNumbers={simView || phase === 'live'}
+            displayTwins={displayTwins}
           />
         </div>
 

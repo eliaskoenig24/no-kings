@@ -264,7 +264,7 @@ export default function WorldGlobe({
               </span>
             ) : (
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-3)' }}>
-                {sel?.count ?? 0} / {MIN_AGGREGATE_PERSONS} · {lockedLabel}
+                {sel?.count ?? 0} · {lockedLabel}
               </span>
             )}
           </div>
@@ -283,7 +283,7 @@ export default function WorldGlobe({
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '10px' }}>
                     <span style={{ fontSize: '12px', color: 'var(--text-2)' }}>{r.name}</span>
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: r.unlocked ? 'var(--positive, #22c55e)' : 'var(--text-3)' }}>
-                      {r.count} / {MIN_AGGREGATE_PERSONS}
+                      {r.count}
                     </span>
                   </div>
                   <div style={{ height: '2px', background: 'var(--divider)', position: 'relative', marginTop: '4px' }}>

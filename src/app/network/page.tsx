@@ -674,7 +674,7 @@ export default function NetworkPage() {
                           )}
                         </span>
                         <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-3)' }}>
-                          {row.count} / {RG_MIN} {row.unlocked ? '' : `· ${nx(lang, 'rg_until')}`}
+                          {row.count} {nx(lang, 'persons')}
                         </span>
                       </div>
                       <div style={{ height: '3px', background: 'var(--divider)', position: 'relative', marginBottom: row.unlocked ? '12px' : 0 }}>

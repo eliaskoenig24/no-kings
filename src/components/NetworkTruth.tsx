@@ -138,22 +138,9 @@ export function FoundingNotice({ lang, persons, onSimulate }: {
       marginBottom: '48px',
     }}>
       <p className="label" style={{ marginBottom: '16px' }}>{ntx(lang, 'founding_title')}</p>
-      <p style={{ fontSize: '14px', lineHeight: 1.75, maxWidth: '600px', marginBottom: '24px', color: 'var(--text-2)' }}>
-        {ntx(lang, 'founding_body')} <strong style={{ color: 'var(--text-1)' }}>{MIN_AGGREGATE_PERSONS}</strong> {ntx(lang, 'founding_body2')}
-      </p>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '8px' }}>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '30px', color: 'var(--text-1)' }}>{persons}</span>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--text-3)' }}>
-          / {MIN_AGGREGATE_PERSONS} {ntx(lang, 'founding_progress')}
-        </span>
-      </div>
-      <div style={{ height: '4px', background: 'var(--divider)', marginBottom: '24px', position: 'relative' }}>
-        <div style={{
-          position: 'absolute', left: 0, top: 0, height: '100%',
-          width: `${Math.round(foundingProgress(persons) * 100)}%`,
-          background: 'var(--accent)',
-          transition: 'width 0.8s ease',
-        }} />
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '14px' }}>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '34px', color: 'var(--text-1)' }}>{persons}</span>
+        <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--text-3)' }}>{ntx(lang, 'persons')}</span>
       </div>
       <p style={{ fontSize: '13px', color: 'var(--text-2)', marginBottom: onSimulate ? '20px' : 0, maxWidth: '520px' }}>
         {ntx(lang, 'founding_cta')}
