@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { AGENDA } from '@/data/agenda';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs'; // edge 1MB limit exceeded since agenda grew to 20 languages
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
