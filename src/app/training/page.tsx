@@ -12,6 +12,30 @@ import { TOPICS, TopicKey } from '@/types';
 import { createTwinFromValues, classifyTwin } from '@/lib/twin-engine';
 import { saveMyTwin, saveDemographics, type TwinDemographics } from '@/lib/db';
 import { regionsForCountry } from '@/data/regions';
+import { AGENDA } from '@/data/agenda';
+import type { AgendaItem } from '@/types';
+
+// 10 concrete statements, chosen once so all 8 dimensions are covered:
+// taking a stance on real questions beats guessing on abstract sliders.
+const TRAINING_ITEMS: AgendaItem[] = (() => {
+  const covered = new Set<string>();
+  const picked: AgendaItem[] = [];
+  const sorted = [...AGENDA].sort(
+    (a, b) => Object.keys(b.topicWeights).length - Object.keys(a.topicWeights).length,
+  );
+  for (const item of sorted) {
+    if (picked.length >= 10) break;
+    if (Object.keys(item.topicWeights).some((t) => !covered.has(t))) {
+      picked.push(item);
+      Object.keys(item.topicWeights).forEach((t) => covered.add(t));
+    }
+  }
+  for (const item of sorted) {
+    if (picked.length >= 10) break;
+    if (!picked.includes(item)) picked.push(item);
+  }
+  return picked;
+})();
 
 const RadarChart = dynamic(() => import('@/components/RadarChart'), { ssr: false });
 
@@ -35,6 +59,22 @@ export default function TrainingPage() {
   const [barVisible, setBarVisible] = useState(false);
   const [archFlash, setArchFlash] = useState(false);
   const [countryTouched, setCountryTouched] = useState(false);
+  const [mode, setMode] = useState<'questions' | 'sliders'>('questions');
+  const [qIdx, setQIdx] = useState(0);
+
+  // Each stance nudges the involved dimensions; ten answers shape the profile.
+  function answerStatement(a: number) {
+    setValues(v => {
+      const next = { ...v };
+      for (const [t, w] of Object.entries(TRAINING_ITEMS[qIdx].topicWeights) as [TopicKey, number][]) {
+        const delta = (a - 0.5) * Math.sign(w) * Math.min(1, Math.abs(w)) * 55;
+        next[t] = Math.round(Math.max(0, Math.min(100, next[t] + delta)));
+      }
+      return next;
+    });
+    if (qIdx + 1 >= TRAINING_ITEMS.length) setMode('sliders');
+    else setQIdx(qIdx + 1);
+  }
 
   // Geo-detected country is only the default; typing takes over permanently.
   const effCountry = countryTouched ? country : (autoCountry?.toUpperCase() ?? '');
@@ -126,6 +166,50 @@ export default function TrainingPage() {
           </div>
         </div>
 
+        {/* Statement flow: stance on concrete questions builds the twin */}
+        {mode === 'questions' && (
+          <div>
+            <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: 1.7, marginBottom: '28px', maxWidth: '520px' }}>
+              {tx(lang, 'tq_intro')}
+            </p>
+            <div style={{ border: '1px solid var(--border)', background: 'var(--surface)', padding: '26px 24px', marginBottom: '20px' }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.18em', color: 'var(--text-3)', marginBottom: '16px' }}>
+                {qIdx + 1} / {TRAINING_ITEMS.length}
+              </p>
+              <p style={{ fontSize: '17px', lineHeight: 1.5, color: 'var(--text-1)', marginBottom: '24px', minHeight: '76px' }}>
+                {TRAINING_ITEMS[qIdx].text[lang] ?? TRAINING_ITEMS[qIdx].text['en']}
+              </p>
+              <div style={{ display: 'grid', gap: '8px' }}>
+                {([['l1', 0], ['l2', 0.25], ['l3', 0.5], ['l4', 0.75], ['l5', 1]] as const).map(([key, val]) => (
+                  <button
+                    key={key}
+                    onClick={() => answerStatement(val)}
+                    style={{
+                      textAlign: 'left', padding: '13px 16px', fontSize: '14px',
+                      background: 'var(--bg)', color: 'var(--text-1)',
+                      border: '1px solid var(--border)', cursor: 'pointer',
+                    }}
+                  >
+                    {tx(lang, key)}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <button
+              onClick={() => setMode('sliders')}
+              style={{ background: 'none', border: 'none', color: 'var(--text-3)', fontFamily: 'var(--font-mono)', fontSize: '11px', cursor: 'pointer', letterSpacing: '0.06em' }}
+            >
+              {tx(lang, 'tq_skip')}
+            </button>
+          </div>
+        )}
+
+        {mode === 'sliders' && (<>
+        {qIdx > 0 && (
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--positive)', marginBottom: '28px', letterSpacing: '0.04em' }}>
+            ✓ {tx(lang, 'tq_done')}
+          </p>
+        )}
         {/* Sliders */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '48px', marginBottom: '72px' }}>
           {topics.map((topic) => {
@@ -266,6 +350,7 @@ export default function TrainingPage() {
           </button>
         </div>
 
+        </>)}
       </div>
 
       {/* Live twin bar — the twin visibly morphs while you train it */}

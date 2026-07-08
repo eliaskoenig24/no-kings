@@ -17,10 +17,6 @@ const ITEMS = [
     href: '/twin',
     label: { de: 'Zwilling', en: 'Twin', es: 'Gemelo', fr: 'Jumeau', pt: 'Gêmeo', ar: 'توأم', zh: '孪生', ja: 'ツイン', hi: 'जुड़वां', ru: 'Двойник', id: 'Kembaran', tr: 'İkiz', ko: '트윈', it: 'Gemello', nl: 'Tweeling', pl: 'Bliźniak', uk: 'Двійник', vi: 'Sinh đôi', bn: 'যমজ', fa: 'دوقلو' },
   },
-  {
-    href: '/network',
-    label: { de: 'Netzwerk', en: 'Network', es: 'Red', fr: 'Réseau', pt: 'Rede', ar: 'الشبكة', zh: '网络', ja: 'ネット', hi: 'नेटवर्क', ru: 'Сеть', id: 'Jaringan', tr: 'Ağ', ko: '네트워크', it: 'Rete', nl: 'Netwerk', pl: 'Sieć', uk: 'Мережа', vi: 'Mạng', bn: 'নেটওয়ার্ক', fa: 'شبکه' },
-  },
 ];
 
 /** Mobile-only bottom tab bar — navigation must be visible, not hidden behind an icon. */

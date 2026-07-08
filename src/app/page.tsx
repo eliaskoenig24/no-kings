@@ -147,37 +147,14 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Header */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-end',
-          flexWrap: 'wrap',
-          gap: '24px',
-          marginBottom: '48px',
-          paddingBottom: '32px',
-          borderBottom: '1px solid var(--divider)',
-        }}>
-          <div>
-            <p style={{
-              fontFamily: 'var(--font-mono)', fontSize: '10px',
-              letterSpacing: '0.2em', color: 'var(--text-3)',
-              textTransform: 'uppercase', marginBottom: '14px',
-            }}>
-              {tx(lang, 'label')}
-            </p>
-            <h1 style={{ fontSize: 'clamp(1.6rem, 4vw, 2.8rem)', fontWeight: 400, lineHeight: 1.1 }}>
-              {tx(lang, 'title')}
-            </h1>
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '32px', fontWeight: 300, color: 'var(--text-1)', lineHeight: 1 }}>
-              {eose || simView ? headCount.toLocaleString() : '…'}
-            </div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-3)', letterSpacing: '0.1em', marginTop: '4px' }}>
-              {ntx(lang, 'persons')}
-            </div>
-          </div>
+        {/* Analysis search — ask the network anything it can answer */}
+        <div style={{ marginBottom: '72px' }}>
+          <QuestionSearch
+            lang={lang}
+            myTwin={myTwin}
+            revealNumbers={simView || phase === 'live'}
+            displayTwins={displayTwins}
+          />
         </div>
 
         {/* The world, lit country by country — dark until enough persons per country */}
@@ -327,61 +304,9 @@ export default function HomePage() {
           })()}
         </div>
 
-        {/* Analysis search — ask the network anything it can answer */}
-        <div style={{ marginBottom: '72px' }}>
-          <QuestionSearch
-            lang={lang}
-            myTwin={myTwin}
-            revealNumbers={simView || phase === 'live'}
-            displayTwins={displayTwins}
-          />
-        </div>
-
         {/* Founding phase — the honest cold start, right on the front door */}
         {!simView && eose && phase === 'founding' && (
           <FoundingNotice lang={lang} persons={stats.persons} onSimulate={() => setSimView(true)} />
-        )}
-
-        {/* Twin status bar */}
-        {loaded && (
-          <div style={{
-            padding: '14px 20px',
-            marginBottom: '40px',
-            background: myTwin ? 'rgba(150,98,27,0.06)' : 'var(--surface)',
-            border: myTwin ? '1px solid rgba(150,98,27,0.2)' : '1px solid var(--border)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '16px',
-            flexWrap: 'wrap',
-          }}>
-            {myTwin ? (
-              <>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ width: '6px', height: '6px', background: 'var(--accent)', borderRadius: '50%', boxShadow: '0 0 6px var(--accent)' }} />
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--accent)', letterSpacing: '0.06em' }}>
-                    {tx(lang, 'active')}
-                  </span>
-                </div>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-3)' }}>
-                  {tx(lang, 'active_sub')}
-                </span>
-              </>
-            ) : (
-              <>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--text-3)', letterSpacing: '0.04em' }}>
-                  {ntx(lang, 'locked_hint')}
-                </span>
-                <Link href="/training" style={{
-                  fontFamily: 'var(--font-mono)', fontSize: '12px',
-                  color: 'var(--text-1)', letterSpacing: '0.06em',
-                  textDecoration: 'none', whiteSpace: 'nowrap',
-                }}>
-                  {tx(lang, 'cta')}
-                </Link>
-              </>
-            )}
-          </div>
         )}
 
         {/* Question list */}
