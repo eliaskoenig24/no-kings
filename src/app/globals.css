@@ -309,3 +309,13 @@ body { overscroll-behavior-x: none; }
     grid-template-columns: 1fr !important;
   }
 }
+
+/* Voice answering: recording button breathes while listening */
+@keyframes mic-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(150, 98, 27, 0.45); }
+  50% { box-shadow: 0 0 0 10px rgba(150, 98, 27, 0); }
+}
+.mic-pulse { animation: mic-pulse 1.3s ease-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .mic-pulse { animation: none; }
+}

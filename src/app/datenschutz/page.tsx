@@ -31,7 +31,7 @@ export default function DatenschutzPage() {
             <strong style={{ color: 'var(--text-1)' }}> keine Konten, keine E-Mail-Adressen, kein Tracking,
             keine Werbung, keine eigene Nutzerdatenbank.</strong> Dein Zwilling, deine Antworten und dein
             kryptografischer Schlüssel liegen ausschließlich lokal in deinem Browser (IndexedDB/localStorage)
-            und verlassen dein Gerät nur, wenn du ausdrücklich auf „Teilen" klickst.
+            und verlassen dein Gerät nur, wenn du ausdrücklich auf „Teilen“ klickst.
           </p>
 
           <H>1. Lokale Datenhaltung (auf deinem Gerät)</H>
@@ -45,8 +45,8 @@ export default function DatenschutzPage() {
 
           <H>2. Veröffentlichung deines Zwillings (nur auf deinen Klick)</H>
           <p>
-            Wenn du „Ins Netzwerk teilen" wählst, veröffentlichst du dein Twin-Profil (acht Zahlenwerte zu
-            politischen Dimensionen) — auf Wunsch ergänzt um Land und grobe Region (z. B. „DE-BY", nie
+            Wenn du „Ins Netzwerk teilen“ wählst, veröffentlichst du dein Twin-Profil (acht Zahlenwerte zu
+            politischen Dimensionen) — auf Wunsch ergänzt um Land und grobe Region (z. B. „DE-BY“, nie
             genauere Ortsdaten) — <strong style={{ color: 'var(--text-1)' }}>pseudonym</strong> unter deinem
             öffentlichen Schlüssel auf öffentliche, dezentrale Nostr-Relays weltweit. Politische Meinungen sind
             besondere Kategorien personenbezogener Daten (Art. 9 DSGVO); die Veröffentlichung erfolgt
@@ -70,6 +70,14 @@ export default function DatenschutzPage() {
             Landes wird das Herkunftsland aus den Verbindungs-Headern gelesen; es wird von uns nicht
             gespeichert. Dein Browser verbindet sich außerdem direkt mit den von dir konfigurierten
             Nostr-Relays (Drittanbieter); dabei sehen diese deine IP-Adresse — wie bei jedem Webserver.
+          </p>
+          <p style={{ marginTop: '12px' }}>
+            <strong style={{ color: 'var(--text-1)' }}>Sprachfunktion:</strong> Die optionale Spracherkennung
+            läuft vollständig auf deinem Gerät — Audioaufnahmen werden{' '}
+            <strong style={{ color: 'var(--text-1)' }}>niemals übertragen</strong> und nirgends gespeichert.
+            Aktivierst du sie, lädt dein Browser einmalig die Erkennungs-Modelldateien vom CDN der Hugging
+            Face, Inc. (dabei sieht dieser Anbieter deine IP-Adresse, aber nie deine Stimme oder Antworten).
+            Die Sprachausgabe nutzt die eingebaute Vorlesefunktion deines Geräts.
           </p>
 
           <H>4. Deine Rechte</H>

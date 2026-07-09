@@ -2,8 +2,11 @@
 
 import { ARCHETYPE_NAMES } from '@/data/archetypes';
 import { TX } from './page.tx';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
+import { speak, stopSpeaking, ttsAvailable } from '@/lib/voice';
+import { speechSupported, loadRecognizer, recordUtterance, transcribe, type Recording } from '@/lib/speech';
+import { parseVoiceAnswer } from '@/lib/voice-answer';
 import { makeTx } from '@/lib/tx';
 import { useRouter } from 'next/navigation';
 import { useLang } from '@/context/LangContext';
@@ -41,6 +44,26 @@ const RadarChart = dynamic(() => import('@/components/RadarChart'), { ssr: false
 
 const AGE_OPTIONS = ['18-24', '25-34', '35-49', '50-64', '65+'] as const;
 
+function SpeakerIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+      <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+      <path d="M19 5a9 9 0 0 1 0 14" />
+    </svg>
+  );
+}
+
+function MicIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="9" y="2" width="6" height="12" rx="3" />
+      <path d="M5 10a7 7 0 0 0 14 0" />
+      <line x1="12" y1="19" x2="12" y2="22" />
+    </svg>
+  );
+}
+
 const tx = makeTx(TX);
 
 export default function TrainingPage() {
@@ -62,6 +85,17 @@ export default function TrainingPage() {
   const [mode, setMode] = useState<'questions' | 'sliders'>('questions');
   const [qIdx, setQIdx] = useState(0);
 
+  // Voice — the statement can be read aloud (device TTS, local) and answered
+  // by speaking (on-device Whisper; the voice never leaves the device).
+  const [voiceState, setVoiceState] = useState<'off' | 'setup' | 'loading' | 'ready' | 'recording' | 'thinking'>('off');
+  const [loadFrac, setLoadFrac] = useState(0);
+  const [heard, setHeard] = useState<string | null>(null);
+  const [heardMatched, setHeardMatched] = useState(true);
+  const [voiceErr, setVoiceErr] = useState(false);
+  const recRef = useRef<Recording | null>(null);
+
+  const stmtText = TRAINING_ITEMS[qIdx].text[lang] ?? TRAINING_ITEMS[qIdx].text['en'];
+
   // Each stance nudges the involved dimensions; ten answers shape the profile.
   function answerStatement(a: number) {
     setValues(v => {
@@ -75,6 +109,54 @@ export default function TrainingPage() {
     if (qIdx + 1 >= TRAINING_ITEMS.length) setMode('sliders');
     else setQIdx(qIdx + 1);
   }
+
+  // In voice mode the twin asks each question aloud — a conversation, not a form.
+  useEffect(() => {
+    if (mode === 'questions' && (voiceState === 'ready' || voiceState === 'recording')) {
+      void speak(stmtText, lang);
+    }
+    return () => stopSpeaking();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [qIdx, mode]);
+
+  async function enableVoice() {
+    setVoiceErr(false);
+    setVoiceState('loading');
+    try {
+      await loadRecognizer((f) => setLoadFrac(f));
+      setVoiceState('ready');
+    } catch {
+      setVoiceErr(true);
+      setVoiceState('setup');
+    }
+  }
+
+  const toggleRecord = useCallback(async () => {
+    if (voiceState === 'recording') { recRef.current?.stop(); return; }
+    if (voiceState !== 'ready') return;
+    setHeard(null);
+    stopSpeaking(); // never record while the device is still talking
+    try {
+      const rec = await recordUtterance(6000);
+      recRef.current = rec;
+      setVoiceState('recording');
+      const audio = await rec.audio;
+      setVoiceState('thinking');
+      const text = (await transcribe(audio, lang)).trim();
+      const parsed = parseVoiceAnswer(text, lang);
+      setHeard(text || null);
+      setHeardMatched(parsed !== null);
+      setVoiceState('ready');
+      if (parsed !== null) {
+        // show what was understood for a beat, then answer
+        setTimeout(() => { setHeard(null); answerStatement(parsed); }, 700);
+      }
+    } catch {
+      setVoiceErr(true);
+      setVoiceState('ready');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [voiceState, lang, qIdx]);
 
   // Geo-detected country is only the default; typing takes over permanently.
   const effCountry = countryTouched ? country : (autoCountry?.toUpperCase() ?? '');
@@ -173,11 +255,27 @@ export default function TrainingPage() {
               {tx(lang, 'tq_intro')}
             </p>
             <div style={{ border: '1px solid var(--border)', background: 'var(--surface)', padding: '26px 24px', marginBottom: '20px' }}>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.18em', color: 'var(--text-3)', marginBottom: '16px' }}>
-                {qIdx + 1} / {TRAINING_ITEMS.length}
-              </p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.18em', color: 'var(--text-3)' }}>
+                  {qIdx + 1} / {TRAINING_ITEMS.length}
+                </p>
+                {ttsAvailable() && (
+                  <button
+                    onClick={() => void speak(stmtText, lang)}
+                    aria-label={tx(lang, 'voice_read')}
+                    style={{
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      color: 'var(--text-3)', fontFamily: 'var(--font-mono)',
+                      fontSize: '10px', letterSpacing: '0.1em', padding: '4px 0',
+                      display: 'flex', alignItems: 'center', gap: '6px',
+                    }}
+                  >
+                    <SpeakerIcon /> {tx(lang, 'voice_read')}
+                  </button>
+                )}
+              </div>
               <p style={{ fontSize: '17px', lineHeight: 1.5, color: 'var(--text-1)', marginBottom: '24px', minHeight: '76px' }}>
-                {TRAINING_ITEMS[qIdx].text[lang] ?? TRAINING_ITEMS[qIdx].text['en']}
+                {stmtText}
               </p>
               <div style={{ display: 'grid', gap: '8px' }}>
                 {([['l1', 0], ['l2', 0.25], ['l3', 0.5], ['l4', 0.75], ['l5', 1]] as const).map(([key, val]) => (
@@ -194,6 +292,98 @@ export default function TrainingPage() {
                   </button>
                 ))}
               </div>
+
+              {/* Voice answering — on-device Whisper, opt-in, honest about the download */}
+              {speechSupported() && (
+                <div style={{ borderTop: '1px solid var(--divider)', marginTop: '22px', paddingTop: '18px' }}>
+                  {voiceState === 'off' && (
+                    <button
+                      onClick={() => setVoiceState('setup')}
+                      style={{
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        color: 'var(--text-3)', fontFamily: 'var(--font-mono)',
+                        fontSize: '11px', letterSpacing: '0.08em', padding: 0,
+                        display: 'flex', alignItems: 'center', gap: '8px',
+                      }}
+                    >
+                      <MicIcon size={13} /> {tx(lang, 'voice_answer')}
+                    </button>
+                  )}
+
+                  {voiceState === 'setup' && (
+                    <div>
+                      <p style={{ fontSize: '12px', color: 'var(--text-3)', lineHeight: 1.7, marginBottom: '14px', maxWidth: '440px' }}>
+                        {tx(lang, 'voice_setup')}
+                      </p>
+                      {voiceErr && (
+                        <p style={{ fontSize: '11px', color: 'var(--accent)', marginBottom: '10px' }}>{tx(lang, 'voice_error')}</p>
+                      )}
+                      <button
+                        onClick={() => void enableVoice()}
+                        style={{
+                          background: 'var(--text-1)', color: 'var(--bg)', border: 'none',
+                          padding: '10px 22px', fontSize: '12px', fontWeight: 700,
+                          letterSpacing: '0.06em', cursor: 'pointer', fontFamily: 'var(--font-sans)',
+                        }}
+                      >
+                        {tx(lang, 'voice_load')}
+                      </button>
+                    </div>
+                  )}
+
+                  {voiceState === 'loading' && (
+                    <div>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-3)', marginBottom: '10px' }}>
+                        {tx(lang, 'voice_loading')} — {Math.round(loadFrac * 100)}%
+                      </p>
+                      <div style={{ height: '3px', background: 'var(--border)', maxWidth: '280px' }}>
+                        <div style={{ height: '100%', width: `${Math.round(loadFrac * 100)}%`, background: 'var(--accent)', transition: 'width 0.3s' }} />
+                      </div>
+                    </div>
+                  )}
+
+                  {(voiceState === 'ready' || voiceState === 'recording' || voiceState === 'thinking') && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                      <button
+                        onClick={() => void toggleRecord()}
+                        disabled={voiceState === 'thinking'}
+                        aria-label={tx(lang, voiceState === 'recording' ? 'voice_recording' : 'voice_tap')}
+                        className={voiceState === 'recording' ? 'mic-pulse' : undefined}
+                        style={{
+                          width: '52px', height: '52px', borderRadius: '50%',
+                          border: '1px solid var(--border)',
+                          background: voiceState === 'recording' ? 'var(--accent)' : 'var(--text-1)',
+                          color: 'var(--bg)', cursor: voiceState === 'thinking' ? 'default' : 'pointer',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          opacity: voiceState === 'thinking' ? 0.5 : 1, flexShrink: 0,
+                        }}
+                      >
+                        <MicIcon size={20} />
+                      </button>
+                      <div style={{ flex: 1, minWidth: '180px' }}>
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: voiceState === 'recording' ? 'var(--accent)' : 'var(--text-3)', letterSpacing: '0.06em' }}>
+                          {voiceState === 'recording' ? tx(lang, 'voice_recording')
+                            : voiceState === 'thinking' ? tx(lang, 'voice_thinking')
+                            : tx(lang, 'voice_tap')}
+                        </p>
+                        {voiceErr && voiceState === 'ready' && (
+                          <p style={{ fontSize: '11px', color: 'var(--accent)', marginTop: '6px' }}>{tx(lang, 'voice_error')}</p>
+                        )}
+                        {heard && voiceState === 'ready' && (
+                          <p style={{ fontSize: '12px', color: 'var(--text-2)', marginTop: '6px', lineHeight: 1.5 }}>
+                            {tx(lang, 'voice_heard')} „{heard}“
+                            {!heardMatched && (
+                              <span style={{ display: 'block', color: 'var(--text-3)', fontSize: '11px', marginTop: '4px' }}>
+                                {tx(lang, 'voice_no_match')}
+                              </span>
+                            )}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
             <button
               onClick={() => setMode('sliders')}

@@ -10,7 +10,7 @@
  *   - demo data only as an explicitly labeled, opt-in simulation
  */
 
-import { useEffect, useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import { makeTx } from '@/lib/tx';
 import { subscribeToUniqueNetworkTwins, type NetworkTwin, type NetworkStats } from '@/lib/nostr-reader';
 import { MIN_AGGREGATE_PERSONS, networkPhase, foundingProgress, type NetworkPhase } from '@/lib/network-policy';
@@ -49,12 +49,20 @@ type TruthState = { twins: NetworkTwin[]; stats: NetworkStats; eose: boolean };
 let truthCache: TruthState = { twins: [], stats: { events: 0, persons: 0, verified: 0 }, eose: false };
 let truthFetchedAt = 0;
 let truthInflight = false;
-const truthListeners = new Set<(s: TruthState) => void>();
+const truthListeners = new Set<() => void>();
 const TRUTH_TTL_MS = 60_000;
 
 function notifyTruth() {
-  for (const l of truthListeners) l(truthCache);
+  for (const l of truthListeners) l();
 }
+
+// useSyncExternalStore contract: subscribe + snapshot of the module-level cache
+function subscribeTruth(cb: () => void) {
+  truthListeners.add(cb);
+  ensureTruthSubscription();
+  return () => { truthListeners.delete(cb); };
+}
+const getTruth = () => truthCache;
 
 function ensureTruthSubscription() {
   if (truthInflight) return;
@@ -81,15 +89,8 @@ function ensureTruthSubscription() {
 }
 
 export function useNetworkTwins() {
-  const [state, setState] = useState<TruthState>(truthCache);
+  const state = useSyncExternalStore(subscribeTruth, getTruth, getTruth);
   const [simView, setSimView] = useState(false);
-
-  useEffect(() => {
-    truthListeners.add(setState);
-    setState(truthCache);
-    ensureTruthSubscription();
-    return () => { truthListeners.delete(setState); };
-  }, []);
 
   const { twins, stats, eose } = state;
   const phase: NetworkPhase = networkPhase(stats.persons);
