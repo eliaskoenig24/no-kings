@@ -21,7 +21,7 @@ await new Promise((resolve, reject) => {
 });
 
 const browser = await chromium.launchPersistentContext(
-  new URL('../.browser-e2e-profile', import.meta.url).pathname, // persists the ~150 MB model cache between runs
+  `${process.env.HOME}/.cache/no-kings-browser-e2e`, // persists the ~150 MB model cache between runs (outside the repo — deploy uploads must never see it)
   { headless: true },
 );
 const page = await browser.newPage();
