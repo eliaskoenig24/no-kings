@@ -10,7 +10,9 @@
     "test": "vitest run",
     "e2e": "node scripts/relay-e2e.mjs",
     "e2e:voice": "node scripts/voice-e2e.mjs",
-    "e2e:talk": "node scripts/talk-e2e.mjs"
+    "e2e:talk": "node scripts/talk-e2e.mjs",
+    "prebuild": "node scripts/copy-ort.mjs",
+    "e2e:browser": "node scripts/browser-e2e.mjs"
   },
   "dependencies": {
     "@huggingface/transformers": "^4.2.0",
@@ -38,6 +40,7 @@
     "@types/uuid": "^10.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
+    "playwright": "^1.61.1",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.9"

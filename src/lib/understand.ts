@@ -10,6 +10,7 @@
 
 import { AGENDA } from '@/data/agenda';
 import type { AgendaItem } from '@/types';
+import { pickInferenceDevice } from '@/lib/device';
 
 export const EMBED_MODEL = 'Xenova/multilingual-e5-small';
 
@@ -43,7 +44,12 @@ let embedderPromise: Promise<any> | null = null;
 export function loadEmbedder(onProgress?: (frac: number) => void): Promise<any> {
   if (!embedderPromise) {
     embedderPromise = (async () => {
-      const { pipeline } = await import('@huggingface/transformers');
+      const { pipeline, env } = await import('@huggingface/transformers');
+      // self-hosted ORT runtime (see scripts/copy-ort.mjs): the bundler only
+      // emits one wasm variant, so the default resolution 404s in production
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+      const wasm = (env as any)?.backends?.onnx?.wasm;
+      if (wasm) wasm.wasmPaths = '/ort/';
       const files = new Map<string, { loaded: number; total: number }>();
       const report = () => {
         if (!onProgress || files.size === 0) return;
@@ -64,13 +70,18 @@ export function loadEmbedder(onProgress?: (frac: number) => void): Promise<any> 
           }
         },
       };
-      const hasWebGPU = typeof navigator !== 'undefined' && 'gpu' in navigator;
+      const device = await pickInferenceDevice();
       try {
-        return await pipeline('feature-extraction', EMBED_MODEL, { ...opts, device: hasWebGPU ? 'webgpu' : 'wasm' });
+        return await pipeline('feature-extraction', EMBED_MODEL, { ...opts, device });
       } catch (err) {
-        console.error('[no-kings] embedder load failed on', hasWebGPU ? 'webgpu' : 'wasm', err);
-        if (!hasWebGPU) throw err;
-        return await pipeline('feature-extraction', EMBED_MODEL, { ...opts, device: 'wasm' });
+        console.error('[no-kings] embedder load failed on', device, err);
+        if (device === 'wasm') throw err;
+        try {
+          return await pipeline('feature-extraction', EMBED_MODEL, { ...opts, device: 'wasm' });
+        } catch (err2) {
+          console.error('[no-kings] embedder wasm fallback failed too', err2);
+          throw err2;
+        }
       }
     })();
     embedderPromise.catch(() => { embedderPromise = null; });

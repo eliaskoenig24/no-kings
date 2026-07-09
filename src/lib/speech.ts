@@ -8,6 +8,8 @@
  * which ships audio to Apple/Google servers.
  */
 
+import { pickInferenceDevice } from '@/lib/device';
+
 const MODEL_ID = 'onnx-community/whisper-tiny';
 
 // Whisper language tokens use ISO codes; all 20 platform languages are covered.
@@ -35,7 +37,11 @@ let recognizerPromise: Promise<any> | null = null;
 export function loadRecognizer(onProgress?: (frac: number) => void): Promise<any> {
   if (!recognizerPromise) {
     recognizerPromise = (async () => {
-      const { pipeline } = await import('@huggingface/transformers');
+      const { pipeline, env } = await import('@huggingface/transformers');
+      // self-hosted ORT runtime — see scripts/copy-ort.mjs
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+      const wasm = (env as any)?.backends?.onnx?.wasm;
+      if (wasm) wasm.wasmPaths = '/ort/';
       const files = new Map<string, { loaded: number; total: number }>();
       const report = () => {
         if (!onProgress || files.size === 0) return;
@@ -56,16 +62,19 @@ export function loadRecognizer(onProgress?: (frac: number) => void): Promise<any
           }
         },
       };
-      // WebGPU where available, WASM everywhere else.
-      const hasWebGPU = typeof navigator !== 'undefined' && 'gpu' in navigator;
+      // WebGPU only when a probe proves it actually works, WASM everywhere else.
+      const device = await pickInferenceDevice();
       try {
-        return await pipeline('automatic-speech-recognition', MODEL_ID, {
-          ...opts, device: hasWebGPU ? 'webgpu' : 'wasm',
-        });
+        return await pipeline('automatic-speech-recognition', MODEL_ID, { ...opts, device });
       } catch (err) {
-        console.error('[no-kings] speech model load failed on', hasWebGPU ? 'webgpu' : 'wasm', err);
-        if (!hasWebGPU) throw err;
-        return await pipeline('automatic-speech-recognition', MODEL_ID, { ...opts, device: 'wasm' });
+        console.error('[no-kings] speech model load failed on', device, err);
+        if (device === 'wasm') throw err;
+        try {
+          return await pipeline('automatic-speech-recognition', MODEL_ID, { ...opts, device: 'wasm' });
+        } catch (err2) {
+          console.error('[no-kings] speech wasm fallback failed too', err2);
+          throw err2;
+        }
       }
     })();
     // a failed load must not poison future attempts
