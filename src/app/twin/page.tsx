@@ -18,6 +18,7 @@ import { SPECTRUM, getTopicLabel } from '@/lib/i18n';
 import { TOPICS, TopicKey } from '@/types';
 import type { AgendaItem } from '@/types';
 import { createTwinFromValues, classifyTwin } from '@/lib/twin-engine';
+import { summarizeTwin, poleText } from '@/lib/twin-summary';
 import { getMyTwin, saveMyTwin, getDemographics, saveDemographics, type TwinDemographics } from '@/lib/db';
 import { getOrCreateIdentity } from '@/lib/identity';
 import { publishTwin } from '@/lib/nostr';
@@ -544,11 +545,12 @@ export default function TwinPage() {
           )}
         </div>
 
-        {/* The twin: 8 dimensions, read or fine-tune */}
+        {/* The twin in plain language — what it stands for, no percentages.
+            The numbers stay reachable behind "edit": presentation, not hiding. */}
         <div style={{ marginBottom: '56px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
             <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-3)' }}>
-              {tx(lang, 'dims')}
+              {tx(lang, editMode ? 'dims' : 'sum_title')}
             </p>
             <button
               onClick={() => setEditMode(e => !e)}
@@ -562,10 +564,10 @@ export default function TwinPage() {
             </button>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: editMode ? '32px' : '16px' }}>
-            {topics.map(topic => {
-              const val = values[topic.key];
-              if (editMode) {
+          {editMode ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+              {topics.map(topic => {
+                const val = values[topic.key];
                 return (
                   <div key={topic.key}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
@@ -588,22 +590,39 @@ export default function TwinPage() {
                     </div>
                   </div>
                 );
-              }
-              return (
-                <div key={topic.key} style={{ display: 'grid', gridTemplateColumns: '80px 1fr 48px', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-3)' }}>
-                    {topic.title}
-                  </span>
-                  <div style={{ height: '4px', background: 'var(--raised)', position: 'relative' }}>
-                    <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${val}%`, background: 'var(--accent)' }} />
-                  </div>
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', fontWeight: 700, color: 'var(--accent)', textAlign: 'right' }}>
-                    {val}%
-                  </span>
-                </div>
-              );
-            })}
-          </div>
+              })}
+            </div>
+          ) : (() => {
+            // Plain language instead of percentages: the localized pole labels
+            // become "clearly …" / "leaning …" statements, most decisive first.
+            const { leans, balanced } = summarizeTwin(values);
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {leans.map(({ key, pole, strength }) => {
+                  const topic = topics.find(t => t.key === key);
+                  if (!topic) return null;
+                  return (
+                    <div key={key} style={{ display: 'flex', alignItems: 'baseline', gap: '14px' }}>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-3)', minWidth: '82px', flexShrink: 0 }}>
+                        {topic.title}
+                      </span>
+                      <p style={{ fontSize: '15px', lineHeight: 1.55, color: strength === 'strong' ? 'var(--text-1)' : 'var(--text-2)', margin: 0 }}>
+                        <span style={{ color: 'var(--accent)', fontStyle: 'italic' }}>
+                          {tx(lang, strength === 'strong' ? 'sum_strong' : 'sum_lean')}
+                        </span>{' '}
+                        {poleText(pole === 'left' ? topic.left : topic.right)}
+                      </p>
+                    </div>
+                  );
+                })}
+                {balanced.length > 0 && (
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-3)', lineHeight: 1.7, marginTop: leans.length > 0 ? '10px' : 0 }}>
+                    {tx(lang, 'sum_balanced')}: {balanced.map(k => topics.find(t => t.key === k)?.title ?? k).join(' · ')}
+                  </p>
+                )}
+              </div>
+            );
+          })()}
         </div>
 
         {/* Demographics — optional, coarse, auto-saved */}
