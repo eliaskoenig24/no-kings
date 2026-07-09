@@ -9,15 +9,15 @@ import { SUPPORTED_LANGS } from '@/lib/i18n';
 const NAV = [
   {
     href: '/',
-    label: { de: 'Die Welt', en: 'The World', es: 'El Mundo', fr: 'Le Monde', pt: 'O Mundo', ar: 'العالم', zh: '世界', ja: '世界', hi: 'दुनिया', ru: 'Мир', id: 'Dunia', tr: 'Dünya', ko: '세계', it: 'Il Mondo', nl: 'De Wereld', pl: 'Świat', uk: 'Світ', vi: 'Thế Giới', bn: 'বিশ্ব', fa: 'جهان' },
+    label: { de: 'Warum', en: 'Why', es: 'Por qué', fr: 'Pourquoi', pt: 'Por quê', ar: 'لماذا', zh: '为什么', ja: 'なぜ', hi: 'क्यों', ru: 'Почему', id: 'Mengapa', tr: 'Neden', ko: '왜', it: 'Perché', nl: 'Waarom', pl: 'Dlaczego', uk: 'Чому', vi: 'Tại sao', bn: 'কেন', fa: 'چرا' },
   },
   {
     href: '/twin',
     label: { de: 'Mein Zwilling', en: 'My Twin', es: 'Mi Gemelo', fr: 'Mon Jumeau', pt: 'Meu Gêmeo', ar: 'توأمي', zh: '我的孪生', ja: '私のツイン', hi: 'मेरा जुड़वां', ru: 'Мой двойник', id: 'Kembaran Saya', tr: 'Benim İkizim', ko: '내 트윈', it: 'Il Mio Gemello', nl: 'Mijn Tweeling', pl: 'Mój Bliźniak', uk: 'Мій двійник', vi: 'Sinh Đôi Của Tôi', bn: 'আমার যমজ', fa: 'دوقلوی من' },
   },
   {
-    href: '/pulse',
-    label: { de: 'Trainieren', en: 'Train', es: 'Entrenar', fr: 'Entraîner', pt: 'Treinar', ar: 'تدريب', zh: '训练', ja: 'トレーニング', hi: 'प्रशिक्षण', ru: 'Тренировка', id: 'Latihan', tr: 'Eğitim', ko: '훈련', it: 'Allenare', nl: 'Trainen', pl: 'Trenować', uk: 'Тренування', vi: 'Huấn luyện', bn: 'প্রশিক্ষণ', fa: 'تمرین' },
+    href: '/world',
+    label: { de: 'Die Welt', en: 'The World', es: 'El Mundo', fr: 'Le Monde', pt: 'O Mundo', ar: 'العالم', zh: '世界', ja: '世界', hi: 'दुनिया', ru: 'Мир', id: 'Dunia', tr: 'Dünya', ko: '세계', it: 'Il Mondo', nl: 'De Wereld', pl: 'Świat', uk: 'Світ', vi: 'Thế Giới', bn: 'বিশ্ব', fa: 'جهان' },
   },
 ];
 

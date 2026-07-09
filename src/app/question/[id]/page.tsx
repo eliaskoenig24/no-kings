@@ -172,7 +172,7 @@ export default function QuestionPage({ params }: { params: { id: string } }) {
           >
             ↗ X
           </a>
-          <Link href="/training" style={{
+          <Link href="/twin" style={{
             display: 'inline-block',
             border: '1px solid var(--border)', color: 'var(--text-2)',
             padding: '12px 24px', fontSize: '12px', letterSpacing: '0.06em',

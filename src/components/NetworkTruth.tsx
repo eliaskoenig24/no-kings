@@ -13,7 +13,7 @@
 import { useState, useSyncExternalStore } from 'react';
 import { makeTx } from '@/lib/tx';
 import { subscribeToUniqueNetworkTwins, type NetworkTwin, type NetworkStats } from '@/lib/nostr-reader';
-import { MIN_AGGREGATE_PERSONS, networkPhase, foundingProgress, type NetworkPhase } from '@/lib/network-policy';
+import { networkPhase, type NetworkPhase } from '@/lib/network-policy';
 import { DEMO_TWINS } from '@/data/demo-twins';
 import type { TwinProfile } from '@/types';
 

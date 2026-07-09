@@ -136,7 +136,7 @@ export default function TwinByPubkeyPage({
         <p className="label" style={{ marginBottom: '32px' }}>
           {TX.not_found[lang as keyof typeof TX.not_found] ?? TX.not_found.en}
         </p>
-        <Link href="/network" style={{
+        <Link href="/world" style={{
           display: 'inline-block',
           background: 'transparent',
           color: 'var(--text-2)',
@@ -441,7 +441,7 @@ export default function TwinByPubkeyPage({
         {/* Actions */}
         <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginBottom: '48px' }}>
           {hasOwnTwin ? (
-            <Link href="/compare" style={{
+            <Link href="/twin" style={{
               display: 'inline-block',
               background: 'var(--text-1)',
               color: 'var(--bg)',
@@ -455,7 +455,7 @@ export default function TwinByPubkeyPage({
               {TX.compare_cta[lang as keyof typeof TX.compare_cta] ?? TX.compare_cta.en}
             </Link>
           ) : (
-            <Link href="/training" style={{
+            <Link href="/twin" style={{
               display: 'inline-block',
               background: 'var(--text-1)',
               color: 'var(--bg)',
@@ -469,7 +469,7 @@ export default function TwinByPubkeyPage({
               {TX.create_cta[lang as keyof typeof TX.create_cta] ?? TX.create_cta.en} →
             </Link>
           )}
-          <Link href="/network" style={{
+          <Link href="/world" style={{
             display: 'inline-block',
             background: 'transparent',
             color: 'var(--text-2)',
@@ -511,7 +511,7 @@ export default function TwinByPubkeyPage({
             <p style={{ fontSize: '13px', color: 'var(--text-3)', margin: '0 0 24px', lineHeight: 1.6 }}>
               {t(lang, 'twin_compare_desc')}
             </p>
-            <Link href="/training" style={{
+            <Link href="/twin" style={{
               display: 'inline-block',
               background: 'var(--text-1)',
               color: 'var(--bg)',

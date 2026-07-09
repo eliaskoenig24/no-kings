@@ -42,10 +42,8 @@ export default function Footer() {
           </p>
         </div>
         <nav style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', alignItems: 'center' }}>
-          <Link href="/"         style={{ fontSize: '12px', color: 'var(--text-3)', textDecoration: 'none' }}>Die Welt</Link>
+          <Link href="/world"    style={{ fontSize: '12px', color: 'var(--text-3)', textDecoration: 'none' }}>Die Welt</Link>
           <Link href="/twin"     style={{ fontSize: '12px', color: 'var(--text-3)', textDecoration: 'none' }}>Mein Zwilling</Link>
-          <Link href="/training" style={{ fontSize: '12px', color: 'var(--text-3)', textDecoration: 'none' }}>Training</Link>
-          <Link href="/about"    style={{ fontSize: '12px', color: 'var(--text-3)', textDecoration: 'none' }}>About</Link>
           <Link href="/impressum"   style={{ fontSize: '12px', color: 'var(--text-3)', textDecoration: 'none' }}>Impressum</Link>
           <Link href="/datenschutz" style={{ fontSize: '12px', color: 'var(--text-3)', textDecoration: 'none' }}>Datenschutz</Link>
           <a href="https://github.com/eliaskoenig24/no-kings" target="_blank" rel="noopener noreferrer" style={{ fontSize: '12px', color: 'var(--text-3)', textDecoration: 'none', fontFamily: 'var(--font-mono)' }}>Code ↗</a>

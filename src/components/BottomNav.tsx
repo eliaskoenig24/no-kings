@@ -7,15 +7,15 @@ import { useLang } from '@/context/LangContext';
 const ITEMS = [
   {
     href: '/',
-    label: { de: 'Welt', en: 'World', es: 'Mundo', fr: 'Monde', pt: 'Mundo', ar: 'العالم', zh: '世界', ja: '世界', hi: 'दुनिया', ru: 'Мир', id: 'Dunia', tr: 'Dünya', ko: '세계', it: 'Mondo', nl: 'Wereld', pl: 'Świat', uk: 'Світ', vi: 'Thế giới', bn: 'বিশ্ব', fa: 'جهان' },
+    label: { de: 'Warum', en: 'Why', es: 'Por qué', fr: 'Pourquoi', pt: 'Por quê', ar: 'لماذا', zh: '为什么', ja: 'なぜ', hi: 'क्यों', ru: 'Почему', id: 'Mengapa', tr: 'Neden', ko: '왜', it: 'Perché', nl: 'Waarom', pl: 'Dlaczego', uk: 'Чому', vi: 'Tại sao', bn: 'কেন', fa: 'چرا' },
   },
-  {
-    href: '/training',
-    label: { de: 'Trainieren', en: 'Train', es: 'Entrenar', fr: 'Entraîner', pt: 'Treinar', ar: 'تدريب', zh: '训练', ja: '訓練', hi: 'प्रशिक्षण', ru: 'Тренировка', id: 'Latihan', tr: 'Eğitim', ko: '훈련', it: 'Allenare', nl: 'Trainen', pl: 'Trening', uk: 'Тренування', vi: 'Huấn luyện', bn: 'প্রশিক্ষণ', fa: 'تمرین' },
-  },
-  {
+    {
     href: '/twin',
     label: { de: 'Zwilling', en: 'Twin', es: 'Gemelo', fr: 'Jumeau', pt: 'Gêmeo', ar: 'توأم', zh: '孪生', ja: 'ツイン', hi: 'जुड़वां', ru: 'Двойник', id: 'Kembaran', tr: 'İkiz', ko: '트윈', it: 'Gemello', nl: 'Tweeling', pl: 'Bliźniak', uk: 'Двійник', vi: 'Sinh đôi', bn: 'যমজ', fa: 'دوقلو' },
+  },
+  {
+    href: '/world',
+    label: { de: 'Welt', en: 'World', es: 'Mundo', fr: 'Monde', pt: 'Mundo', ar: 'العالم', zh: '世界', ja: '世界', hi: 'दुनिया', ru: 'Мир', id: 'Dunia', tr: 'Dünya', ko: '세계', it: 'Mondo', nl: 'Wereld', pl: 'Świat', uk: 'Світ', vi: 'Thế giới', bn: 'বিশ্ব', fa: 'جهان' },
   },
 ];
 

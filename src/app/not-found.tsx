@@ -94,7 +94,7 @@ export default function NotFound() {
           }}>
             ← Home
           </Link>
-          <Link href="/training" style={{
+          <Link href="/twin" style={{
             display: 'inline-block',
             border: '1px solid var(--border)',
             color: 'var(--text-2)',
