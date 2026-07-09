@@ -10,7 +10,7 @@
  */
 
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
-import { geoOrthographic, geoPath, geoContains } from 'd3-geo';
+import { geoOrthographic, geoPath, geoContains, geoBounds, geoCentroid, geoDistance } from 'd3-geo';
 import { feature } from 'topojson-client';
 import type { Topology, GeometryCollection } from 'topojson-specification';
 import type { Feature, Geometry } from 'geojson';
@@ -47,6 +47,45 @@ function alpha2Of(f: CountryFeature): string | undefined {
 
 export type RegionRow = { code: string; name: string; count: number; unlocked: boolean };
 
+// ---- People as points of light -------------------------------------------
+// One dot per person, placed DETERMINISTICALLY inside their (voluntary,
+// coarse) country — never a real location, never an opinion. The seed is the
+// person's stable id, so the same person always glows in the same spot.
+
+const BASE_COUNTRIES = COUNTRIES; // the 110m set — placement must not shift when 50m loads
+
+function hash32(s: string): number {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return h >>> 0;
+}
+
+/** Seeded position inside a country: rejection sampling in its bounds. */
+function placeInCountry(f: CountryFeature, seed: number): [number, number] {
+  const [[w, s], [e, n]] = geoBounds(f);
+  const spanLon = w <= e ? e - w : e + 360 - w; // antimeridian countries wrap
+  let state = seed || 1;
+  const rnd = () => {
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    return state / 4294967296;
+  };
+  for (let i = 0; i < 14; i++) {
+    let lon = w + rnd() * spanLon;
+    if (lon > 180) lon -= 360;
+    // uniform on the sphere: sample sin(lat), not lat
+    const sinS = Math.sin(s * Math.PI / 180);
+    const sinN = Math.sin(n * Math.PI / 180);
+    const lat = Math.asin(sinS + rnd() * (sinN - sinS)) * 180 / Math.PI;
+    if (geoContains(f, [lon, lat])) return [lon, lat];
+  }
+  return geoCentroid(f);
+}
+
+const MAX_DOTS = 1500; // beyond this the sky is dense enough; drawing more only costs frames
+
 export default function WorldGlobe({
   data,
   lang,
@@ -54,6 +93,7 @@ export default function WorldGlobe({
   lockedLabel,
   supportLabel,
   regions,
+  people,
 }: {
   data: Record<string, CountryDatum>;
   lang: string;
@@ -61,6 +101,7 @@ export default function WorldGlobe({
   lockedLabel: string;   // e.g. "Personen bis zur Freischaltung"
   supportLabel: string;  // e.g. "dafür — Frage des Tages"
   regions?: Record<string, RegionRow[]>; // zoom level 2: per-country region breakdown
+  people?: Record<string, string[]>;     // country → stable ids: one light per person
 }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -77,6 +118,37 @@ export default function WorldGlobe({
     () => typeof window !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches,
     [],
   );
+
+  // One light per person. Positions are seeded by the person's id, so they
+  // are stable across sessions; a newly arrived light pulses for a moment.
+  const firstSeenRef = useRef(new Map<string, number>());
+  const mountedAtRef = useRef(0);
+  useEffect(() => { mountedAtRef.current = performance.now(); }, []);
+  const lights = useMemo(() => {
+    if (!people) return [] as { id: string; lon: number; lat: number }[];
+    const byA2 = new Map<string, CountryFeature>();
+    for (const f of BASE_COUNTRIES) {
+      const a2 = alpha2Of(f);
+      if (a2) byA2.set(a2, f);
+    }
+    const out: { id: string; lon: number; lat: number }[] = [];
+    for (const [a2, ids] of Object.entries(people)) {
+      const f = byA2.get(a2);
+      if (!f) continue;
+      for (const id of ids) {
+        const [lon, lat] = placeInCountry(f, hash32(id));
+        out.push({ id, lon, lat });
+      }
+    }
+    // deterministic cap: dense skies stay dense, frames stay smooth
+    if (out.length > MAX_DOTS) {
+      const step = out.length / MAX_DOTS;
+      const capped: typeof out = [];
+      for (let i = 0; i < out.length; i += step) capped.push(out[Math.floor(i)]);
+      return capped;
+    }
+    return out;
+  }, [people]);
 
   const baseScaleRef = useRef(1);
   const projectionRef = useRef(geoOrthographic());
@@ -142,7 +214,39 @@ export default function WorldGlobe({
       ctx.lineWidth = selected && a2 && selected.a2 === a2 ? 1.6 : 0.6;
       ctx.stroke();
     }
-  }, [size, data, selected]);
+
+    // People as points of light. New lights bloom in — every arriving human
+    // is a visible event on the dark earth.
+    if (lights.length > 0) {
+      const now = performance.now();
+      const [rl, rp] = rotationRef.current;
+      const center: [number, number] = [-rl, -rp];
+      const r = Math.min(3.4, 1.3 + 0.45 * Math.sqrt(zoomRef.current));
+      ctx.save();
+      for (const light of lights) {
+        // orthographic: skip the far hemisphere
+        if (geoDistance([light.lon, light.lat], center) > 1.5607) continue; // ~89.4°
+        const pt = projection([light.lon, light.lat]);
+        if (!pt) continue;
+        let seen = firstSeenRef.current.get(light.id);
+        if (seen === undefined) {
+          // lights present at mount don't all "arrive" at once
+          seen = now - mountedAtRef.current < 1500 ? 0 : now;
+          firstSeenRef.current.set(light.id, seen);
+        }
+        const age = now - seen;
+        const arriving = seen > 0 && age < 2600;
+        const bloom = arriving ? 1 + 2.2 * Math.exp(-age / 600) : 1;
+        ctx.beginPath();
+        ctx.arc(pt[0], pt[1], r * bloom, 0, Math.PI * 2);
+        ctx.shadowColor = 'rgba(255,232,180,0.9)';
+        ctx.shadowBlur = arriving ? 18 : 7;
+        ctx.fillStyle = `rgba(255,240,210,${arriving ? 1 : 0.92})`;
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+  }, [size, data, selected, lights]);
 
   // responsive sizing
   useEffect(() => {

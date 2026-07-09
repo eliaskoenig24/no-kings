@@ -353,6 +353,9 @@ export default function TwinPage() {
               >
                 <MicIcon size={14} /> {tx(lang, 'talk_load')}
               </button>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-3)', letterSpacing: '0.05em', marginTop: '10px' }}>
+                {tx(lang, 'talk_size')}
+              </p>
             </div>
           )}
 

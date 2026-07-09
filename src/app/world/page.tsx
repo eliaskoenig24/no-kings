@@ -93,6 +93,23 @@ export default function WorldPage() {
     );
   }, [simView, twins, dq]);
 
+  // One light per person on the globe — presence only (country is voluntary
+  // and coarse; the dot's spot is seeded, never a real location).
+  const peopleByCountry = useMemo(() => {
+    const out: Record<string, string[]> = {};
+    if (simView) {
+      DEMO_TWINS_TAGGED.forEach(({ country }, i) => {
+        (out[country] ??= []).push(`sim-${i}`);
+      });
+    } else {
+      for (const t of twins) {
+        if (!t.country) continue;
+        (out[t.country] ??= []).push(t.pubkey);
+      }
+    }
+    return out;
+  }, [simView, twins]);
+
   // Zoom level 2 for the globe: regions per country, each with its own gate.
   const regionsByCountry = useMemo(() => {
     if (simView) return {};
@@ -184,6 +201,7 @@ export default function WorldPage() {
             lockedLabel={ntx(lang, 'rg_until')}
             supportLabel={`${tx(lang, 'support')} · ${tx(lang, 'dq_label')}`}
             regions={regionsByCountry}
+            people={peopleByCountry}
           />
         </div>
 
