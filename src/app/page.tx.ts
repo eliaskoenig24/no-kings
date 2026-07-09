@@ -26,6 +26,7 @@ export const TX = {
   dq_days:  { de: 'Tage', en: 'days', es: 'días', fr: 'jours', pt: 'dias', ar: 'أيام', zh: '天', ja: '日', hi: 'दिन', ru: 'дн.', id: 'hari', tr: 'gün', ko: '일', it: 'giorni', nl: 'dagen', pl: 'dni', uk: 'дн.', vi: 'ngày', bn: 'দিন', fa: 'روز' },
   support:  { de: 'dafür', en: 'support', es: 'a favor', fr: 'pour', pt: 'a favor', ar: 'مؤيد', zh: '支持', ja: '支持', hi: 'पक्ष', ru: 'за', id: 'mendukung', tr: 'destek', ko: '찬성', it: 'a favore', nl: 'voor', pl: 'za', uk: 'за', vi: 'ủng hộ', bn: 'সমর্থন', fa: 'موافق' },
   oppose:   { de: 'dagegen', en: 'oppose', es: 'en contra', fr: 'contre', pt: 'contra', ar: 'معارض', zh: '反对', ja: '反対', hi: 'विरोध', ru: 'против', id: 'menolak', tr: 'karşı', ko: '반대', it: 'contro', nl: 'tegen', pl: 'przeciw', uk: 'проти', vi: 'phản đối', bn: 'বিরোধ', fa: 'مخالف' },
+  voice_read: { de: 'Vorlesen', en: 'Read aloud', es: 'Leer en voz alta', fr: 'Lire à voix haute', pt: 'Ler em voz alta', ar: 'قراءة بصوت عالٍ', zh: '朗读', ja: '読み上げ', hi: 'ज़ोर से पढ़ें', ru: 'Озвучить', id: 'Bacakan', tr: 'Sesli oku', ko: '소리 내어 읽기', it: 'Leggi ad alta voce', nl: 'Voorlezen', pl: 'Przeczytaj na głos', uk: 'Озвучити', vi: 'Đọc to', bn: 'জোরে পড়ো', fa: 'بلند بخوان' },
 };
 
 

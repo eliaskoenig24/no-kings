@@ -23,13 +23,17 @@ die jedes Formular der Welt ausschließt. Ziel: Der Twin entsteht im Gespräch.
 
 Die Treppe dorthin:
 
-1. **Vorlesen (jederzeit baubar):** Fragen per Sprachausgabe — läuft lokal
-   auf jedem Gerät, keine KI nötig.
-2. **Spracheingabe (nah):** Sprache→Text auf dem Gerät (Whisper-Klasse,
-   ~40 MB im Browser) für gesprochene Antworten auf bestehende Fragen.
+1. **Vorlesen — ✅ gebaut:** Trainings-Aussagen werden per Sprachausgabe des
+   Geräts vorgelesen (`src/lib/voice.ts`) — lokal, keine KI, kein Download.
+2. **Spracheingabe — ✅ gebaut:** Antworten per Stimme. Whisper läuft
+   **auf dem Gerät** (WebGPU/WASM, einmalig ~40 MB, opt-in mit ehrlicher
+   Offenlegung); ein Parser versteht Zustimmung/Ablehnung in allen
+   20 Sprachen (`src/lib/speech.ts`, `src/lib/voice-answer.ts`). Im
+   Sprachmodus liest der Twin jede Frage vor und hört die Antwort —
+   das Training ist ein Gespräch.
 3. **Das Gespräch (Vision):** „Erzähl mir, was dich bewegt" — ein Modell
    **auf dem Gerät** übersetzt freie Sprache in Dimensions-Vorschläge, die
-   der Mensch bestätigt.
+   der Mensch bestätigt. Wartet auf alltagstaugliche On-Device-LLMs.
 
 **Rote Linie:** Politische Äußerungen verlassen niemals das Gerät. Ein
 Server-LLM ist für diesen Zweck ausgeschlossen — die Gesprächs-Stufe wartet

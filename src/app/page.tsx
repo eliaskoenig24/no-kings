@@ -16,6 +16,7 @@ import { getMyTwin } from '@/lib/db';
 import { useNetworkTwins, SimulationBanner, FoundingNotice, ntx } from '@/components/NetworkTruth';
 import { dailyIndex, dateKey, readDaily, saveDailyEntry, streak, aggregateDailyEntries, type DailyStore } from '@/lib/daily';
 import { getOrCreateIdentity } from '@/lib/identity';
+import { speak, ttsAvailable } from '@/lib/voice';
 import { publishDailyAnswer } from '@/lib/nostr';
 import { fetchDailyEntries } from '@/lib/nostr-reader';
 import { MIN_AGGREGATE_PERSONS, DAILY_MIN_PERSONS, groupByRegion } from '@/lib/network-policy';
@@ -178,11 +179,30 @@ export default function HomePage() {
             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.2em', color: 'var(--accent)', textTransform: 'uppercase' }}>
               {tx(lang, 'dq_label')}
             </span>
-            {dqStreak > 0 && (
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-3)' }}>
-                {tx(lang, 'dq_streak')}: {dqStreak} {tx(lang, 'dq_days')}
-              </span>
-            )}
+            <span style={{ display: 'flex', alignItems: 'baseline', gap: '16px' }}>
+              {dqStreak > 0 && (
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-3)' }}>
+                  {tx(lang, 'dq_streak')}: {dqStreak} {tx(lang, 'dq_days')}
+                </span>
+              )}
+              {ttsAvailable() && (
+                <button
+                  onClick={() => void speak(dq.text[lang] ?? dq.text['en'], lang)}
+                  aria-label={tx(lang, 'voice_read')}
+                  title={tx(lang, 'voice_read')}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                    color: 'var(--text-3)', display: 'flex', alignItems: 'center',
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                    <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+                    <path d="M19 5a9 9 0 0 1 0 14" />
+                  </svg>
+                </button>
+              )}
+            </span>
           </div>
           <p style={{ fontSize: '17px', lineHeight: 1.5, color: 'var(--text-1)', marginBottom: '20px', maxWidth: '640px' }}>
             {dq.text[lang] ?? dq.text['en']}
