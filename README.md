@@ -8,6 +8,26 @@ economy, liberty against welfare, present against future — across 8 dimensions
 The network aggregates millions of twins into a continuous, auditable map of
 what people actually want. No accounts, no tracking, no editors.
 
+## The whole product is three pages
+
+| Page | Job |
+|---|---|
+| `/` | explains why this exists and why to trust it |
+| `/twin` | **"Tell me what moves you"** — speak (or type), matching questions appear, you take a stance, the twin forms and auto-saves; publish it when you choose |
+| `/world` | search and analyze the network — globe, daily question, every agenda question; opens once your own twin exists (reciprocity: nobody just watches) |
+
+### Voice, entirely on the device
+
+Speech recognition (Whisper, ~43 MB) and free-text understanding
+(multilingual embeddings, ~145 MB) run **in the browser** — opt-in,
+downloaded once, cached. No spoken or typed political word ever leaves the
+device; that is why the Web Speech API (which ships audio to Apple/Google)
+is deliberately not used. The machine only finds *which questions* you are
+talking about — **the stance is always taken by the human**, so the platform
+structurally cannot put words in anyone's mouth. Quality gates:
+`npm run e2e:voice`, `npm run e2e:talk` (real audio / real multilingual
+utterances against the exact shipped models).
+
 ## How it works
 
 ```
@@ -45,7 +65,9 @@ it never feeds into real aggregates.
 - ✅ Identity: your keys, generated and stored locally.
 - ✅ Aggregation: computed in every visitor's browser.
 - ⚠️ Frontend hosting: currently centralized (IPFS mirror planned).
-- ⚠️ Relay list: hardcoded default set (user-configurable list planned).
+- ⚠️ Relay list: hardcoded default set (`src/lib/relays.ts` supports local
+  overrides; a settings UI was removed in the three-page compression and
+  will return in a settings corner).
 - ⚠️ The questionnaire: governed by rules, not yet by the network — see
   [docs/QUESTION-CONSTITUTION.md](docs/QUESTION-CONSTITUTION.md).
 
@@ -68,7 +90,11 @@ Key modules:
 | `src/lib/nostr-reader.ts` | fetch/subscribe with per-person dedup (`PubkeyDeduper`) |
 | `src/lib/network-policy.ts` | founding phase / k-anonymity threshold |
 | `src/lib/identity.ts` | keypair create, export (nsec), import |
-| `src/data/questions.ts` | training questions — changes governed by the Question Constitution |
+| `src/lib/voice.ts` | read questions aloud (device TTS, local) |
+| `src/lib/speech.ts` | on-device Whisper: record + transcribe, voice never leaves |
+| `src/lib/voice-answer.ts` | spoken Likert answers in all 20 languages |
+| `src/lib/understand.ts` | on-device embeddings: free speech → matching agenda questions |
+| `src/data/agenda.ts` | the questions — changes governed by the Question Constitution |
 
 ## License
 

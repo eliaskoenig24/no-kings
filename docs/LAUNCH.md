@@ -77,6 +77,6 @@ Ab dann laufen Lint + Tests + Build bei jedem Push auf GitHub.
 
 - **Rollback:** Vercel-Dashboard → Deployments → vorheriges Deployment →
   "Promote to Production" (eine Minute).
-- **Relay down:** Nutzer können unter /network eigene Relays eintragen;
-  Standard-Liste in `src/lib/relays.ts`.
+- **Relay down:** Standard-Liste in `src/lib/relays.ts` anpassen und deployen
+  (die Nutzer-UI für eigene Relays wurde mit der 3-Seiten-Kompression entfernt).
 - **Alles neu bauen lokal:** `npm ci && npm test && npm run build && npm start`.
