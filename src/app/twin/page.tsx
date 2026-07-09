@@ -305,176 +305,169 @@ export default function TwinPage() {
     <div style={{ padding: 'clamp(48px, 7vw, 88px) 0 80px' }}>
       <div className="container" style={{ maxWidth: '680px' }}>
 
-        {/* Header: title + live twin */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '24px', marginBottom: '48px', flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: '240px' }}>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.18em', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: '14px' }}>
-              {tx(lang, 'label')}
-            </p>
-            <h1 style={{ fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontWeight: 400, lineHeight: 1.15, marginBottom: '12px' }}>
-              {tx(lang, 'title')}
-            </h1>
-            <p style={{ fontSize: '13px', color: 'var(--text-3)', lineHeight: 1.6 }}>
-              {tx(lang, 'sub')}
-            </p>
+        {/* Hero: the twin IS the page — radar centered, archetype as headline */}
+        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.24em', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: '28px' }}>
+            {tx(lang, 'title')}
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+            <RadarChart values={liveValues} animated={false} size={170} />
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-            <RadarChart values={liveValues} animated={false} size={96} />
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.1em', color: 'var(--accent)' }}>
-              {archetypeLabel}
-            </span>
-          </div>
+          <h1 style={{ fontSize: 'clamp(1.7rem, 5vw, 2.6rem)', fontWeight: 500, lineHeight: 1.1, letterSpacing: '-0.01em', marginBottom: '10px' }}>
+            {archetypeLabel}
+          </h1>
+          <p style={{ fontSize: '14px', color: 'var(--text-3)' }}>
+            {tx(lang, 'sub')}
+          </p>
         </div>
 
-        {/* THE hero: tell me what moves you */}
-        <div style={{ border: '1px solid var(--border)', background: 'var(--surface)', padding: '26px 24px', marginBottom: '16px' }}>
-          <p style={{ fontSize: '19px', lineHeight: 1.35, color: 'var(--text-1)', marginBottom: '10px' }}>
-            {tx(lang, 'talk_btn')}
-          </p>
-          <p style={{ fontSize: '12px', color: 'var(--text-3)', lineHeight: 1.7, marginBottom: '20px', maxWidth: '480px' }}>
-            {tx(lang, 'talk_intro')}
-          </p>
+        {/* THE action: one microphone. No boxes, no form. */}
+        <div style={{ textAlign: 'center', margin: '0 auto 84px', maxWidth: '520px' }}>
 
           {(!understandSupported() || talkState === 'setup') && (
-            <div>
+            <div style={{ paddingTop: '28px' }}>
               {talkErr && (
-                <p style={{ fontSize: '11px', color: 'var(--accent)', marginBottom: '10px' }}>{tx(lang, 'voice_error')}</p>
+                <p style={{ fontSize: '12px', color: 'var(--accent)', marginBottom: '14px' }}>{tx(lang, 'voice_error')}</p>
               )}
               <button
                 onClick={() => void enableTalk()}
                 disabled={!understandSupported()}
                 style={{
                   background: 'var(--text-1)', color: 'var(--bg)', border: 'none',
-                  padding: '12px 26px', fontSize: '12px', fontWeight: 700,
-                  letterSpacing: '0.06em', cursor: 'pointer', fontFamily: 'var(--font-sans)',
-                  display: 'flex', alignItems: 'center', gap: '10px',
+                  padding: '17px 36px', fontSize: '14px', fontWeight: 600,
+                  letterSpacing: '0.02em', cursor: 'pointer', fontFamily: 'var(--font-sans)',
+                  borderRadius: '999px',
+                  display: 'inline-flex', alignItems: 'center', gap: '10px',
                   opacity: understandSupported() ? 1 : 0.4,
                 }}
               >
-                <MicIcon size={14} /> {tx(lang, 'talk_load')}
+                <MicIcon size={16} /> {tx(lang, 'talk_btn')}
               </button>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-3)', letterSpacing: '0.05em', marginTop: '10px' }}>
+              <p style={{ fontSize: '13px', color: 'var(--text-3)', lineHeight: 1.7, marginTop: '18px' }}>
+                {tx(lang, 'talk_intro')}
+              </p>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-3)', letterSpacing: '0.05em', marginTop: '6px' }}>
                 {tx(lang, 'talk_size')}
               </p>
             </div>
           )}
 
           {talkState === 'loading' && (
-            <div>
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-3)', marginBottom: '10px' }}>
-                {tx(lang, 'voice_loading')} — {Math.round(talkFrac * 100)}%
-              </p>
-              <div style={{ height: '3px', background: 'var(--border)', maxWidth: '280px' }}>
+            <div style={{ paddingTop: '40px' }}>
+              <div style={{ height: '3px', background: 'var(--border)', maxWidth: '260px', margin: '0 auto' }}>
                 <div style={{ height: '100%', width: `${Math.round(talkFrac * 100)}%`, background: 'var(--accent)', transition: 'width 0.3s' }} />
               </div>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-3)', marginTop: '12px' }}>
+                {tx(lang, 'voice_loading')} — {Math.round(talkFrac * 100)}%
+              </p>
             </div>
           )}
 
           {(talkState === 'ready' || talkState === 'matching') && (
-            <div>
-              <textarea
-                value={talkText}
-                onChange={(e) => setTalkText(e.target.value)}
-                placeholder={tx(lang, 'talk_placeholder')}
-                rows={3}
-                style={{
-                  width: '100%', background: 'var(--bg)', border: '1px solid var(--border)',
-                  color: 'var(--text-1)', padding: '12px 14px', fontSize: '14px', lineHeight: 1.6,
-                  fontFamily: 'var(--font-sans)', outline: 'none', resize: 'vertical', borderRadius: 0,
-                }}
-              />
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '12px', flexWrap: 'wrap' }}>
-                {speechSupported() && (
-                  <button
-                    onClick={() => void talkRecord()}
-                    disabled={talkMic === 'thinking' || talkMic === 'loading'}
-                    aria-label={tx(lang, talkMic === 'recording' ? 'voice_recording' : 'voice_tap')}
-                    className={talkMic === 'recording' ? 'mic-pulse' : undefined}
-                    style={{
-                      width: '52px', height: '52px', borderRadius: '50%',
-                      border: '1px solid var(--border)',
-                      background: talkMic === 'recording' ? 'var(--accent)' : 'var(--text-1)',
-                      color: 'var(--bg)', cursor: 'pointer',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      opacity: talkMic === 'thinking' || talkMic === 'loading' ? 0.5 : 1, flexShrink: 0,
-                    }}
-                  >
-                    <MicIcon size={20} />
-                  </button>
-                )}
+            <div style={{ paddingTop: '20px' }}>
+              {speechSupported() && (
+                <button
+                  onClick={() => void talkRecord()}
+                  disabled={talkMic === 'thinking' || talkMic === 'loading'}
+                  aria-label={tx(lang, talkMic === 'recording' ? 'voice_recording' : 'voice_tap')}
+                  className={talkMic === 'recording' ? 'mic-pulse' : undefined}
+                  style={{
+                    width: '76px', height: '76px', borderRadius: '50%', border: 'none',
+                    background: talkMic === 'recording' ? 'var(--accent)' : 'var(--text-1)',
+                    color: 'var(--bg)', cursor: 'pointer',
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    opacity: talkMic === 'thinking' || talkMic === 'loading' ? 0.5 : 1,
+                    boxShadow: '0 6px 24px rgba(0,0,0,0.14)',
+                    transition: 'background 0.2s',
+                  }}
+                >
+                  <MicIcon size={30} />
+                </button>
+              )}
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.06em', color: talkMic === 'recording' ? 'var(--accent)' : 'var(--text-3)', marginTop: '14px', minHeight: '16px' }}>
+                {talkMic === 'recording' ? tx(lang, 'voice_recording')
+                  : talkMic === 'thinking' ? tx(lang, 'voice_thinking')
+                  : talkMic === 'loading' ? tx(lang, 'voice_loading') + ' …'
+                  : talkState === 'matching' ? '…'
+                  : tx(lang, 'talk_intro')}
+              </p>
+              {talkErr && (
+                <p style={{ fontSize: '12px', color: 'var(--accent)', marginTop: '8px' }}>{tx(lang, 'voice_error')}</p>
+              )}
+
+              {/* typing works too — a single quiet line, not a form field */}
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', marginTop: '26px', textAlign: 'left' }}>
+                <textarea
+                  value={talkText}
+                  onChange={(e) => setTalkText(e.target.value)}
+                  placeholder={tx(lang, 'talk_placeholder')}
+                  rows={1}
+                  style={{
+                    flex: 1, background: 'transparent', border: 'none',
+                    borderBottom: '1px solid var(--border)',
+                    color: 'var(--text-1)', padding: '8px 2px', fontSize: '16px', lineHeight: 1.5,
+                    fontFamily: 'var(--font-sans)', outline: 'none', resize: 'none', borderRadius: 0,
+                  }}
+                />
                 <button
                   onClick={() => void runTalk()}
                   disabled={talkState === 'matching' || !talkText.trim()}
                   style={{
-                    background: 'var(--text-1)', color: 'var(--bg)', border: 'none',
-                    padding: '14px 28px', fontSize: '12px', fontWeight: 700,
-                    letterSpacing: '0.08em', textTransform: 'uppercase',
-                    cursor: talkState === 'matching' || !talkText.trim() ? 'default' : 'pointer',
-                    opacity: talkState === 'matching' || !talkText.trim() ? 0.5 : 1,
-                    fontFamily: 'var(--font-sans)',
+                    background: 'none', border: 'none', padding: '8px 2px',
+                    color: talkText.trim() ? 'var(--accent)' : 'var(--text-3)',
+                    fontSize: '13px', fontWeight: 600, cursor: talkText.trim() ? 'pointer' : 'default',
+                    fontFamily: 'var(--font-sans)', flexShrink: 0,
                   }}
                 >
                   {talkState === 'matching' ? '…' : tx(lang, 'talk_go')}
                 </button>
-                {(talkMic === 'recording' || talkMic === 'thinking' || talkMic === 'loading') && (
-                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: talkMic === 'recording' ? 'var(--accent)' : 'var(--text-3)' }}>
-                    {talkMic === 'recording' ? tx(lang, 'voice_recording')
-                      : talkMic === 'loading' ? tx(lang, 'voice_loading') + ' …'
-                      : tx(lang, 'voice_thinking')}
-                  </span>
-                )}
               </div>
-              {talkErr && (
-                <p style={{ fontSize: '11px', color: 'var(--accent)', marginTop: '10px' }}>{tx(lang, 'voice_error')}</p>
-              )}
 
               {talkMatches !== null && talkMatches.length === 0 && (
-                <p style={{ fontSize: '13px', color: 'var(--text-2)', marginTop: '20px', lineHeight: 1.6 }}>
+                <p style={{ fontSize: '13px', color: 'var(--text-2)', marginTop: '24px', lineHeight: 1.6 }}>
                   {tx(lang, 'talk_none')}
                 </p>
               )}
 
               {talkMatches !== null && talkMatches.length > 0 && (
-                <div style={{ marginTop: '24px' }}>
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.08em', color: 'var(--text-3)', marginBottom: '14px' }}>
+                <div style={{ marginTop: '36px', textAlign: 'left' }}>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: '4px' }}>
                     {tx(lang, 'talk_matches')}
                   </p>
-                  <div style={{ display: 'grid', gap: '12px' }}>
-                    {talkMatches.map(({ item }) => {
-                      const answered = talkAnswered[item.id];
-                      return (
-                        <div key={item.id} style={{ border: '1px solid var(--border)', background: 'var(--bg)', padding: '16px 16px' }}>
-                          <p style={{ fontSize: '14px', lineHeight: 1.5, color: 'var(--text-1)', marginBottom: '12px' }}>
-                            {item.text[lang] ?? item.text['en']}
+                  {talkMatches.map(({ item }) => {
+                    const answered = talkAnswered[item.id];
+                    return (
+                      <div key={item.id} style={{ padding: '20px 0', borderBottom: '1px solid var(--divider)' }}>
+                        <p style={{ fontSize: '15px', lineHeight: 1.55, color: 'var(--text-1)', marginBottom: '14px' }}>
+                          {item.text[lang] ?? item.text['en']}
+                        </p>
+                        {answered !== undefined ? (
+                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--positive, #22c55e)', letterSpacing: '0.04em' }}>
+                            ✓ {tx(lang, (['l1', 'l2', 'l3', 'l4', 'l5'] as const)[answered * 4])}
                           </p>
-                          {answered !== undefined ? (
-                            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--positive, #22c55e)', letterSpacing: '0.04em' }}>
-                              ✓ {tx(lang, (['l1', 'l2', 'l3', 'l4', 'l5'] as const)[answered * 4])}
-                            </p>
-                          ) : (
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                              {([['l1', 0], ['l2', 0.25], ['l3', 0.5], ['l4', 0.75], ['l5', 1]] as const).map(([key, val]) => (
-                                <button
-                                  key={key}
-                                  onClick={() => { applyStance(item, val); setTalkAnswered((a) => ({ ...a, [item.id]: val })); }}
-                                  style={{
-                                    padding: '8px 12px', fontSize: '12px',
-                                    background: 'var(--surface)', color: 'var(--text-1)',
-                                    border: '1px solid var(--border)', cursor: 'pointer',
-                                  }}
-                                >
-                                  {tx(lang, key)}
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
+                        ) : (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                            {([['l1', 0], ['l2', 0.25], ['l3', 0.5], ['l4', 0.75], ['l5', 1]] as const).map(([key, val]) => (
+                              <button
+                                key={key}
+                                onClick={() => { applyStance(item, val); setTalkAnswered((a) => ({ ...a, [item.id]: val })); }}
+                                style={{
+                                  padding: '9px 14px', fontSize: '12.5px',
+                                  background: 'transparent', color: 'var(--text-1)',
+                                  border: '1px solid var(--border)', borderRadius: '999px', cursor: 'pointer',
+                                }}
+                              >
+                                {tx(lang, key)}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                   <button
                     onClick={() => { setTalkText(''); setTalkMatches(null); }}
-                    style={{ background: 'none', border: 'none', color: 'var(--accent)', fontFamily: 'var(--font-mono)', fontSize: '11px', cursor: 'pointer', letterSpacing: '0.06em', marginTop: '16px', padding: 0 }}
+                    style={{ background: 'none', border: 'none', color: 'var(--accent)', fontFamily: 'var(--font-mono)', fontSize: '11px', cursor: 'pointer', letterSpacing: '0.06em', marginTop: '18px', padding: 0 }}
                   >
                     {tx(lang, 'talk_more')} →
                   </button>
@@ -500,7 +493,7 @@ export default function TwinPage() {
             </p>
           )}
           {qOpen && (
-            <div style={{ border: '1px solid var(--border)', background: 'var(--surface)', padding: '26px 24px', marginTop: '8px' }}>
+            <div style={{ borderTop: '1px solid var(--divider)', padding: '26px 0 8px', marginTop: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                 <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.18em', color: 'var(--text-3)' }}>
                   {qIdx + 1} / {TRAINING_ITEMS.length}
@@ -529,9 +522,9 @@ export default function TwinPage() {
                     key={key}
                     onClick={() => answerStatement(val)}
                     style={{
-                      textAlign: 'left', padding: '13px 16px', fontSize: '14px',
-                      background: 'var(--bg)', color: 'var(--text-1)',
-                      border: '1px solid var(--border)', cursor: 'pointer',
+                      textAlign: 'left', padding: '13px 18px', fontSize: '14px',
+                      background: 'transparent', color: 'var(--text-1)',
+                      border: '1px solid var(--border)', borderRadius: '12px', cursor: 'pointer',
                     }}
                   >
                     {tx(lang, key)}
@@ -702,17 +695,8 @@ export default function TwinPage() {
         </div>
 
         {/* Publish — the twin becomes a standing voice in the network */}
-        <div style={{
-          border: sharing === 'done' ? '1px solid rgba(74,222,128,0.3)' : '1px solid var(--border)',
-          padding: '28px 26px',
-          background: sharing === 'done' ? 'rgba(74,222,128,0.03)' : 'var(--surface)',
-          transition: 'all 300ms',
-          marginBottom: '32px',
-        }}>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: '12px' }}>
-            nostr
-          </p>
-          <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: 1.7, marginBottom: '24px', maxWidth: '480px' }}>
+        <div style={{ textAlign: 'center', margin: '0 auto 40px', maxWidth: '520px' }}>
+          <p style={{ fontSize: '14px', color: 'var(--text-2)', lineHeight: 1.7, marginBottom: '22px' }}>
             {tx(lang, 'share_hint')}
           </p>
           {confirming && (
@@ -721,7 +705,7 @@ export default function TwinPage() {
               background: 'rgba(250,180,50,0.05)',
               padding: '20px 24px',
               marginBottom: '24px',
-              maxWidth: '520px',
+              textAlign: 'left',
             }}>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgb(180,120,20)', marginBottom: '10px' }}>
                 {tx(lang, 'consent_title')}
@@ -739,42 +723,41 @@ export default function TwinPage() {
               ⛏ {tx(lang, 'pow_mining')}
             </p>
           )}
-          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-            <button
-              onClick={handleShare}
-              disabled={sharing === 'loading' || sharing === 'done' || !everTrained}
-              style={{
-                background: sharing === 'done' ? 'transparent' : 'var(--text-1)',
-                color: sharing === 'done' ? 'var(--positive)' : 'var(--bg)',
-                border: sharing === 'done' ? '1px solid var(--positive)' : 'none',
-                padding: '14px 32px', fontSize: '13px', fontWeight: 700,
-                letterSpacing: '0.08em', textTransform: 'uppercase',
-                cursor: sharing === 'loading' || sharing === 'done' || !everTrained ? 'default' : 'pointer',
-                opacity: sharing === 'loading' || !everTrained ? 0.6 : 1,
-                fontFamily: 'var(--font-sans)',
-                transition: 'all 300ms',
-              }}
-            >
-              {sharing === 'loading' ? tx(lang, 'sharing') :
-               sharing === 'done' ? tx(lang, 'shared') :
-               confirming ? tx(lang, 'consent_ok') :
-               tx(lang, 'share_btn')}
-            </button>
+          <button
+            onClick={handleShare}
+            disabled={sharing === 'loading' || sharing === 'done' || !everTrained}
+            style={{
+              width: '100%', maxWidth: '380px',
+              background: sharing === 'done' ? 'transparent' : 'var(--text-1)',
+              color: sharing === 'done' ? 'var(--positive)' : 'var(--bg)',
+              border: sharing === 'done' ? '1px solid var(--positive)' : 'none',
+              padding: '18px 36px', fontSize: '15px', fontWeight: 600,
+              letterSpacing: '0.01em', borderRadius: '999px',
+              cursor: sharing === 'loading' || sharing === 'done' || !everTrained ? 'default' : 'pointer',
+              opacity: sharing === 'loading' || !everTrained ? 0.55 : 1,
+              fontFamily: 'var(--font-sans)',
+              transition: 'all 300ms',
+              boxShadow: sharing === 'done' ? 'none' : '0 6px 24px rgba(0,0,0,0.12)',
+            }}
+          >
+            {sharing === 'loading' ? tx(lang, 'sharing') :
+             sharing === 'done' ? tx(lang, 'shared') :
+             confirming ? tx(lang, 'consent_ok') :
+             tx(lang, 'share_btn')}
+          </button>
+          <div style={{ marginTop: '14px' }}>
             <button
               onClick={handleShareCard}
               disabled={cardBusy}
               style={{
-                background: 'transparent',
-                color: 'var(--text-2)',
-                border: '1px solid var(--border)',
-                padding: '14px 28px', fontSize: '13px',
-                letterSpacing: '0.06em',
-                cursor: cardBusy ? 'default' : 'pointer',
-                opacity: cardBusy ? 0.6 : 1,
-                fontFamily: 'var(--font-sans)',
+                background: 'none', border: 'none',
+                color: 'var(--text-3)', fontSize: '12px',
+                letterSpacing: '0.04em', cursor: cardBusy ? 'default' : 'pointer',
+                opacity: cardBusy ? 0.6 : 1, fontFamily: 'var(--font-mono)',
+                padding: '4px 8px',
               }}
             >
-              {cardBusy ? tx(lang, 'card_making') : tx(lang, 'card_btn')}
+              {cardBusy ? tx(lang, 'card_making') : tx(lang, 'card_btn')} →
             </button>
           </div>
 
@@ -785,7 +768,7 @@ export default function TwinPage() {
               border: '1px solid rgba(250,180,50,0.45)',
               background: 'rgba(250,180,50,0.05)',
               padding: '20px 24px',
-              maxWidth: '520px',
+              textAlign: 'left',
             }}>
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgb(180,120,20)', marginBottom: '10px' }}>
                 {tx(lang, 'backup_title')}

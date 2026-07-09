@@ -1,17 +1,11 @@
-const CACHE_NAME = 'nk-v3';
+const CACHE_NAME = 'nk-v4';
 
 // App-Shell-Seiten die immer verfügbar sein sollen
 const PRECACHE_URLS = [
   '/',
-  '/training',
   '/twin',
-  '/network',
-  '/compare',
-  '/politicians',
-  '/history',
+  '/world',
   '/identity',
-  '/about',
-  '/trust',
   '/manifest.json',
   '/offline.html',
   '/icon.svg',
@@ -101,7 +95,26 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 3b. Other assets → Stale-While-Revalidate
+  // 3b. Images/fonts → Stale-While-Revalidate; everything else (RSC
+  // payloads, JSON) → Network First so a deploy is visible immediately.
+  const dest = request.destination;
+  if (!(dest === 'image' || dest === 'font' || dest === 'style' || dest === 'script')) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response && response.status === 200 && response.type !== 'opaque') {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+          }
+          return response;
+        })
+        .catch(async () => {
+          const cached = await caches.match(request);
+          return cached ?? new Response(null, { status: 503 });
+        })
+    );
+    return;
+  }
   event.respondWith(
     caches.open(CACHE_NAME).then(async (cache) => {
       const cached = await cache.match(request);
