@@ -62,8 +62,9 @@ export function loadRecognizer(onProgress?: (frac: number) => void): Promise<any
         return await pipeline('automatic-speech-recognition', MODEL_ID, {
           ...opts, device: hasWebGPU ? 'webgpu' : 'wasm',
         });
-      } catch {
-        if (!hasWebGPU) throw new Error('speech model failed to load');
+      } catch (err) {
+        console.error('[no-kings] speech model load failed on', hasWebGPU ? 'webgpu' : 'wasm', err);
+        if (!hasWebGPU) throw err;
         return await pipeline('automatic-speech-recognition', MODEL_ID, { ...opts, device: 'wasm' });
       }
     })();

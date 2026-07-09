@@ -67,8 +67,9 @@ export function loadEmbedder(onProgress?: (frac: number) => void): Promise<any> 
       const hasWebGPU = typeof navigator !== 'undefined' && 'gpu' in navigator;
       try {
         return await pipeline('feature-extraction', EMBED_MODEL, { ...opts, device: hasWebGPU ? 'webgpu' : 'wasm' });
-      } catch {
-        if (!hasWebGPU) throw new Error('embedding model failed to load');
+      } catch (err) {
+        console.error('[no-kings] embedder load failed on', hasWebGPU ? 'webgpu' : 'wasm', err);
+        if (!hasWebGPU) throw err;
         return await pipeline('feature-extraction', EMBED_MODEL, { ...opts, device: 'wasm' });
       }
     })();

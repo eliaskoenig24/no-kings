@@ -29,7 +29,7 @@ import { speak, stopSpeaking, ttsAvailable } from '@/lib/voice';
 import { speechSupported, loadRecognizer, recognizerReady, recordUtterance, transcribe, type Recording } from '@/lib/speech';
 import { loadEmbedder, embedderReady, matchAgenda, understandSupported, type AgendaMatch } from '@/lib/understand';
 
-const RadarChart = dynamic(() => import('@/components/RadarChart'), { ssr: false });
+const TwinGlyph = dynamic(() => import('@/components/TwinGlyph'), { ssr: false });
 
 const tx = makeTx({ ...TWIN_TX, ...TRAIN_TX });
 
@@ -311,7 +311,7 @@ export default function TwinPage() {
             {tx(lang, 'title')}
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-            <RadarChart values={liveValues} animated={false} size={170} />
+            <TwinGlyph values={liveValues} size={210} />
           </div>
           <h1 style={{ fontSize: 'clamp(1.7rem, 5vw, 2.6rem)', fontWeight: 500, lineHeight: 1.1, letterSpacing: '-0.01em', marginBottom: '10px' }}>
             {archetypeLabel}
@@ -327,7 +327,7 @@ export default function TwinPage() {
           {(!understandSupported() || talkState === 'setup') && (
             <div style={{ paddingTop: '28px' }}>
               {talkErr && (
-                <p style={{ fontSize: '12px', color: 'var(--accent)', marginBottom: '14px' }}>{tx(lang, 'voice_error')}</p>
+                <p style={{ fontSize: '12px', color: 'var(--accent)', marginBottom: '14px' }}>{tx(lang, 'load_error')}</p>
               )}
               <button
                 onClick={() => void enableTalk()}
@@ -813,7 +813,7 @@ export default function TwinPage() {
         transform: barVisible ? 'translateY(0)' : 'translateY(110%)',
         transition: 'transform 0.28s ease',
       }}>
-        <RadarChart values={liveValues} animated={false} size={48} />
+        <TwinGlyph values={liveValues} size={44} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '9px', letterSpacing: '0.14em', color: 'var(--text-3)', textTransform: 'uppercase' }}>
             {tx(lang, 'archetype_lbl')}
