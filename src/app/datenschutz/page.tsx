@@ -72,12 +72,13 @@ export default function DatenschutzPage() {
             Nostr-Relays (Drittanbieter); dabei sehen diese deine IP-Adresse — wie bei jedem Webserver.
           </p>
           <p style={{ marginTop: '12px' }}>
-            <strong style={{ color: 'var(--text-1)' }}>Sprachfunktion:</strong> Die optionale Spracherkennung
-            läuft vollständig auf deinem Gerät — Audioaufnahmen werden{' '}
+            <strong style={{ color: 'var(--text-1)' }}>Sprach- und Verstehens-Funktion:</strong> Die optionale
+            Spracherkennung und die Freitext-Analyse („Erzähl mir, was dich bewegt“) laufen vollständig auf
+            deinem Gerät — Audioaufnahmen und eingegebene bzw. gesprochene Texte werden{' '}
             <strong style={{ color: 'var(--text-1)' }}>niemals übertragen</strong> und nirgends gespeichert.
-            Aktivierst du sie, lädt dein Browser einmalig die Erkennungs-Modelldateien vom CDN der Hugging
-            Face, Inc. (dabei sieht dieser Anbieter deine IP-Adresse, aber nie deine Stimme oder Antworten).
-            Die Sprachausgabe nutzt die eingebaute Vorlesefunktion deines Geräts.
+            Aktivierst du diese Funktionen, lädt dein Browser einmalig die Modelldateien vom CDN der Hugging
+            Face, Inc. (dabei sieht dieser Anbieter deine IP-Adresse, aber nie deine Stimme, Texte oder
+            Antworten). Die Sprachausgabe nutzt die eingebaute Vorlesefunktion deines Geräts.
           </p>
 
           <H>4. Deine Rechte</H>

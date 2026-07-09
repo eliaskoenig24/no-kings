@@ -31,9 +31,16 @@ Die Treppe dorthin:
    20 Sprachen (`src/lib/speech.ts`, `src/lib/voice-answer.ts`). Im
    Sprachmodus liest der Twin jede Frage vor und hört die Antwort —
    das Training ist ein Gespräch.
-3. **Das Gespräch (Vision):** „Erzähl mir, was dich bewegt" — ein Modell
-   **auf dem Gerät** übersetzt freie Sprache in Dimensions-Vorschläge, die
-   der Mensch bestätigt. Wartet auf alltagstaugliche On-Device-LLMs.
+3. **Das Gespräch — ✅ gebaut (ohne LLM, mit Absicht):** „Erzähl mir, was
+   dich bewegt" — ein mehrsprachiges Embedding-Modell **auf dem Gerät**
+   (`Xenova/multilingual-e5-small`, ~150 MB, opt-in) versteht, *wovon* du
+   sprichst, und findet die passenden Agenda-Fragen; *wo du stehst*, sagst
+   nur du (`src/lib/understand.ts`, Qualität real verifiziert via
+   `npm run e2e:talk` in de/en/es/fr/zh). Diese Architektur ist der
+   Neutralität geschuldet: Die Maschine schlägt Themen vor, sie rät niemals
+   Meinungen. Ein generatives On-Device-LLM kann diese Stufe später
+   verfeinern (Rückfragen, Paraphrasen) — die rote Linie bleibt: kein
+   politisches Wort verlässt das Gerät.
 
 **Rote Linie:** Politische Äußerungen verlassen niemals das Gerät. Ein
 Server-LLM ist für diesen Zweck ausgeschlossen — die Gesprächs-Stufe wartet

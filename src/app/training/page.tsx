@@ -5,8 +5,9 @@ import { TX } from './page.tx';
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { speak, stopSpeaking, ttsAvailable } from '@/lib/voice';
-import { speechSupported, loadRecognizer, recordUtterance, transcribe, type Recording } from '@/lib/speech';
+import { speechSupported, loadRecognizer, recognizerReady, recordUtterance, transcribe, type Recording } from '@/lib/speech';
 import { parseVoiceAnswer } from '@/lib/voice-answer';
+import { loadEmbedder, embedderReady, matchAgenda, understandSupported, type AgendaMatch } from '@/lib/understand';
 import { makeTx } from '@/lib/tx';
 import { useRouter } from 'next/navigation';
 import { useLang } from '@/context/LangContext';
@@ -82,8 +83,18 @@ export default function TrainingPage() {
   const [barVisible, setBarVisible] = useState(false);
   const [archFlash, setArchFlash] = useState(false);
   const [countryTouched, setCountryTouched] = useState(false);
-  const [mode, setMode] = useState<'questions' | 'sliders'>('questions');
+  const [mode, setMode] = useState<'questions' | 'sliders' | 'talk'>('questions');
   const [qIdx, setQIdx] = useState(0);
+
+  // "Tell me what moves you" — free speech/text mapped to agenda questions,
+  // entirely on the device. The machine finds the topic; the stance is yours.
+  const [talkState, setTalkState] = useState<'setup' | 'loading' | 'ready' | 'matching'>('setup');
+  const [talkFrac, setTalkFrac] = useState(0);
+  const [talkText, setTalkText] = useState('');
+  const [talkMatches, setTalkMatches] = useState<AgendaMatch[] | null>(null);
+  const [talkAnswered, setTalkAnswered] = useState<Record<string, number>>({});
+  const [talkMic, setTalkMic] = useState<'idle' | 'loading' | 'recording' | 'thinking'>('idle');
+  const [talkErr, setTalkErr] = useState(false);
 
   // Voice — the statement can be read aloud (device TTS, local) and answered
   // by speaking (on-device Whisper; the voice never leaves the device).
@@ -96,18 +107,78 @@ export default function TrainingPage() {
 
   const stmtText = TRAINING_ITEMS[qIdx].text[lang] ?? TRAINING_ITEMS[qIdx].text['en'];
 
-  // Each stance nudges the involved dimensions; ten answers shape the profile.
-  function answerStatement(a: number) {
+  // Each stance nudges the involved dimensions — shared by the 10-question
+  // flow and the talk mode, so every answer shapes the twin the same way.
+  function applyStance(item: AgendaItem, a: number) {
     setValues(v => {
       const next = { ...v };
-      for (const [t, w] of Object.entries(TRAINING_ITEMS[qIdx].topicWeights) as [TopicKey, number][]) {
+      for (const [t, w] of Object.entries(item.topicWeights) as [TopicKey, number][]) {
         const delta = (a - 0.5) * Math.sign(w) * Math.min(1, Math.abs(w)) * 55;
         next[t] = Math.round(Math.max(0, Math.min(100, next[t] + delta)));
       }
       return next;
     });
+  }
+
+  function answerStatement(a: number) {
+    applyStance(TRAINING_ITEMS[qIdx], a);
     if (qIdx + 1 >= TRAINING_ITEMS.length) setMode('sliders');
     else setQIdx(qIdx + 1);
+  }
+
+  async function enableTalk() {
+    setTalkErr(false);
+    setTalkState('loading');
+    try {
+      await loadEmbedder((f) => setTalkFrac(f));
+      setTalkState('ready');
+    } catch {
+      setTalkErr(true);
+      setTalkState('setup');
+    }
+  }
+
+  async function runTalk(text?: string) {
+    const utterance = (text ?? talkText).trim();
+    if (!utterance) return;
+    setTalkState('matching');
+    setTalkErr(false);
+    try {
+      setTalkMatches(await matchAgenda(utterance, lang));
+    } catch {
+      setTalkErr(true);
+      setTalkMatches(null);
+    } finally {
+      setTalkState('ready');
+    }
+  }
+
+  // Mic inside talk mode: dictate, then match right away.
+  async function talkRecord() {
+    if (talkMic === 'recording') { recRef.current?.stop(); return; }
+    if (talkMic !== 'idle') return;
+    stopSpeaking();
+    try {
+      if (!recognizerReady()) {
+        setTalkMic('loading');
+        await loadRecognizer();
+      }
+      const rec = await recordUtterance(10000);
+      recRef.current = rec;
+      setTalkMic('recording');
+      const audio = await rec.audio;
+      setTalkMic('thinking');
+      const text = (await transcribe(audio, lang)).trim();
+      setTalkMic('idle');
+      if (text) {
+        const combined = (talkText ? talkText + ' ' : '') + text;
+        setTalkText(combined);
+        void runTalk(combined);
+      }
+    } catch {
+      setTalkErr(true);
+      setTalkMic('idle');
+    }
   }
 
   // In voice mode the twin asks each question aloud — a conversation, not a form.
@@ -385,11 +456,187 @@ export default function TrainingPage() {
                 </div>
               )}
             </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '14px' }}>
+              {understandSupported() && (
+                <button
+                  onClick={() => { setMode('talk'); if (embedderReady()) setTalkState('ready'); }}
+                  style={{
+                    background: 'none', border: '1px solid var(--accent)', color: 'var(--accent)',
+                    padding: '10px 18px', fontFamily: 'var(--font-mono)', fontSize: '11px',
+                    letterSpacing: '0.08em', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px',
+                  }}
+                >
+                  <MicIcon size={12} /> {tx(lang, 'talk_btn')}
+                </button>
+              )}
+              <button
+                onClick={() => setMode('sliders')}
+                style={{ background: 'none', border: 'none', color: 'var(--text-3)', fontFamily: 'var(--font-mono)', fontSize: '11px', cursor: 'pointer', letterSpacing: '0.06em', padding: 0 }}
+              >
+                {tx(lang, 'tq_skip')}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Talk mode: "tell me what moves you" — free speech → matching questions → your stance */}
+        {mode === 'talk' && (
+          <div>
+            <div style={{ border: '1px solid var(--border)', background: 'var(--surface)', padding: '26px 24px', marginBottom: '20px' }}>
+              <p style={{ fontSize: '17px', lineHeight: 1.4, color: 'var(--text-1)', marginBottom: '10px', fontFamily: 'var(--font-serif, inherit)' }}>
+                {tx(lang, 'talk_btn')}
+              </p>
+              <p style={{ fontSize: '12px', color: 'var(--text-3)', lineHeight: 1.7, marginBottom: '20px', maxWidth: '480px' }}>
+                {tx(lang, 'talk_intro')}
+              </p>
+
+              {talkState === 'setup' && (
+                <div>
+                  {talkErr && (
+                    <p style={{ fontSize: '11px', color: 'var(--accent)', marginBottom: '10px' }}>{tx(lang, 'voice_error')}</p>
+                  )}
+                  <button
+                    onClick={() => void enableTalk()}
+                    style={{
+                      background: 'var(--text-1)', color: 'var(--bg)', border: 'none',
+                      padding: '10px 22px', fontSize: '12px', fontWeight: 700,
+                      letterSpacing: '0.06em', cursor: 'pointer', fontFamily: 'var(--font-sans)',
+                    }}
+                  >
+                    {tx(lang, 'talk_load')}
+                  </button>
+                </div>
+              )}
+
+              {talkState === 'loading' && (
+                <div>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-3)', marginBottom: '10px' }}>
+                    {tx(lang, 'voice_loading')} — {Math.round(talkFrac * 100)}%
+                  </p>
+                  <div style={{ height: '3px', background: 'var(--border)', maxWidth: '280px' }}>
+                    <div style={{ height: '100%', width: `${Math.round(talkFrac * 100)}%`, background: 'var(--accent)', transition: 'width 0.3s' }} />
+                  </div>
+                </div>
+              )}
+
+              {(talkState === 'ready' || talkState === 'matching') && (
+                <div>
+                  <textarea
+                    value={talkText}
+                    onChange={(e) => setTalkText(e.target.value)}
+                    placeholder={tx(lang, 'talk_placeholder')}
+                    rows={3}
+                    style={{
+                      width: '100%', background: 'var(--bg)', border: '1px solid var(--border)',
+                      color: 'var(--text-1)', padding: '12px 14px', fontSize: '14px', lineHeight: 1.6,
+                      fontFamily: 'var(--font-sans)', outline: 'none', resize: 'vertical', borderRadius: 0,
+                    }}
+                  />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '12px', flexWrap: 'wrap' }}>
+                    {speechSupported() && (
+                      <button
+                        onClick={() => void talkRecord()}
+                        disabled={talkMic === 'thinking' || talkMic === 'loading'}
+                        aria-label={tx(lang, talkMic === 'recording' ? 'voice_recording' : 'voice_tap')}
+                        className={talkMic === 'recording' ? 'mic-pulse' : undefined}
+                        style={{
+                          width: '44px', height: '44px', borderRadius: '50%',
+                          border: '1px solid var(--border)',
+                          background: talkMic === 'recording' ? 'var(--accent)' : 'var(--text-1)',
+                          color: 'var(--bg)', cursor: 'pointer',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          opacity: talkMic === 'thinking' || talkMic === 'loading' ? 0.5 : 1, flexShrink: 0,
+                        }}
+                      >
+                        <MicIcon size={17} />
+                      </button>
+                    )}
+                    <button
+                      onClick={() => void runTalk()}
+                      disabled={talkState === 'matching' || !talkText.trim()}
+                      style={{
+                        background: 'var(--text-1)', color: 'var(--bg)', border: 'none',
+                        padding: '12px 26px', fontSize: '12px', fontWeight: 700,
+                        letterSpacing: '0.08em', textTransform: 'uppercase',
+                        cursor: talkState === 'matching' || !talkText.trim() ? 'default' : 'pointer',
+                        opacity: talkState === 'matching' || !talkText.trim() ? 0.5 : 1,
+                        fontFamily: 'var(--font-sans)',
+                      }}
+                    >
+                      {talkState === 'matching' ? '…' : tx(lang, 'talk_go')}
+                    </button>
+                    {(talkMic === 'recording' || talkMic === 'thinking' || talkMic === 'loading') && (
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: talkMic === 'recording' ? 'var(--accent)' : 'var(--text-3)' }}>
+                        {talkMic === 'recording' ? tx(lang, 'voice_recording')
+                          : talkMic === 'loading' ? tx(lang, 'voice_loading') + ' …'
+                          : tx(lang, 'voice_thinking')}
+                      </span>
+                    )}
+                  </div>
+                  {talkErr && (
+                    <p style={{ fontSize: '11px', color: 'var(--accent)', marginTop: '10px' }}>{tx(lang, 'voice_error')}</p>
+                  )}
+
+                  {talkMatches !== null && talkMatches.length === 0 && (
+                    <p style={{ fontSize: '13px', color: 'var(--text-2)', marginTop: '20px', lineHeight: 1.6 }}>
+                      {tx(lang, 'talk_none')}
+                    </p>
+                  )}
+
+                  {talkMatches !== null && talkMatches.length > 0 && (
+                    <div style={{ marginTop: '24px' }}>
+                      <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.08em', color: 'var(--text-3)', marginBottom: '14px' }}>
+                        {tx(lang, 'talk_matches')}
+                      </p>
+                      <div style={{ display: 'grid', gap: '12px' }}>
+                        {talkMatches.map(({ item }) => {
+                          const answered = talkAnswered[item.id];
+                          return (
+                            <div key={item.id} style={{ border: '1px solid var(--border)', background: 'var(--bg)', padding: '16px 16px' }}>
+                              <p style={{ fontSize: '14px', lineHeight: 1.5, color: 'var(--text-1)', marginBottom: '12px' }}>
+                                {item.text[lang] ?? item.text['en']}
+                              </p>
+                              {answered !== undefined ? (
+                                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--positive, #22c55e)', letterSpacing: '0.04em' }}>
+                                  ✓ {tx(lang, (['l1', 'l2', 'l3', 'l4', 'l5'] as const)[answered * 4])}
+                                </p>
+                              ) : (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                  {([['l1', 0], ['l2', 0.25], ['l3', 0.5], ['l4', 0.75], ['l5', 1]] as const).map(([key, val]) => (
+                                    <button
+                                      key={key}
+                                      onClick={() => { applyStance(item, val); setTalkAnswered((a) => ({ ...a, [item.id]: val })); }}
+                                      style={{
+                                        padding: '8px 12px', fontSize: '12px',
+                                        background: 'var(--surface)', color: 'var(--text-1)',
+                                        border: '1px solid var(--border)', cursor: 'pointer',
+                                      }}
+                                    >
+                                      {tx(lang, key)}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <button
+                        onClick={() => { setTalkText(''); setTalkMatches(null); }}
+                        style={{ background: 'none', border: 'none', color: 'var(--accent)', fontFamily: 'var(--font-mono)', fontSize: '11px', cursor: 'pointer', letterSpacing: '0.06em', marginTop: '16px', padding: 0 }}
+                      >
+                        {tx(lang, 'talk_more')} →
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
             <button
-              onClick={() => setMode('sliders')}
-              style={{ background: 'none', border: 'none', color: 'var(--text-3)', fontFamily: 'var(--font-mono)', fontSize: '11px', cursor: 'pointer', letterSpacing: '0.06em' }}
+              onClick={() => setMode('questions')}
+              style={{ background: 'none', border: 'none', color: 'var(--text-3)', fontFamily: 'var(--font-mono)', fontSize: '11px', cursor: 'pointer', letterSpacing: '0.06em', padding: 0 }}
             >
-              {tx(lang, 'tq_skip')}
+              {tx(lang, 'talk_back')}
             </button>
           </div>
         )}
