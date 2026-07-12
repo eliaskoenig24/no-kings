@@ -20,7 +20,14 @@ const EMBED_MODEL = 'Xenova/multilingual-e5-small';
 
 async function pickDevice(): Promise<'webgpu' | 'wasm'> {
   try {
-    const gpu = (self.navigator as any)?.gpu;
+    // iOS: WebGPU uploads keep a second copy of the weights in unified
+    // memory — that peak gets the tab killed ("repeatedly a problem
+    // occurred"). WASM stays inside one arena and survives.
+    const nav = self.navigator as any;
+    const isIOS = /iPad|iPhone|iPod/.test(nav?.userAgent ?? '') ||
+      (nav?.platform === 'MacIntel' && (nav?.maxTouchPoints ?? 0) > 1);
+    if (isIOS) return 'wasm';
+    const gpu = nav?.gpu;
     if (!gpu) return 'wasm';
     const adapter = await gpu.requestAdapter();
     if (!adapter) return 'wasm';
@@ -103,11 +110,16 @@ function loadEmbed(id: number): Promise<any> {
 
 async function embed(texts: string[], prefix: 'query: ' | 'passage: '): Promise<Float32Array[]> {
   const fe = await loadEmbed(-1);
-  const out = await fe(texts.map((t) => prefix + t), { pooling: 'mean', normalize: true });
-  const [n, dim] = out.dims as [number, number];
-  const data = out.data as Float32Array;
   const vecs: Float32Array[] = [];
-  for (let i = 0; i < n; i++) vecs.push(data.slice(i * dim, (i + 1) * dim));
+  // small batches: one 35-text batch spikes activation memory enough to
+  // matter on phones — chunking keeps the peak flat
+  for (let start = 0; start < texts.length; start += 8) {
+    const chunk = texts.slice(start, start + 8);
+    const out = await fe(chunk.map((t) => prefix + t), { pooling: 'mean', normalize: true });
+    const [n, dim] = out.dims as [number, number];
+    const data = out.data as Float32Array;
+    for (let i = 0; i < n; i++) vecs.push(data.slice(i * dim, (i + 1) * dim));
+  }
   return vecs;
 }
 
@@ -127,7 +139,15 @@ const WHISPER_LANGS = new Set([
   'id', 'tr', 'ko', 'it', 'nl', 'pl', 'uk', 'vi', 'bn', 'fa',
 ]);
 
-self.onmessage = async (e: MessageEvent) => {
+// One operation at a time: overlapping loads/inference double the memory
+// peak — exactly what kills the tab on phones.
+let chain: Promise<void> = Promise.resolve();
+
+self.onmessage = (e: MessageEvent) => {
+  chain = chain.then(() => handle(e)).catch(() => { /* reported per-op */ });
+};
+
+async function handle(e: MessageEvent) {
   const { id, op } = e.data as { id: number; op: string };
   try {
     if (op === 'asr-load') {
@@ -162,4 +182,4 @@ self.onmessage = async (e: MessageEvent) => {
     console.error('[no-kings] worker op failed:', op, err);
     self.postMessage({ id, type: 'error', message: err instanceof Error ? err.message : String(err) });
   }
-};
+}

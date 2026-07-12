@@ -97,12 +97,15 @@ export default function TwinPage() {
   const [talkMic, setTalkMic] = useState<'idle' | 'loading' | 'recording' | 'thinking'>('idle');
   const [talkErr, setTalkErr] = useState(false);
   const [micLevel, setMicLevel] = useState(0);
+  const [micFrac, setMicFrac] = useState(0);
   const recRef = useRef<Recording | null>(null);
 
-  // Prefetch whisper in the background once talk mode is ready, so the
-  // first mic tap listens instantly instead of stalling on a download.
+  // Prefetch whisper ONLY on machines with memory to spare: holding both
+  // models at once is what got the tab killed on iPhones. Everyone else
+  // loads it on the first mic tap, with visible progress.
   useEffect(() => {
-    if (talkState === 'ready' && speechSupported()) {
+    const mem = (navigator as unknown as { deviceMemory?: number }).deviceMemory;
+    if (talkState === 'ready' && speechSupported() && (mem ?? 0) >= 8) {
       loadRecognizer().catch(() => { /* surfaces on actual use */ });
     }
   }, [talkState]);
@@ -240,7 +243,7 @@ export default function TwinPage() {
     try {
       if (!recognizerReady()) {
         setTalkMic('loading');
-        await loadRecognizer();
+        await loadRecognizer((f) => setMicFrac(f));
       }
       const rec = await recordUtterance(15000, setMicLevel);
       recRef.current = rec;
@@ -404,7 +407,7 @@ export default function TwinPage() {
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.06em', color: talkMic === 'recording' ? 'var(--accent)' : 'var(--text-3)', marginTop: '14px', minHeight: '16px' }}>
                 {talkMic === 'recording' ? tx(lang, 'voice_recording')
                   : talkMic === 'thinking' ? tx(lang, 'voice_thinking')
-                  : talkMic === 'loading' ? tx(lang, 'voice_loading') + ' …'
+                  : talkMic === 'loading' ? `${tx(lang, 'voice_loading')} — ${Math.round(micFrac * 100)}%`
                   : talkState === 'matching' ? '…'
                   : tx(lang, 'talk_intro')}
               </p>
