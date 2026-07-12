@@ -244,8 +244,12 @@ export default function TwinPage() {
         const combined = (talkText ? talkText + ' ' : '') + text;
         setTalkText(combined);
         void runTalk(combined);
+      } else {
+        // heard nothing usable — say so instead of going silently idle
+        setTalkMatches([]);
       }
-    } catch {
+    } catch (err) {
+      console.error('[no-kings] mic flow failed', err);
       setTalkErr(true);
       setTalkMic('idle');
     }
@@ -370,6 +374,7 @@ export default function TwinPage() {
                   onClick={() => void talkRecord()}
                   disabled={talkMic === 'thinking' || talkMic === 'loading'}
                   aria-label={tx(lang, talkMic === 'recording' ? 'voice_recording' : 'voice_tap')}
+                  data-testid="talk-mic"
                   className={talkMic === 'recording' ? 'mic-pulse' : undefined}
                   style={{
                     width: '76px', height: '76px', borderRadius: '50%', border: 'none',

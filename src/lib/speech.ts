@@ -10,7 +10,10 @@
 
 import { pickInferenceDevice } from '@/lib/device';
 
-const MODEL_ID = 'onnx-community/whisper-tiny';
+// Xenova export, not onnx-community: the latter's q8 decoder uses ops the
+// browser wasm runtime rejects ("MatMulNBits missing scale") — found by
+// scripts/browser-e2e.mjs, invisible in node.
+const MODEL_ID = 'Xenova/whisper-tiny';
 
 // Whisper language tokens use ISO codes; all 20 platform languages are covered.
 const WHISPER_LANGS = new Set([
@@ -51,6 +54,9 @@ export function loadRecognizer(onProgress?: (frac: number) => void): Promise<any
       };
       const opts = {
         dtype: 'q8' as const,
+        // the ort-web dev build's graph optimizer crashes on the quantized
+        // decoder ("TransposeDQWeightsForMatMulNBits missing scale")
+        session_options: { graphOptimizationLevel: 'disabled' as const },
         progress_callback: (p: any) => {
           if (p.status === 'progress' && p.file && p.total) {
             files.set(p.file, { loaded: p.loaded ?? 0, total: p.total });

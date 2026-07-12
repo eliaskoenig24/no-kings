@@ -21,7 +21,7 @@ function wavToFloat32(path) {
 }
 
 console.log('loading whisper-tiny (q8)…');
-const asr = await pipeline('automatic-speech-recognition', 'onnx-community/whisper-tiny', { dtype: 'q8' });
+const asr = await pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny', { dtype: 'q8' });
 
 let fail = 0;
 for (const c of CASES) {
