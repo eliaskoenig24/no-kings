@@ -96,7 +96,16 @@ export default function TwinPage() {
   const [talkAnswered, setTalkAnswered] = useState<Record<string, number>>({});
   const [talkMic, setTalkMic] = useState<'idle' | 'loading' | 'recording' | 'thinking'>('idle');
   const [talkErr, setTalkErr] = useState(false);
+  const [micLevel, setMicLevel] = useState(0);
   const recRef = useRef<Recording | null>(null);
+
+  // Prefetch whisper in the background once talk mode is ready, so the
+  // first mic tap listens instantly instead of stalling on a download.
+  useEffect(() => {
+    if (talkState === 'ready' && speechSupported()) {
+      loadRecognizer().catch(() => { /* surfaces on actual use */ });
+    }
+  }, [talkState]);
 
   // 10-question fallback (collapsible)
   const [qOpen, setQOpen] = useState(false);
@@ -233,7 +242,7 @@ export default function TwinPage() {
         setTalkMic('loading');
         await loadRecognizer();
       }
-      const rec = await recordUtterance(10000);
+      const rec = await recordUtterance(15000, setMicLevel);
       recRef.current = rec;
       setTalkMic('recording');
       const audio = await rec.audio;
@@ -382,8 +391,11 @@ export default function TwinPage() {
                     color: 'var(--bg)', cursor: 'pointer',
                     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                     opacity: talkMic === 'thinking' || talkMic === 'loading' ? 0.5 : 1,
-                    boxShadow: '0 6px 24px rgba(0,0,0,0.14)',
-                    transition: 'background 0.2s',
+                    boxShadow: talkMic === 'recording'
+                      ? `0 0 0 ${Math.round(micLevel * 22)}px rgba(150,98,27,0.18), 0 6px 24px rgba(0,0,0,0.14)`
+                      : '0 6px 24px rgba(0,0,0,0.14)',
+                    transform: talkMic === 'recording' ? `scale(${(1 + micLevel * 0.12).toFixed(3)})` : 'scale(1)',
+                    transition: 'background 0.2s, transform 0.09s ease-out, box-shadow 0.09s ease-out',
                   }}
                 >
                   <MicIcon size={30} />

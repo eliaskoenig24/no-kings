@@ -1,112 +1,38 @@
 /**
  * On-device speech recognition — the second step of the voice vision.
  *
- * Whisper (tiny, multilingual) runs entirely in the browser via WebGPU or
- * WASM. The model (~40 MB) is downloaded once from the Hugging Face CDN and
- * cached; the user's VOICE NEVER LEAVES THE DEVICE — that is the red line
- * (docs/VISION.md) and the reason this does not use the Web Speech API,
- * which ships audio to Apple/Google servers.
+ * Whisper (tiny, multilingual) runs entirely on the device, inside the AI
+ * worker (src/lib/ai.worker.ts) so the page never stutters while it thinks.
+ * The model (~40 MB) is downloaded once and cached; the user's VOICE NEVER
+ * LEAVES THE DEVICE — that is the red line (docs/VISION.md) and the reason
+ * this does not use the Web Speech API, which ships audio to Apple/Google.
  */
 
-import { pickInferenceDevice } from '@/lib/device';
-
-// Xenova export, not onnx-community: the latter's q8 decoder uses ops the
-// browser wasm runtime rejects ("MatMulNBits missing scale") — found by
-// scripts/browser-e2e.mjs, invisible in node.
-const MODEL_ID = 'Xenova/whisper-tiny';
-
-// Whisper language tokens use ISO codes; all 20 platform languages are covered.
-const WHISPER_LANGS = new Set([
-  'de', 'en', 'es', 'fr', 'pt', 'ar', 'zh', 'ja', 'hi', 'ru',
-  'id', 'tr', 'ko', 'it', 'nl', 'pl', 'uk', 'vi', 'bn', 'fa',
-]);
+import { loadAsr, asrReady, transcribeInWorker } from '@/lib/ai-client';
 
 export function speechSupported(): boolean {
   return (
     typeof window !== 'undefined' &&
     typeof navigator !== 'undefined' &&
     !!navigator.mediaDevices?.getUserMedia &&
-    typeof WebAssembly !== 'undefined'
+    typeof WebAssembly !== 'undefined' &&
+    typeof Worker !== 'undefined'
   );
 }
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-let recognizerPromise: Promise<any> | null = null;
-
-/**
- * Loads the recognizer once (subsequent calls reuse it). Progress is
- * reported as 0–1 across all model files so the UI can show one bar.
- */
-export function loadRecognizer(onProgress?: (frac: number) => void): Promise<any> {
-  if (!recognizerPromise) {
-    recognizerPromise = (async () => {
-      const { pipeline, env } = await import('@huggingface/transformers');
-      // self-hosted ORT runtime — see scripts/copy-ort.mjs
-      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      const wasm = (env as any)?.backends?.onnx?.wasm;
-      if (wasm) wasm.wasmPaths = '/ort/';
-      const files = new Map<string, { loaded: number; total: number }>();
-      const report = () => {
-        if (!onProgress || files.size === 0) return;
-        let loaded = 0, total = 0;
-        for (const f of files.values()) { loaded += f.loaded; total += f.total; }
-        if (total > 0) onProgress(Math.min(1, loaded / total));
-      };
-      const opts = {
-        dtype: 'q8' as const,
-        // the ort-web dev build's graph optimizer crashes on the quantized
-        // decoder ("TransposeDQWeightsForMatMulNBits missing scale")
-        session_options: { graphOptimizationLevel: 'disabled' as const },
-        progress_callback: (p: any) => {
-          if (p.status === 'progress' && p.file && p.total) {
-            files.set(p.file, { loaded: p.loaded ?? 0, total: p.total });
-            report();
-          }
-          if (p.status === 'done' && p.file) {
-            const f = files.get(p.file);
-            if (f) { f.loaded = f.total; report(); }
-          }
-        },
-      };
-      // WebGPU only when a probe proves it actually works, WASM everywhere else.
-      const device = await pickInferenceDevice();
-      try {
-        return await pipeline('automatic-speech-recognition', MODEL_ID, { ...opts, device });
-      } catch (err) {
-        console.error('[no-kings] speech model load failed on', device, err);
-        if (device === 'wasm') throw err;
-        try {
-          return await pipeline('automatic-speech-recognition', MODEL_ID, { ...opts, device: 'wasm' });
-        } catch (err2) {
-          console.error('[no-kings] speech wasm fallback failed too', err2);
-          throw err2;
-        }
-      }
-    })();
-    // a failed load must not poison future attempts
-    recognizerPromise.catch(() => { recognizerPromise = null; });
-  }
-  return recognizerPromise;
+/** Loads the recognizer once (subsequent calls reuse it). */
+export function loadRecognizer(onProgress?: (frac: number) => void): Promise<boolean> {
+  return loadAsr(onProgress);
 }
 
 export function recognizerReady(): boolean {
-  return recognizerPromise !== null;
+  return asrReady();
 }
 
-/** Transcribes 16 kHz mono audio; hints Whisper with the UI language. */
-export async function transcribe(audio: Float32Array, lang: string): Promise<string> {
-  const recognizer = await loadRecognizer();
-  const language = WHISPER_LANGS.has(lang) ? lang : undefined;
-  try {
-    const out = await recognizer(audio, { language, task: 'transcribe' });
-    return (Array.isArray(out) ? out[0]?.text : out?.text) ?? '';
-  } catch {
-    // some builds reject the language option — retry letting Whisper detect it
-    const out = await recognizer(audio, { task: 'transcribe' });
-    return (Array.isArray(out) ? out[0]?.text : out?.text) ?? '';
-  }
+/** Transcribes 16 kHz mono audio off-thread; hints Whisper with the UI language. */
+export function transcribe(audio: Float32Array, lang: string): Promise<string> {
+  return transcribeInWorker(audio, lang);
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 export type Recording = {
   /** stops recording early; the promise still resolves with the audio */
@@ -116,10 +42,14 @@ export type Recording = {
 };
 
 /**
- * Records one utterance from the microphone (tap to stop, hard cap maxMs)
- * and resamples it to the 16 kHz mono Float32Array Whisper expects.
+ * Records one utterance: tap once, speak, and it stops BY ITSELF when you
+ * pause (~1.4 s of silence after speech); tap again to stop early, hard cap
+ * as a net. `onLevel` reports live input loudness (0–1) for UI feedback.
  */
-export async function recordUtterance(maxMs = 6000): Promise<Recording> {
+export async function recordUtterance(
+  maxMs = 15000,
+  onLevel?: (level: number) => void,
+): Promise<Recording> {
   const stream = await navigator.mediaDevices.getUserMedia({
     audio: { echoCancellation: true, noiseSuppression: true },
   });
@@ -129,22 +59,53 @@ export async function recordUtterance(maxMs = 6000): Promise<Recording> {
 
   const stopped = new Promise<void>((resolve) => { recorder.onstop = () => resolve(); });
   recorder.start();
-  const timer = setTimeout(() => { if (recorder.state === 'recording') recorder.stop(); }, maxMs);
 
-  const stop = () => {
+  // live level + voice activity: created inside the tap gesture, so the
+  // context is allowed to run everywhere including iOS
+  const AC: typeof AudioContext = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+  const ctx = new AC();
+  const analyser = ctx.createAnalyser();
+  analyser.fftSize = 1024;
+  ctx.createMediaStreamSource(stream).connect(analyser);
+  const buf = new Float32Array(analyser.fftSize);
+
+  let spoke = false;
+  let silentSince = 0;
+  const SPEECH_RMS = 0.015;
+  const SILENCE_MS = 1400;
+
+  const timer = setTimeout(() => stop(), maxMs);
+  const meter = setInterval(() => {
+    analyser.getFloatTimeDomainData(buf);
+    let sum = 0;
+    for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
+    const rms = Math.sqrt(sum / buf.length);
+    onLevel?.(Math.min(1, rms * 9));
+    if (rms > SPEECH_RMS) {
+      spoke = true;
+      silentSince = 0;
+    } else if (spoke) {
+      const now = Date.now();
+      if (!silentSince) silentSince = now;
+      else if (now - silentSince > SILENCE_MS) stop(); // you paused — that's the signal
+    }
+  }, 100);
+
+  function stop() {
     clearTimeout(timer);
+    clearInterval(meter);
+    onLevel?.(0);
     if (recorder.state === 'recording') recorder.stop();
-  };
+  }
 
   const audio = (async () => {
     await stopped;
     stream.getTracks().forEach((t) => t.stop());
+    clearInterval(meter);
     const blob = new Blob(chunks, { type: recorder.mimeType });
     const raw = await blob.arrayBuffer();
-    // decode at device rate, then resample to 16 kHz via OfflineAudioContext
-    const AC: typeof AudioContext = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    const ctx = new AC();
     try {
+      // decode at device rate, then resample to 16 kHz via OfflineAudioContext
       const decoded = await ctx.decodeAudioData(raw);
       const frames = Math.max(1, Math.ceil(decoded.duration * 16000));
       const off = new OfflineAudioContext(1, frames, 16000);
