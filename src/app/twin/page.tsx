@@ -26,7 +26,7 @@ import { generateShareCard, shareOrDownloadCard } from '@/lib/share-card';
 import { regionsForCountry } from '@/data/regions';
 import { AGENDA } from '@/data/agenda';
 import { speak, stopSpeaking, ttsAvailable } from '@/lib/voice';
-import { speechSupported, loadRecognizer, recognizerReady, recordUtterance, transcribe, type Recording } from '@/lib/speech';
+import { speechSupported, loadRecognizer, recognizerReady, recordUtterance, transcribe, playRecording, type Recording } from '@/lib/speech';
 import { loadEmbedder, embedderReady, matchAgenda, understandSupported, type AgendaMatch } from '@/lib/understand';
 
 const TwinGlyph = dynamic(() => import('@/components/TwinGlyph'), { ssr: false });
@@ -55,6 +55,20 @@ const TRAINING_ITEMS: AgendaItem[] = (() => {
 })();
 
 const AGE_OPTIONS = ['18-24', '25-34', '35-49', '50-64', '65+'] as const;
+
+const REC_MAX_MS = 30000;
+
+function fmtSecs(s: number): string {
+  const t = Math.max(0, Math.round(s));
+  return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
+}
+
+/** One short technical line for the error UI — the difference between
+    "nothing happens" and a bug report we can actually act on. */
+function errText(err: unknown): string {
+  if (err instanceof Error) return `${err.name}: ${err.message}`.slice(0, 140);
+  return String(err).slice(0, 140);
+}
 
 function MicIcon({ size = 16 }: { size?: number }) {
   return (
@@ -96,11 +110,20 @@ export default function TwinPage() {
   const [talkAnswered, setTalkAnswered] = useState<Record<string, number>>({});
   const [talkMic, setTalkMic] = useState<'idle' | 'loading' | 'recording' | 'thinking'>('idle');
   const [talkErr, setTalkErr] = useState(false);
+  const [errDetail, setErrDetail] = useState('');
   const [heard, setHeard] = useState(false);
   const [heardNothing, setHeardNothing] = useState(false);
   const [micLevel, setMicLevel] = useState(0);
   const [micFrac, setMicFrac] = useState(0);
   const recRef = useRef<Recording | null>(null);
+
+  // The voice message: recording → replayable artifact → analyzed in stages.
+  // Each stage leaves something visible, so a failure has a place to point at.
+  const [recAudio, setRecAudio] = useState<Float32Array | null>(null);
+  const [recElapsed, setRecElapsed] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const playStopRef = useRef<(() => void) | null>(null);
+  const elapsedRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Prefetch whisper ONLY on machines with memory to spare: holding both
   // models at once is what got the tab killed on iPhones. Everyone else
@@ -194,7 +217,11 @@ export default function TwinPage() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  useEffect(() => () => stopSpeaking(), []);
+  useEffect(() => () => {
+    stopSpeaking();
+    playStopRef.current?.();
+    if (elapsedRef.current) clearInterval(elapsedRef.current);
+  }, []);
 
   // Every stance nudges the involved dimensions — talk, questions and sliders
   // all shape the twin the same way.
@@ -238,25 +265,63 @@ export default function TwinPage() {
     }
   }
 
+  function stopPlayback() {
+    playStopRef.current?.();
+    playStopRef.current = null;
+    setPlaying(false);
+  }
+
+  function togglePlay() {
+    if (playing) { stopPlayback(); return; }
+    if (!recAudio) return;
+    setPlaying(true);
+    playStopRef.current = playRecording(recAudio, () => { playStopRef.current = null; setPlaying(false); });
+  }
+
   async function talkRecord() {
     if (talkMic === 'recording') { recRef.current?.stop(); return; }
     if (talkMic !== 'idle') return;
     stopSpeaking();
+    stopPlayback();
     setTalkErr(false);
+    setErrDetail('');
     setHeardNothing(false);
     try {
       if (!recognizerReady()) {
         setTalkMic('loading');
         await loadRecognizer((f) => setMicFrac(f));
       }
-      const rec = await recordUtterance(15000, setMicLevel);
+      const rec = await recordUtterance(REC_MAX_MS, setMicLevel);
       recRef.current = rec;
+      setRecAudio(null);
+      setRecElapsed(0);
       setTalkMic('recording');
+      const t0 = Date.now();
+      elapsedRef.current = setInterval(() => setRecElapsed((Date.now() - t0) / 1000), 250);
       const audio = await rec.audio;
-      setTalkMic('thinking');
+      if (elapsedRef.current) clearInterval(elapsedRef.current);
+      setMicLevel(0);
+      setRecAudio(audio);
+      await analyzeRecording(audio);
+    } catch (err) {
+      if (elapsedRef.current) clearInterval(elapsedRef.current);
+      console.error('[no-kings] mic flow failed', err);
+      setTalkErr(true);
+      setErrDetail(errText(err));
+      setTalkMic('idle');
+    }
+  }
+
+  // The recording survives an analysis failure — retry without speaking again.
+  async function analyzeRecording(audio: Float32Array) {
+    setTalkMic('thinking');
+    setTalkErr(false);
+    setErrDetail('');
+    try {
       const text = (await transcribe(audio, lang)).trim();
       setTalkMic('idle');
       if (text) {
+        setHeardNothing(false);
         const combined = (talkText ? talkText + ' ' : '') + text;
         setHeard(true);
         setTalkText(combined);
@@ -267,8 +332,9 @@ export default function TwinPage() {
         setHeardNothing(true);
       }
     } catch (err) {
-      console.error('[no-kings] mic flow failed', err);
+      console.error('[no-kings] transcribe failed', err);
       setTalkErr(true);
+      setErrDetail(errText(err));
       setTalkMic('idle');
     }
   }
@@ -425,14 +491,61 @@ export default function TwinPage() {
                 </button>
               )}
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '0.06em', color: talkMic === 'recording' ? 'var(--accent)' : 'var(--text-3)', marginTop: '14px', minHeight: '16px' }}>
-                {talkMic === 'recording' ? tx(lang, 'voice_recording')
+                {talkMic === 'recording' ? `● ${tx(lang, 'voice_recording')} · ${fmtSecs(recElapsed)} / ${fmtSecs(REC_MAX_MS / 1000)}`
                   : talkMic === 'thinking' ? tx(lang, 'voice_thinking')
                   : talkMic === 'loading' ? `${tx(lang, 'voice_loading')} — ${Math.round(micFrac * 100)}%`
                   : talkState === 'matching' ? tx(lang, 'talk_matching')
                   : tx(lang, 'talk_intro')}
               </p>
               {talkErr && (
-                <p style={{ fontSize: '12px', color: 'var(--accent)', marginTop: '8px' }}>{tx(lang, 'voice_error')}</p>
+                <>
+                  <p style={{ fontSize: '12px', color: 'var(--accent)', marginTop: '8px' }}>{tx(lang, 'voice_error')}</p>
+                  {errDetail && (
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-3)', marginTop: '4px' }}>{errDetail}</p>
+                  )}
+                </>
+              )}
+
+              {/* the voice message itself — replayable proof of what was captured */}
+              {recAudio !== null && talkMic !== 'recording' && (
+                <div data-testid="voice-message" style={{ marginTop: '22px', textAlign: 'left', border: '1px solid var(--border)', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <button
+                    onClick={togglePlay}
+                    aria-label={tx(lang, 'vm_play')}
+                    style={{
+                      width: '42px', height: '42px', borderRadius: '50%', flexShrink: 0,
+                      border: '1px solid var(--border)', background: 'var(--raised)',
+                      color: 'var(--text-1)', cursor: 'pointer',
+                      display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    }}
+                  >
+                    {playing ? (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" /><rect x="14" y="5" width="4" height="14" /></svg>
+                    ) : (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="7 4 21 12 7 20" /></svg>
+                    )}
+                  </button>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-2)', margin: 0 }}>
+                      {tx(lang, 'vm_title')} · {fmtSecs(recAudio.length / 16000)}
+                    </p>
+                    <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: talkMic === 'thinking' ? 'var(--accent)' : 'var(--text-3)', margin: '3px 0 0' }}>
+                      {talkMic === 'thinking' ? tx(lang, 'vm_analyzing') : tx(lang, 'vm_local')}
+                    </p>
+                  </div>
+                  {talkErr && talkMic === 'idle' && (
+                    <button
+                      onClick={() => { const a = recAudio; if (a) void analyzeRecording(a); }}
+                      style={{
+                        background: 'var(--text-1)', color: 'var(--bg)', border: 'none',
+                        padding: '9px 14px', fontSize: '12px', fontWeight: 600,
+                        borderRadius: '999px', cursor: 'pointer', fontFamily: 'var(--font-sans)', flexShrink: 0,
+                      }}
+                    >
+                      {tx(lang, 'vm_retry')}
+                    </button>
+                  )}
+                </div>
               )}
 
               {/* typing works too — a single quiet line, not a form field */}

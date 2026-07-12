@@ -34,6 +34,25 @@ export function transcribe(audio: Float32Array, lang: string): Promise<string> {
   return transcribeInWorker(audio, lang);
 }
 
+/**
+ * Plays back a recorded voice message (16 kHz mono samples) — hearing your
+ * own recording is the proof that the microphone actually captured you.
+ * Returns a stop function.
+ */
+export function playRecording(samples: Float32Array, onEnded?: () => void): () => void {
+  const AC: typeof AudioContext = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+  const ctx = new AC();
+  void ctx.resume();
+  const buf = ctx.createBuffer(1, samples.length, 16000);
+  buf.copyToChannel(samples as Float32Array<ArrayBuffer>, 0);
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  src.connect(ctx.destination);
+  src.onended = () => { onEnded?.(); void ctx.close(); };
+  src.start();
+  return () => { try { src.stop(); } catch { /* already stopped */ } };
+}
+
 export type Recording = {
   /** stops recording early; the promise still resolves with the audio */
   stop: () => void;
@@ -42,12 +61,13 @@ export type Recording = {
 };
 
 /**
- * Records one utterance: tap once, speak, and it stops BY ITSELF when you
- * pause (~1.4 s of silence after speech); tap again to stop early, hard cap
- * as a net. `onLevel` reports live input loudness (0–1) for UI feedback.
+ * Records one voice message: tap to start, tap to stop, hard cap as a net.
+ * Deliberately NO silence auto-stop — a recording that ends itself while the
+ * speaker is thinking reads as "the mic is broken". `onLevel` reports live
+ * input loudness (0–1) for UI feedback.
  */
 export async function recordUtterance(
-  maxMs = 15000,
+  maxMs = 30000,
   onLevel?: (level: number) => void,
 ): Promise<Recording> {
   const stream = await navigator.mediaDevices.getUserMedia({
@@ -71,27 +91,13 @@ export async function recordUtterance(
   const chunks: Float32Array[] = [];
   let recording = true;
 
-  let spoke = false;
-  let silentSince = 0;
-  const SPEECH_RMS = 0.015;
-  const SILENCE_MS = 1400;
-
   proc.onaudioprocess = (e) => {
     if (!recording) return;
     const data = e.inputBuffer.getChannelData(0);
     chunks.push(new Float32Array(data));
     let sum = 0;
     for (let i = 0; i < data.length; i++) sum += data[i] * data[i];
-    const rms = Math.sqrt(sum / data.length);
-    onLevel?.(Math.min(1, rms * 9));
-    if (rms > SPEECH_RMS) {
-      spoke = true;
-      silentSince = 0;
-    } else if (spoke) {
-      const now = Date.now();
-      if (!silentSince) silentSince = now;
-      else if (now - silentSince > SILENCE_MS) stop(); // you paused — that's the signal
-    }
+    onLevel?.(Math.min(1, Math.sqrt(sum / data.length) * 9));
   };
   source.connect(proc);
   // a processor only runs when routed to the destination — mute it so the

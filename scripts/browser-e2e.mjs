@@ -76,8 +76,10 @@ if (ok) {
 if (ok) {
   await page.fill('textarea', ''); // transcript must land here on its own
   await page.getByTestId('talk-mic').click();       // start (may first download whisper ~43 MB)
-  await page.waitForTimeout(6500);                  // let the fake mic "speak"
-  await page.getByTestId('talk-mic').click().catch(() => {}); // stop (no-op if auto-stopped)
+  // the fake mic loops the WAV with arbitrary phase — the window must be
+  // longer than two sentence lengths so one FULL repetition is always inside
+  await page.waitForTimeout(11000);
+  await page.getByTestId('talk-mic').click().catch(() => {}); // tap-stop, like a voice message
   try {
     await page.waitForFunction(
       () => (document.querySelector('textarea')?.value ?? '').length > 5,
