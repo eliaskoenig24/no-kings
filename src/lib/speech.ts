@@ -53,33 +53,36 @@ export async function recordUtterance(
   const stream = await navigator.mediaDevices.getUserMedia({
     audio: { echoCancellation: true, noiseSuppression: true },
   });
-  const recorder = new MediaRecorder(stream);
-  const chunks: Blob[] = [];
-  recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
 
-  const stopped = new Promise<void>((resolve) => { recorder.onstop = () => resolve(); });
-  recorder.start();
-
-  // live level + voice activity: created inside the tap gesture, so the
-  // context is allowed to run everywhere including iOS
+  // created inside the tap gesture, so the context is allowed to run
+  // everywhere including iOS — and resumed, because iOS can still hand
+  // out a suspended context (which would record pure silence)
   const AC: typeof AudioContext = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
   const ctx = new AC();
-  const analyser = ctx.createAnalyser();
-  analyser.fftSize = 1024;
-  ctx.createMediaStreamSource(stream).connect(analyser);
-  const buf = new Float32Array(analyser.fftSize);
+  void ctx.resume();
+  const source = ctx.createMediaStreamSource(stream);
+
+  // Raw PCM via ScriptProcessor — deliberately NOT MediaRecorder: iOS Safari
+  // records fragmented MP4 that its own decodeAudioData cannot decode, so the
+  // utterance was silently lost on tap-stop. Raw samples have no container to
+  // fail on. (ScriptProcessor is deprecated but universal; AudioWorklet needs
+  // a separately bundled module — not worth it for mono 16 kHz speech.)
+  const proc = ctx.createScriptProcessor(4096, 1, 1);
+  const chunks: Float32Array[] = [];
+  let recording = true;
 
   let spoke = false;
   let silentSince = 0;
   const SPEECH_RMS = 0.015;
   const SILENCE_MS = 1400;
 
-  const timer = setTimeout(() => stop(), maxMs);
-  const meter = setInterval(() => {
-    analyser.getFloatTimeDomainData(buf);
+  proc.onaudioprocess = (e) => {
+    if (!recording) return;
+    const data = e.inputBuffer.getChannelData(0);
+    chunks.push(new Float32Array(data));
     let sum = 0;
-    for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
-    const rms = Math.sqrt(sum / buf.length);
+    for (let i = 0; i < data.length; i++) sum += data[i] * data[i];
+    const rms = Math.sqrt(sum / data.length);
     onLevel?.(Math.min(1, rms * 9));
     if (rms > SPEECH_RMS) {
       spoke = true;
@@ -89,31 +92,49 @@ export async function recordUtterance(
       if (!silentSince) silentSince = now;
       else if (now - silentSince > SILENCE_MS) stop(); // you paused — that's the signal
     }
-  }, 100);
+  };
+  source.connect(proc);
+  // a processor only runs when routed to the destination — mute it so the
+  // microphone is never echoed back through the speakers
+  const mute = ctx.createGain();
+  mute.gain.value = 0;
+  proc.connect(mute);
+  mute.connect(ctx.destination);
+
+  const timer = setTimeout(() => stop(), maxMs);
+  let resolveStopped!: () => void;
+  const stopped = new Promise<void>((resolve) => { resolveStopped = resolve; });
 
   function stop() {
+    if (!recording) return;
+    recording = false;
     clearTimeout(timer);
-    clearInterval(meter);
     onLevel?.(0);
-    if (recorder.state === 'recording') recorder.stop();
+    proc.disconnect();
+    source.disconnect();
+    stream.getTracks().forEach((t) => t.stop());
+    resolveStopped();
   }
 
   const audio = (async () => {
     await stopped;
-    stream.getTracks().forEach((t) => t.stop());
-    clearInterval(meter);
-    const blob = new Blob(chunks, { type: recorder.mimeType });
-    const raw = await blob.arrayBuffer();
     try {
-      // decode at device rate, then resample to 16 kHz via OfflineAudioContext
-      const decoded = await ctx.decodeAudioData(raw);
-      const frames = Math.max(1, Math.ceil(decoded.duration * 16000));
-      const off = new OfflineAudioContext(1, frames, 16000);
-      const src = off.createBufferSource();
-      src.buffer = decoded;
-      src.connect(off.destination);
+      const total = chunks.reduce((n, c) => n + c.length, 0);
+      const joined = new Float32Array(Math.max(1, total));
+      let off = 0;
+      for (const c of chunks) { joined.set(c, off); off += c.length; }
+      const inRate = ctx.sampleRate;
+      if (inRate === 16000) return joined;
+      // filtered resample to 16 kHz via OfflineAudioContext — still no decoding
+      const buf = ctx.createBuffer(1, joined.length, inRate);
+      buf.copyToChannel(joined, 0);
+      const frames = Math.max(1, Math.ceil((joined.length / inRate) * 16000));
+      const offCtx = new OfflineAudioContext(1, frames, 16000);
+      const src = offCtx.createBufferSource();
+      src.buffer = buf;
+      src.connect(offCtx.destination);
       src.start();
-      const rendered = await off.startRendering();
+      const rendered = await offCtx.startRendering();
       return rendered.getChannelData(0);
     } finally {
       void ctx.close();

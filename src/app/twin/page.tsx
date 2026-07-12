@@ -18,7 +18,7 @@ import { SPECTRUM, getTopicLabel } from '@/lib/i18n';
 import { TOPICS, TopicKey } from '@/types';
 import type { AgendaItem } from '@/types';
 import { createTwinFromValues, classifyTwin } from '@/lib/twin-engine';
-import { summarizeTwin, poleText } from '@/lib/twin-summary';
+import { summarizeTwin, poleText, STRONG_AT, LEAN_AT } from '@/lib/twin-summary';
 import { getMyTwin, saveMyTwin, getDemographics, saveDemographics, type TwinDemographics } from '@/lib/db';
 import { getOrCreateIdentity } from '@/lib/identity';
 import { publishTwin } from '@/lib/nostr';
@@ -96,6 +96,8 @@ export default function TwinPage() {
   const [talkAnswered, setTalkAnswered] = useState<Record<string, number>>({});
   const [talkMic, setTalkMic] = useState<'idle' | 'loading' | 'recording' | 'thinking'>('idle');
   const [talkErr, setTalkErr] = useState(false);
+  const [heard, setHeard] = useState(false);
+  const [heardNothing, setHeardNothing] = useState(false);
   const [micLevel, setMicLevel] = useState(0);
   const [micFrac, setMicFrac] = useState(0);
   const recRef = useRef<Recording | null>(null);
@@ -240,6 +242,8 @@ export default function TwinPage() {
     if (talkMic === 'recording') { recRef.current?.stop(); return; }
     if (talkMic !== 'idle') return;
     stopSpeaking();
+    setTalkErr(false);
+    setHeardNothing(false);
     try {
       if (!recognizerReady()) {
         setTalkMic('loading');
@@ -254,11 +258,13 @@ export default function TwinPage() {
       setTalkMic('idle');
       if (text) {
         const combined = (talkText ? talkText + ' ' : '') + text;
+        setHeard(true);
         setTalkText(combined);
         void runTalk(combined);
       } else {
-        // heard nothing usable — say so instead of going silently idle
-        setTalkMatches([]);
+        // heard nothing usable — say so honestly instead of pretending
+        // "no matching question" or going silently idle
+        setHeardNothing(true);
       }
     } catch (err) {
       console.error('[no-kings] mic flow failed', err);
@@ -310,6 +316,19 @@ export default function TwinPage() {
   }
 
   const stmtText = TRAINING_ITEMS[qIdx].text[lang] ?? TRAINING_ITEMS[qIdx].text['en'];
+
+  // The talk flow in three plain steps — shown until the first matches arrive,
+  // so nobody has to guess what speaking actually does.
+  const howSteps = (
+    <div style={{ display: 'inline-flex', flexDirection: 'column', gap: '10px', marginTop: '24px', textAlign: 'left' }}>
+      {(['how_1', 'how_2', 'how_3'] as const).map((k, i) => (
+        <div key={k} style={{ display: 'flex', gap: '12px', alignItems: 'baseline' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--accent)', flexShrink: 0 }}>{i + 1}</span>
+          <span style={{ fontSize: '13px', color: 'var(--text-2)', lineHeight: 1.55 }}>{tx(lang, k)}</span>
+        </div>
+      ))}
+    </div>
+  );
 
   if (!loaded) return (
     <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -365,6 +384,7 @@ export default function TwinPage() {
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', color: 'var(--text-3)', letterSpacing: '0.05em', marginTop: '6px' }}>
                 {tx(lang, 'talk_size')}
               </p>
+              {howSteps}
             </div>
           )}
 
@@ -408,7 +428,7 @@ export default function TwinPage() {
                 {talkMic === 'recording' ? tx(lang, 'voice_recording')
                   : talkMic === 'thinking' ? tx(lang, 'voice_thinking')
                   : talkMic === 'loading' ? `${tx(lang, 'voice_loading')} — ${Math.round(micFrac * 100)}%`
-                  : talkState === 'matching' ? '…'
+                  : talkState === 'matching' ? tx(lang, 'talk_matching')
                   : tx(lang, 'talk_intro')}
               </p>
               {talkErr && (
@@ -416,10 +436,16 @@ export default function TwinPage() {
               )}
 
               {/* typing works too — a single quiet line, not a form field */}
-              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', marginTop: '26px', textAlign: 'left' }}>
+              <div style={{ marginTop: '26px', textAlign: 'left' }}>
+              {heard && talkText.trim() !== '' && (
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: '4px' }}>
+                  {tx(lang, 'voice_heard')}
+                </p>
+              )}
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px' }}>
                 <textarea
                   value={talkText}
-                  onChange={(e) => setTalkText(e.target.value)}
+                  onChange={(e) => { setHeard(false); setTalkText(e.target.value); }}
                   placeholder={tx(lang, 'talk_placeholder')}
                   rows={1}
                   style={{
@@ -442,6 +468,15 @@ export default function TwinPage() {
                   {talkState === 'matching' ? '…' : tx(lang, 'talk_go')}
                 </button>
               </div>
+              </div>
+
+              {heardNothing && (
+                <p style={{ fontSize: '13px', color: 'var(--text-2)', marginTop: '24px', lineHeight: 1.6 }}>
+                  {tx(lang, 'heard_nothing')}
+                </p>
+              )}
+
+              {talkMatches === null && talkText.trim() === '' && !heardNothing && howSteps}
 
               {talkMatches !== null && talkMatches.length === 0 && (
                 <p style={{ fontSize: '13px', color: 'var(--text-2)', marginTop: '24px', lineHeight: 1.6 }}>
@@ -462,9 +497,38 @@ export default function TwinPage() {
                           {item.text[lang] ?? item.text['en']}
                         </p>
                         {answered !== undefined ? (
-                          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--positive, #22c55e)', letterSpacing: '0.04em' }}>
-                            ✓ {tx(lang, (['l1', 'l2', 'l3', 'l4', 'l5'] as const)[answered * 4])}
-                          </p>
+                          <div>
+                            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--positive, #22c55e)', letterSpacing: '0.04em' }}>
+                              ✓ {tx(lang, (['l1', 'l2', 'l3', 'l4', 'l5'] as const)[answered * 4])}
+                            </p>
+                            {/* the immediate consequence: what the twin stands for
+                                on exactly the dimensions this stance just moved */}
+                            <div style={{ marginTop: '12px', paddingLeft: '14px', borderLeft: '2px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-3)', margin: 0 }}>
+                                {tx(lang, 'twin_now')}
+                              </p>
+                              {(Object.keys(item.topicWeights) as TopicKey[]).map((tk) => {
+                                const topic = topics.find(t => t.key === tk);
+                                if (!topic) return null;
+                                const d = values[tk] - 50;
+                                return (
+                                  <p key={tk} style={{ fontSize: '13px', lineHeight: 1.55, color: 'var(--text-2)', margin: 0 }}>
+                                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--text-3)' }}>
+                                      {topic.title}
+                                    </span>{' — '}
+                                    {Math.abs(d) < LEAN_AT ? tx(lang, 'bal_word') : (
+                                      <>
+                                        <span style={{ color: 'var(--accent)', fontStyle: 'italic' }}>
+                                          {tx(lang, Math.abs(d) >= STRONG_AT ? 'sum_strong' : 'sum_lean')}
+                                        </span>{' '}
+                                        {poleText(d > 0 ? topic.right : topic.left)}
+                                      </>
+                                    )}
+                                  </p>
+                                );
+                              })}
+                            </div>
+                          </div>
                         ) : (
                           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                             {([['l1', 0], ['l2', 0.25], ['l3', 0.5], ['l4', 0.75], ['l5', 1]] as const).map(([key, val]) => (
