@@ -30,6 +30,7 @@ import { speechSupported, loadRecognizer, recognizerReady, recordUtterance, tran
 import { loadEmbedder, embedderReady, matchAgenda, understandSupported, type AgendaMatch } from '@/lib/understand';
 
 const TwinGlyph = dynamic(() => import('@/components/TwinGlyph'), { ssr: false });
+const RadarChart = dynamic(() => import('@/components/RadarChart'), { ssr: false });
 
 const tx = makeTx({ ...TWIN_TX, ...TRAIN_TX });
 
@@ -602,10 +603,15 @@ export default function TwinPage() {
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: '4px' }}>
                     {tx(lang, 'talk_matches')}
                   </p>
-                  {talkMatches.map(({ item }) => {
+                  {talkMatches.map(({ item, score }) => {
                     const answered = talkAnswered[item.id];
                     return (
                       <div key={item.id} style={{ padding: '20px 0', borderBottom: '1px solid var(--divider)' }}>
+                        {/* the raw similarity, shown — the machine's guess is auditable,
+                            and the human overrules it simply by not answering */}
+                        <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.08em', color: 'var(--text-3)', marginBottom: '6px' }}>
+                          {Math.round(score * 100)} % {tx(lang, 'match_lbl')}
+                        </p>
                         <p style={{ fontSize: '15px', lineHeight: 1.55, color: 'var(--text-1)', marginBottom: '14px' }}>
                           {item.text[lang] ?? item.text['en']}
                         </p>
@@ -759,6 +765,10 @@ export default function TwinPage() {
 
           {editMode ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+              {/* the 8 dimensions as a shape — it moves with every slider */}
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <RadarChart values={liveValues} size={230} animated />
+              </div>
               {topics.map(topic => {
                 const val = values[topic.key];
                 return (

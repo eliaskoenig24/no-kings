@@ -25,8 +25,13 @@ export default function ExplainPage() {
         <h1 style={{ fontSize: 'clamp(2rem, 6vw, 3.4rem)', fontWeight: 600, lineHeight: 1.1, letterSpacing: '-0.02em', marginBottom: '22px', maxWidth: '16ch' }}>
           {tx(lang, 'hero_title')}
         </h1>
-        <p style={{ fontSize: '16px', lineHeight: 1.75, color: 'var(--text-2)', maxWidth: '580px', marginBottom: '36px' }}>
+        <p style={{ fontSize: '16px', lineHeight: 1.75, color: 'var(--text-2)', maxWidth: '580px', marginBottom: '18px' }}>
           {tx(lang, 'hero_body')}
+        </p>
+        {/* the honest whistleblower promise — no "only censorship-free place
+            on the net" overclaims; the second half is verifiably true */}
+        <p style={{ fontFamily: 'var(--font-serif, Georgia, serif)', fontStyle: 'italic', fontSize: '17px', lineHeight: 1.6, color: 'var(--text-1)', maxWidth: '540px', marginBottom: '36px' }}>
+          {tx(lang, 'hero_whistle')}
         </p>
         <Link href="/twin" style={{
           display: 'inline-block',
