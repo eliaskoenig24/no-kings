@@ -134,6 +134,17 @@ export interface PoliticianDistance {
   divergedTopics: TopicKey[];
 }
 
+// Real-world anchor of a question: the documented decision, law, treaty or
+// ruling where institutions actually dealt with it. Required by the Question
+// Constitution so that "no kings" never invents its own agenda.
+export interface AgendaSource {
+  org: string;   // institution, in English (universal): "European Parliament & Council"
+  doc: string;   // document identifier + short title: "Regulation (EU) 2021/1119 — European Climate Law"
+  date: string;  // ISO date of adoption/decision/publication
+  url?: string;  // only stable official URLs; omitted when none exists — the doc ID is the citation
+  relation: 'exact' | 'related'; // exact: the document decides this question in its jurisdiction; related: nearest real instrument
+}
+
 // Political question the twin can autonomously answer
 export interface AgendaItem {
   id: string;
@@ -146,6 +157,7 @@ export interface AgendaItem {
   category: TopicKey;
   addedAt: string; // ISO date
   tags: string[];
+  source?: AgendaSource; // real-world anchor; every live question must carry one
 }
 
 export interface TwinVote {

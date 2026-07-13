@@ -1,7 +1,7 @@
 'use client';
 
 import { TX } from './page.tx';
-import { useMemo } from 'react';
+import { use, useMemo } from 'react';
 import Link from 'next/link';
 import { makeTx } from '@/lib/tx';
 import { notFound } from 'next/navigation';
@@ -57,9 +57,10 @@ const t = makeTx(TX);
 
 const ALL_TWINS = DEMO_TWINS_TAGGED.map(tt => tt.twin);
 
-export default function QuestionPage({ params }: { params: { id: string } }) {
+export default function QuestionPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const { lang } = useLang();
-  const item = AGENDA.find(a => a.id === params.id);
+  const item = AGENDA.find(a => a.id === id);
   if (!item) notFound();
 
   const aggregate = useMemo(() => aggregateForItem(ALL_TWINS, item), [item]);
@@ -154,6 +155,31 @@ export default function QuestionPage({ params }: { params: { id: string } }) {
             <p style={{ fontSize: '14px', lineHeight: 1.85, color: 'var(--text-2)', maxWidth: '660px' }}>
               {item.description[lang] ?? item.description['en']}
             </p>
+          </div>
+        )}
+
+        {/* Real-world source — the constitution's anchor against gatekeeping */}
+        {item.source && (
+          <div style={{ marginBottom: '40px' }}>
+            <p className="label" style={{ marginBottom: '12px' }}>{t(lang, 'source_label')}</p>
+            <div style={{ paddingLeft: '18px', borderLeft: '2px solid var(--accent)', maxWidth: '660px' }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', lineHeight: 1.8, color: 'var(--text-2)', overflowWrap: 'anywhere' }}>
+                {item.source.org} · {new Date(item.source.date).toLocaleDateString(lang)}
+                <br />
+                {item.source.url ? (
+                  <a href={item.source.url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-1)', textDecorationColor: 'var(--border)' }}>
+                    {item.source.doc} ↗
+                  </a>
+                ) : (
+                  <span style={{ color: 'var(--text-1)' }}>{item.source.doc}</span>
+                )}
+              </p>
+              {item.source.relation === 'related' && (
+                <p style={{ fontSize: '12px', lineHeight: 1.6, color: 'var(--text-3)', marginTop: '8px' }}>
+                  {t(lang, 'source_related')}
+                </p>
+              )}
+            </div>
           </div>
         )}
 

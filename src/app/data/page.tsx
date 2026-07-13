@@ -62,6 +62,7 @@ function buildDataset(
   return {
     dataset: 'no-kings-aggregates',
     version: 1,
+    license: 'CC BY 4.0 — https://creativecommons.org/licenses/by/4.0/ — attribution: no kings (no-kings.world)',
     generated_at: new Date().toISOString(),
     source: 'https://no-kings.world/data',
     method: {
@@ -158,6 +159,18 @@ export default function DataPage() {
           </p>
           <p style={{ fontSize: '13px', lineHeight: 1.7, color: 'var(--text-3)', maxWidth: '560px' }}>
             {tx(lang, 'd_cite_note')}
+          </p>
+        </div>
+
+        <div style={{ borderTop: '1px solid var(--divider)', paddingTop: '40px', marginTop: '48px' }}>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', letterSpacing: '0.18em', color: 'var(--text-3)', textTransform: 'uppercase', marginBottom: '18px' }}>
+            {tx(lang, 'd_lic_t')}
+          </p>
+          <p style={{ fontSize: '13px', lineHeight: 1.7, color: 'var(--text-2)', maxWidth: '560px' }}>
+            {tx(lang, 'd_lic_note')}{' '}
+            <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer" style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'var(--text-1)', textDecorationColor: 'var(--border)' }}>
+              CC BY 4.0 ↗
+            </a>
           </p>
         </div>
 

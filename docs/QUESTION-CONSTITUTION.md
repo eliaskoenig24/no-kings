@@ -30,6 +30,14 @@ meets **all** of these criteria:
 6. **Balanced direction mix.** Within each dimension, pro- and contra-coded
    questions should stay roughly balanced to limit acquiescence bias (the human
    tendency to just agree).
+7. **Anchored in reality.** Every question carries a `source`: the documented
+   decision, law, treaty or ruling where real institutions actually dealt with
+   it (a parliamentary vote, a UN resolution, a court judgment, a national
+   referendum). "no kings" aggregates opinion on questions the world already
+   asks — it does not invent its own agenda. If the nearest real instrument
+   does not decide the question exactly, the source is marked `related` and
+   shown as such. Only stable official URLs are linked; where none exists, the
+   document identifier alone is the citation — an honest ID beats a dead link.
 
 ## Change process
 
@@ -83,6 +91,15 @@ wenn sie **alle** Kriterien erfüllt:
    genau einer der 8 Dimensionen zugeordnet, mit expliziter Richtung (pro/contra).
 6. **Ausgewogene Richtungen.** Pro- und Contra-kodierte Fragen pro Dimension
    ungefähr im Gleichgewicht halten (gegen Zustimmungstendenz).
+7. **In der Realität verankert.** Jede Frage trägt eine `source`: die
+   dokumentierte Entscheidung, das Gesetz, den Vertrag oder das Urteil, in dem
+   echte Institutionen die Frage tatsächlich behandelt haben (Parlamentsvotum,
+   UN-Resolution, Gerichtsurteil, Volksabstimmung). „no kings" aggregiert
+   Meinungen zu Fragen, die die Welt bereits stellt — es erfindet keine eigene
+   Agenda. Entscheidet das nächstliegende reale Dokument die Frage nicht exakt,
+   ist die Quelle als `related` markiert und wird so angezeigt. Verlinkt werden
+   nur stabile offizielle URLs; wo keine existiert, ist die Dokument-Kennung
+   allein die Zitation — eine ehrliche Kennung schlägt einen toten Link.
 
 ## Änderungsprozess
 

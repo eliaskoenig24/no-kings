@@ -3,6 +3,13 @@ import type { AgendaItem } from '@/types';
 export const AGENDA: AgendaItem[] = [
   {
     id: 'eu-klimaneutral-2035',
+    source: {
+      org: 'European Parliament & Council',
+      doc: 'Regulation (EU) 2021/1119 — European Climate Law (climate neutrality by 2050)',
+      date: '2021-06-30',
+      url: 'https://eur-lex.europa.eu/eli/reg/2021/1119/oj',
+      relation: 'related',
+    },
     addedAt: '2026-06-01',
     category: 'klimaschutz',
     tags: ['climate', 'eu', 'energy'],
@@ -54,6 +61,13 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'bedingungsloses-grundeinkommen',
+    source: {
+      org: 'Swiss Confederation',
+      doc: 'Federal popular vote No. 601 — initiative \'For an unconditional basic income\' (rejected 76.9%)',
+      date: '2016-06-05',
+      url: 'https://www.bsv.admin.ch/bsv/de/home/sozialpolitische-themen/soziale-absicherung/revenu-de-base-inconditionnel.html',
+      relation: 'exact',
+    },
     addedAt: '2026-05-15',
     category: 'sozialstaat',
     tags: ['ubi', 'welfare', 'economy'],
@@ -105,6 +119,13 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'verteidigungsausgaben-3-prozent',
+    source: {
+      org: 'NATO',
+      doc: 'The Hague Summit Declaration — 5% of GDP by 2035 (3.5% core + 1.5% broader security)',
+      date: '2025-06-25',
+      url: 'https://www.nato.int/en/about-us/official-texts-and-resources/official-texts/2025/06/25/the-hague-summit-declaration',
+      relation: 'related',
+    },
     addedAt: '2026-06-10',
     category: 'europa',
     tags: ['defense', 'nato', 'military'],
@@ -156,6 +177,12 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'mietendeckel-national',
+    source: {
+      org: 'Bundesverfassungsgericht (Germany)',
+      doc: 'Beschluss 2 BvF 1/20 — Berlin rent cap void, ECLI:DE:BVerfG:2021:rs20210325.2bvf000120',
+      date: '2021-03-25',
+      relation: 'related',
+    },
     addedAt: '2026-04-20',
     category: 'sozialstaat',
     tags: ['housing', 'rents', 'urban'],
@@ -207,6 +234,13 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'atomkraft-brueckentechnologie',
+    source: {
+      org: 'European Commission',
+      doc: 'Delegated Regulation (EU) 2022/1214 — nuclear & gas as transitional activities in the EU taxonomy',
+      date: '2022-07-15',
+      url: 'https://eur-lex.europa.eu/eli/reg_del/2022/1214/oj',
+      relation: 'exact',
+    },
     addedAt: '2026-03-05',
     category: 'klimaschutz',
     tags: ['nuclear', 'energy', 'climate'],
@@ -258,6 +292,13 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'fachkraefte-migration',
+    source: {
+      org: 'European Parliament & Council',
+      doc: 'Directive (EU) 2021/1883 — EU Blue Card, easier entry for highly qualified third-country workers',
+      date: '2021-10-20',
+      url: 'https://eur-lex.europa.eu/eli/dir/2021/1883/oj',
+      relation: 'exact',
+    },
     addedAt: '2026-05-01',
     category: 'migration',
     tags: ['immigration', 'economy', 'labor'],
@@ -309,6 +350,13 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'sozialmedien-verbot-unter-16',
+    source: {
+      org: 'Parliament of Australia',
+      doc: 'Online Safety Amendment (Social Media Minimum Age) Act 2024, No. 127',
+      date: '2024-11-29',
+      url: 'https://www.legislation.gov.au/C2024A00127',
+      relation: 'exact',
+    },
     addedAt: '2026-04-01',
     category: 'freiheit',
     tags: ['social-media', 'children', 'regulation'],
@@ -360,6 +408,13 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'vermoegenssteuer-millionaere',
+    source: {
+      org: 'Cortes Generales (Spain)',
+      doc: 'Ley 38/2022 — solidarity tax on large fortunes (1.7–3.5% above €3M)',
+      date: '2022-12-27',
+      url: 'https://www.boe.es/eli/es/l/2022/12/27/38',
+      relation: 'related',
+    },
     addedAt: '2026-05-20',
     category: 'sozialstaat',
     tags: ['wealth-tax', 'inequality', 'redistribution'],
@@ -411,6 +466,13 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'bildung-kostenlos-hochschule',
+    source: {
+      org: 'United Nations',
+      doc: 'ICESCR, Art. 13(2)(c) — progressive introduction of free higher education',
+      date: '1966-12-16',
+      url: 'https://www.ohchr.org/en/instruments-mechanisms/instruments/international-covenant-economic-social-and-cultural-rights',
+      relation: 'exact',
+    },
     addedAt: '2026-03-15',
     category: 'bildung',
     tags: ['education', 'university', 'access'],
@@ -462,6 +524,13 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'ki-regulierung-global',
+    source: {
+      org: 'European Parliament & Council',
+      doc: 'Regulation (EU) 2024/1689 — Artificial Intelligence Act',
+      date: '2024-06-13',
+      url: 'https://eur-lex.europa.eu/eli/reg/2024/1689/oj',
+      relation: 'exact',
+    },
     addedAt: '2026-06-20',
     category: 'freiheit',
     tags: ['ai', 'regulation', 'technology'],
@@ -514,6 +583,12 @@ export const AGENDA: AgendaItem[] = [
   // ── 5 neue Fragen ────────────────────────────────────────────────────────
   {
     id: 'mietpreisdeckel-national',
+    source: {
+      org: 'UN Committee on Economic, Social and Cultural Rights',
+      doc: 'General Comment No. 4 — right to adequate housing, affordability principle',
+      date: '1991-12-13',
+      relation: 'related',
+    },
     addedAt: '2026-07-01',
     category: 'sozialstaat',
     tags: ['housing', 'rent', 'affordability'],
@@ -565,6 +640,13 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'buergerversicherung-gesundheit',
+    source: {
+      org: 'UN General Assembly',
+      doc: 'Resolution A/RES/74/2 — Political Declaration on Universal Health Coverage',
+      date: '2019-10-10',
+      url: 'https://docs.un.org/en/A/RES/74/2',
+      relation: 'related',
+    },
     addedAt: '2026-07-01',
     category: 'gesundheit',
     tags: ['healthcare', 'universal', 'insurance'],
@@ -616,6 +698,13 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'digitale-grundrechte-verschluesselung',
+    source: {
+      org: 'European Commission',
+      doc: 'Proposal COM(2022) 209 — CSA Regulation (\'chat control\'), the live fight over encrypted communication',
+      date: '2022-05-11',
+      url: 'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:52022PC0209',
+      relation: 'related',
+    },
     addedAt: '2026-07-01',
     category: 'freiheit',
     tags: ['privacy', 'encryption', 'digital-rights', 'surveillance'],
@@ -667,6 +756,12 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'globaler-mindestlohn',
+    source: {
+      org: 'International Labour Organization',
+      doc: 'Convention No. 131 — Minimum Wage Fixing',
+      date: '1970-06-22',
+      relation: 'related',
+    },
     addedAt: '2026-07-01',
     category: 'wirtschaft',
     tags: ['minimum-wage', 'inequality', 'global', 'labor'],
@@ -718,6 +813,13 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'volksabstimmung-direktdemokratie',
+    source: {
+      org: 'Swiss Confederation',
+      doc: 'Federal Constitution, Art. 138–139 — popular initiative',
+      date: '1999-04-18',
+      url: 'https://www.fedlex.admin.ch/eli/cc/1999/404/en',
+      relation: 'exact',
+    },
     addedAt: '2026-07-01',
     category: 'freiheit',
     tags: ['democracy', 'referendum', 'direct-democracy', 'participation'],
@@ -769,6 +871,12 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'waffenrecht-private-kontrolle',
+    source: {
+      org: 'UN General Assembly',
+      doc: 'Arms Trade Treaty, adopted by Resolution A/RES/67/234 B',
+      date: '2013-04-02',
+      relation: 'related',
+    },
     addedAt: '2026-07-01',
     category: 'freiheit',
     tags: ['guns', 'safety', 'rights'],
@@ -820,6 +928,12 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'bildungsausgaben-verdoppeln',
+    source: {
+      org: 'UNESCO / World Education Forum',
+      doc: 'Incheon Declaration & Education 2030 Framework — benchmark 4–6% of GDP, 15–20% of public expenditure',
+      date: '2015-05-21',
+      relation: 'related',
+    },
     addedAt: '2026-07-01',
     category: 'bildung',
     tags: ['education', 'taxes', 'investment'],
@@ -871,6 +985,12 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'sterbehilfe-legalisierung',
+    source: {
+      org: 'Staten-Generaal (Netherlands)',
+      doc: 'Termination of Life on Request and Assisted Suicide (Review Procedures) Act — first national legalisation',
+      date: '2001-04-10',
+      relation: 'exact',
+    },
     addedAt: '2026-07-01',
     category: 'freiheit',
     tags: ['euthanasia', 'healthcare', 'autonomy'],
@@ -922,6 +1042,12 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'massentierhaltung-verbot',
+    source: {
+      org: 'European Commission',
+      doc: 'Response C(2021) 4747 to the ECI \'End the Cage Age\' — commitment to phase out cage farming',
+      date: '2021-06-30',
+      relation: 'related',
+    },
     addedAt: '2026-07-01',
     category: 'klimaschutz',
     tags: ['animals', 'environment', 'food'],
@@ -973,6 +1099,12 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'wehrpflicht-allgemein',
+    source: {
+      org: 'Government of Sweden',
+      doc: 'Decision to reactivate gender-neutral military conscription from 2018',
+      date: '2017-03-02',
+      relation: 'exact',
+    },
     addedAt: '2026-07-01',
     category: 'freiheit',
     tags: ['military', 'defense', 'conscription'],
@@ -1024,6 +1156,13 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'atomwaffen-verbot',
+    source: {
+      org: 'United Nations',
+      doc: 'Treaty on the Prohibition of Nuclear Weapons, A/CONF.229/2017/8',
+      date: '2017-07-07',
+      url: 'https://docs.un.org/en/A/CONF.229/2017/8',
+      relation: 'exact',
+    },
     addedAt: '2026-07-02',
     category: 'freiheit',
     tags: ['nuclear', 'disarmament', 'peace', 'security'],
@@ -1075,6 +1214,13 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'digitalsteuer-konzerne',
+    source: {
+      org: 'Council of the European Union',
+      doc: 'Directive (EU) 2022/2523 — global minimum 15% taxation for multinational groups (OECD Pillar Two)',
+      date: '2022-12-15',
+      url: 'https://eur-lex.europa.eu/eli/dir/2022/2523/oj',
+      relation: 'related',
+    },
     addedAt: '2026-07-02',
     category: 'wirtschaft',
     tags: ['tax', 'big-tech', 'platforms', 'fairness'],
@@ -1126,6 +1272,12 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'vier-tage-woche',
+    source: {
+      org: 'Chambre des représentants (Belgium)',
+      doc: 'Loi du 3 octobre 2022 (\'labour deal\') — right to request a four-day week at full pay',
+      date: '2022-10-03',
+      relation: 'related',
+    },
     addedAt: '2026-07-02',
     category: 'sozialstaat',
     tags: ['work', 'labor', 'productivity', 'wellbeing'],
@@ -1177,6 +1329,12 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'drogenkrieg-entkriminalisierung',
+    source: {
+      org: 'Assembleia da República (Portugal)',
+      doc: 'Lei n.º 30/2000 — decriminalisation of use and possession of all drugs',
+      date: '2000-11-29',
+      relation: 'exact',
+    },
     addedAt: '2026-07-02',
     category: 'freiheit',
     tags: ['drugs', 'criminalization', 'health', 'freedom'],
@@ -1228,6 +1386,13 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'welternaehrung-recht',
+    source: {
+      org: 'United Nations',
+      doc: 'ICESCR, Art. 11 — right to adequate food',
+      date: '1966-12-16',
+      url: 'https://www.ohchr.org/en/instruments-mechanisms/instruments/international-covenant-economic-social-and-cultural-rights',
+      relation: 'related',
+    },
     addedAt: '2026-07-02',
     category: 'sozialstaat',
     tags: ['hunger', 'food', 'rights', 'development'],
@@ -1279,6 +1444,12 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'sozialwohnungsbau-pflicht',
+    source: {
+      org: 'Parlement français',
+      doc: 'Loi n° 2000-1208 (loi SRU) — 20–25% social housing quota for municipalities',
+      date: '2000-12-13',
+      relation: 'related',
+    },
     addedAt: '2026-07-02',
     category: 'sozialstaat',
     tags: ['housing', 'rent', 'inequality', 'welfare'],
@@ -1330,6 +1501,13 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'klimafluechtlinge-aufnahme',
+    source: {
+      org: 'UN Human Rights Committee',
+      doc: 'Teitiota v. New Zealand, CCPR/C/127/D/2728/2016 — non-refoulement may apply to climate-displaced persons',
+      date: '2019-10-24',
+      url: 'https://docs.un.org/en/CCPR/C/127/D/2728/2016',
+      relation: 'related',
+    },
     addedAt: '2026-07-02',
     category: 'migration',
     tags: ['climate', 'refugees', 'migration', 'justice'],
@@ -1381,6 +1559,12 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'patentrecht-impfstoffe',
+    source: {
+      org: 'WTO Ministerial Conference (MC12)',
+      doc: 'Ministerial Decision on the TRIPS Agreement, WT/MIN(22)/30 — COVID-19 vaccine patent flexibilities',
+      date: '2022-06-17',
+      relation: 'exact',
+    },
     addedAt: '2026-07-02',
     category: 'gesundheit',
     tags: ['pharma', 'patents', 'access', 'global health'],
@@ -1432,6 +1616,13 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'digitale-zentralbankwaehrung',
+    source: {
+      org: 'European Commission',
+      doc: 'Proposal COM(2023) 369 — establishment of the digital euro (as complement to cash)',
+      date: '2023-06-28',
+      url: 'https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:52023PC0369',
+      relation: 'related',
+    },
     addedAt: '2026-07-02',
     category: 'wirtschaft',
     tags: ['cbdc', 'finance', 'privacy', 'monetary'],
@@ -1483,6 +1674,13 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'plattformarbeit-rechte',
+    source: {
+      org: 'European Parliament & Council',
+      doc: 'Directive (EU) 2024/2831 — platform work, legal presumption of employment',
+      date: '2024-10-23',
+      url: 'https://eur-lex.europa.eu/eli/dir/2024/2831/oj',
+      relation: 'exact',
+    },
     addedAt: '2026-07-02',
     category: 'wirtschaft',
     tags: ['gig economy', 'labor', 'workers rights', 'platform'],
@@ -1535,6 +1733,13 @@ export const AGENDA: AgendaItem[] = [
   // ── Menschheitsfragen: beyond party politics, same 8 dimensions ──
   {
     id: 'ki-superintelligenz-pause',
+    source: {
+      org: 'Future of Life Institute',
+      doc: 'Open letter \'Pause Giant AI Experiments\' — 30,000+ signatories, no moratorium enacted',
+      date: '2023-03-22',
+      url: 'https://futureoflife.org/open-letter/pause-giant-ai-experiments/',
+      relation: 'exact',
+    },
     addedAt: '2026-07-08',
     category: 'wirtschaft',
     tags: ['ki', 'technologie', 'menschheit', 'zukunft'],
@@ -1586,6 +1791,12 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'gentechnik-embryonen',
+    source: {
+      org: 'Council of Europe',
+      doc: 'Oviedo Convention (ETS No. 164), Art. 13 — ban on heritable human genome editing',
+      date: '1997-04-04',
+      relation: 'related',
+    },
     addedAt: '2026-07-08',
     category: 'gesundheit',
     tags: ['gentechnik', 'bioethik', 'menschheit'],
@@ -1637,6 +1848,12 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'tierrechte-grundrechte',
+    source: {
+      org: 'Constitutional Court of Ecuador',
+      doc: 'Judgment No. 253-20-JH/22 (\'Estrellita\') — wild animals recognised as subjects of rights',
+      date: '2022-01-27',
+      relation: 'exact',
+    },
     addedAt: '2026-07-08',
     category: 'klimaschutz',
     tags: ['tierrechte', 'ethik', 'menschheit'],
@@ -1688,6 +1905,13 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'mars-besiedlung',
+    source: {
+      org: 'United Nations',
+      doc: 'Outer Space Treaty — legal framework for the use and settlement of celestial bodies',
+      date: '1967-01-27',
+      url: 'https://www.unoosa.org/oosa/en/ourwork/spacelaw/treaties/outerspacetreaty.html',
+      relation: 'related',
+    },
     addedAt: '2026-07-08',
     category: 'wirtschaft',
     tags: ['raumfahrt', 'zukunft', 'menschheit'],
@@ -1739,6 +1963,13 @@ export const AGENDA: AgendaItem[] = [
   },
   {
     id: 'radikale-lebensverlaengerung',
+    source: {
+      org: 'UN General Assembly',
+      doc: 'Resolution A/RES/75/131 — UN Decade of Healthy Ageing 2021–2030',
+      date: '2020-12-14',
+      url: 'https://docs.un.org/en/A/RES/75/131',
+      relation: 'related',
+    },
     addedAt: '2026-07-08',
     category: 'gesundheit',
     tags: ['langlebigkeit', 'medizin', 'menschheit'],

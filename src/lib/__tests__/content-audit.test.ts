@@ -36,6 +36,19 @@ describe('agenda content integrity', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
+  it('constitution rule 7: every agenda item is anchored to a real-world source', () => {
+    const bad: string[] = [];
+    for (const item of AGENDA) {
+      const s = item.source;
+      if (!s) { bad.push(`${item.id}: no source`); continue; }
+      if (!s.org.trim() || !s.doc.trim()) bad.push(`${item.id}: empty org/doc`);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(s.date)) bad.push(`${item.id}: bad date ${s.date}`);
+      if (!['exact', 'related'].includes(s.relation)) bad.push(`${item.id}: bad relation`);
+      if (s.url && !/^https:\/\//.test(s.url)) bad.push(`${item.id}: non-https url`);
+    }
+    expect(bad).toEqual([]);
+  });
+
   it('topic weights are sane (|sum| between 0.5 and 1.5, no zero weights)', () => {
     const bad: string[] = [];
     for (const item of AGENDA) {
