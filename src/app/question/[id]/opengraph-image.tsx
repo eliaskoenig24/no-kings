@@ -40,8 +40,9 @@ const WORLD_SUPPORT: Record<string, number> = {
   'plattformarbeit-rechte': 66,
 };
 
-export default function QuestionOGImage({ params }: { params: { id: string } }) {
-  const item = AGENDA.find(a => a.id === params.id);
+export default async function QuestionOGImage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const item = AGENDA.find(a => a.id === id);
   if (!item) {
     return new ImageResponse(
       <div style={{ width: '100%', height: '100%', background: '#080808', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -89,13 +90,13 @@ export default function QuestionOGImage({ params }: { params: { id: string } }) 
           marginBottom: 'auto',
           maxWidth: '900px',
         }}>
-          &ldquo;{shortText}&rdquo;
+          {'“' + shortText + '”'}
         </div>
 
         {/* Result */}
-        <div style={{ marginTop: '40px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', marginTop: '40px' }}>
           {/* Bar track */}
-          <div style={{ height: '6px', background: '#151515', marginBottom: '20px', position: 'relative' }}>
+          <div style={{ display: 'flex', height: '6px', background: '#151515', marginBottom: '20px', position: 'relative' }}>
             <div style={{
               position: 'absolute', left: 0, top: 0, height: '100%',
               width: `${pct}%`, background: barColor,
@@ -103,7 +104,7 @@ export default function QuestionOGImage({ params }: { params: { id: string } }) 
           </div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '16px' }}>
             <div style={{ fontFamily: 'monospace', fontSize: 56, fontWeight: 700, color: barColor, lineHeight: 1 }}>
-              {pct}%
+              {`${pct}%`}
             </div>
             <div style={{ fontFamily: 'monospace', fontSize: 16, color: isSupport ? '#16a34a' : '#b91c1c', letterSpacing: '0.06em' }}>
               {isSupport ? 'SUPPORT' : 'OPPOSE'}

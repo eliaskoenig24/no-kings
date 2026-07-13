@@ -120,7 +120,7 @@ export default function OGImage() {
                   textAlign: 'right',
                   flexShrink: 0,
                 }}>
-                  {pct}%
+                  {`${pct}%`}
                 </div>
               </div>
             );

@@ -76,10 +76,11 @@ async function fetchTwinValues(pubkey: string): Promise<Record<string, number> |
 export default async function TwinPubkeyOGImage({
   params,
 }: {
-  params: { pubkey: string };
+  params: Promise<{ pubkey: string }>;
 }) {
-  const short = params.pubkey.slice(0, 8) + '…' + params.pubkey.slice(-8);
-  const values = await fetchTwinValues(params.pubkey);
+  const { pubkey } = await params;
+  const short = pubkey.slice(0, 8) + '…' + pubkey.slice(-8);
+  const values = await fetchTwinValues(pubkey);
   const archetype = values ? classifyArchetype(values) : null;
 
   const cx = 210;
@@ -98,8 +99,9 @@ export default async function TwinPubkeyOGImage({
         gap: '56px',
         alignItems: 'center',
       }}>
-        {/* Left: Radar SVG */}
-        <svg width="420" height="420" viewBox="0 0 420 420" style={{ flexShrink: 0 }}>
+        {/* Left: Radar SVG (labels are positioned divs — Satori supports no SVG <text>) */}
+        <div style={{ display: 'flex', position: 'relative', width: 420, height: 420, flexShrink: 0 }}>
+        <svg width="420" height="420" viewBox="0 0 420 420">
           {/* Grid rings */}
           {[0.25, 0.5, 0.75, 1].map(f => (
             <polygon key={f} points={gridPoints(cx, cy, maxR, f)} fill="none"
@@ -120,19 +122,6 @@ export default async function TwinPubkeyOGImage({
             <polygon points={polygonPoints({ klimaschutz: 0.5, sozialstaat: 0.5, wirtschaft: 0.5, bildung: 0.5, gesundheit: 0.5, migration: 0.5, freiheit: 0.5, europa: 0.5 }, cx, cy, maxR)}
               fill="rgba(75,158,255,0.06)" stroke="#222222" strokeWidth="1.5" />
           )}
-          {/* Labels */}
-          {TOPICS.map((t, i) => {
-            const angle = (i / TOPICS.length) * 360;
-            const { x, y } = polarToCartesian(cx, cy, maxR + 26, angle);
-            const dx = x - cx;
-            const anchor = dx > 4 ? 'start' : dx < -4 ? 'end' : 'middle';
-            return (
-              <text key={t} x={x} y={y} textAnchor={anchor} dominantBaseline="middle"
-                fontSize="13" fontFamily="monospace" fill="#3A3A3A" letterSpacing="0.04em">
-                {LABELS[t]}
-              </text>
-            );
-          })}
           {/* Value dots */}
           {values && TOPICS.map((t, i) => {
             const angle = (i / TOPICS.length) * 360;
@@ -141,6 +130,23 @@ export default async function TwinPubkeyOGImage({
             return <circle key={t} cx={x} cy={y} r="5" fill="#E9CF9A" />;
           })}
         </svg>
+        {TOPICS.map((t, i) => {
+          const angle = (i / TOPICS.length) * 360;
+          const { x, y } = polarToCartesian(cx, cy, maxR + 26, angle);
+          const dx = x - cx;
+          const justify = dx > 4 ? 'flex-start' : dx < -4 ? 'flex-end' : 'center';
+          const left = dx > 4 ? x : dx < -4 ? x - 120 : x - 60;
+          return (
+            <div key={t} style={{
+              position: 'absolute', left, top: y - 8, width: 120, height: 16,
+              display: 'flex', alignItems: 'center', justifyContent: justify,
+              fontSize: 13, fontFamily: 'monospace', color: '#3A3A3A', letterSpacing: '0.04em',
+            }}>
+              {LABELS[t]}
+            </div>
+          );
+        })}
+        </div>
 
         {/* Right: Info */}
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%' }}>
@@ -200,7 +206,7 @@ export default async function TwinPubkeyOGImage({
                       }} />
                     </div>
                     <div style={{ color: '#3A3A3A', fontSize: 11, fontFamily: 'monospace', width: '32px', textAlign: 'right' }}>
-                      {pct}%
+                      {`${pct}%`}
                     </div>
                   </div>
                 );
@@ -214,7 +220,7 @@ export default async function TwinPubkeyOGImage({
               {short}
             </div>
             <div style={{ color: '#222222', fontSize: 12, fontFamily: 'monospace', letterSpacing: '0.06em' }}>
-              no-kings.world/twin/{params.pubkey.slice(0, 12)}…
+              {`no-kings.world/twin/${pubkey.slice(0, 12)}…`}
             </div>
           </div>
         </div>

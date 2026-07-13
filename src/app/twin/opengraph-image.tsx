@@ -67,11 +67,11 @@ export default function TwinOGImage() {
                   <div style={{ fontFamily: 'monospace', fontSize: 9, letterSpacing: '0.1em', color: '#3A3A3A', width: '68px', flexShrink: 0 }}>
                     {label}
                   </div>
-                  <div style={{ flex: 1, height: '6px', background: '#1A1A1A', position: 'relative' }}>
+                  <div style={{ display: 'flex', flex: 1, height: '6px', background: '#1A1A1A', position: 'relative' }}>
                     <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${pct}%`, background: color }} />
                   </div>
                   <div style={{ fontFamily: 'monospace', fontSize: 10, color, width: '28px', textAlign: 'right' }}>
-                    {pct}%
+                    {`${pct}%`}
                   </div>
                 </div>
               );
@@ -98,8 +98,10 @@ export default function TwinOGImage() {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', alignItems: 'flex-end' }}>
-            <div style={{ fontFamily: 'monospace', fontSize: 10, color: '#3A3A3A', textAlign: 'right', lineHeight: 1.6 }}>
-              2,500 digital twins<br />44 countries<br />30 global questions
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', fontFamily: 'monospace', fontSize: 10, color: '#3A3A3A', textAlign: 'right', lineHeight: 1.6 }}>
+              <div>2,500 digital twins</div>
+              <div>44 countries</div>
+              <div>30 global questions</div>
             </div>
             <div style={{
               background: '#F0F0F0',

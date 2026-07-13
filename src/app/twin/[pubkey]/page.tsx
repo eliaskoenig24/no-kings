@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { fetchTwinByPubkey } from '@/lib/nostr-reader';
 import type { TwinProfile } from '@/types';
@@ -94,8 +94,9 @@ type Phase = 'loading' | 'found' | 'not-found';
 export default function TwinByPubkeyPage({
   params,
 }: {
-  params: { pubkey: string };
+  params: Promise<{ pubkey: string }>;
 }) {
+  const { pubkey } = use(params);
   const { lang } = useLang();
   const [phase, setPhase] = useState<Phase>('loading');
   const [twin, setTwin] = useState<TwinProfile | null>(null);
@@ -104,7 +105,7 @@ export default function TwinByPubkeyPage({
   const hasOwnTwin = !!myTwin;
 
   useEffect(() => {
-    fetchTwinByPubkey(params.pubkey).then((result) => {
+    fetchTwinByPubkey(pubkey).then((result) => {
       if (result) {
         setTwin(result);
         setPhase('found');
@@ -113,7 +114,7 @@ export default function TwinByPubkeyPage({
       }
     });
     getMyTwin().then(t => setMyTwin(t ?? null));
-  }, [params.pubkey]);
+  }, [pubkey]);
 
   if (phase === 'loading') {
     return (
@@ -124,7 +125,7 @@ export default function TwinByPubkeyPage({
           fontSize: '12px',
           color: 'var(--text-3)',
         }}>
-          {truncateKey(params.pubkey)}
+          {truncateKey(pubkey)}
         </p>
       </div>
     );
@@ -172,7 +173,7 @@ export default function TwinByPubkeyPage({
               color: 'var(--accent)',
               letterSpacing: '0.06em',
             }}>
-              {truncateKey(params.pubkey)}
+              {truncateKey(pubkey)}
             </span>
           </h1>
           {/* Archetype badge + optional match score */}

@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import { AGENDA } from '@/data/agenda';
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const item = AGENDA.find(a => a.id === params.id);
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const item = AGENDA.find(a => a.id === id);
   if (!item) return { title: 'Question Not Found' };
 
   const text = item.text['en'] ?? item.text[Object.keys(item.text)[0]];
